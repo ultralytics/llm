@@ -28,6 +28,7 @@ Load the chat widget via [jsDelivr CDN](https://www.jsdelivr.com/package/gh/ultr
 ```
 
 **CDN Options:**
+
 - 🔍 **Browse files**: [jsdelivr.com/package/gh/ultralytics/llm](https://www.jsdelivr.com/package/gh/ultralytics/llm)
 - 📊 **View stats**: Check download counts and version usage
 - 🔗 **Direct link**: `https://cdn.jsdelivr.net/gh/ultralytics/llm@latest/js/chat.min.js`
