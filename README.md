@@ -174,22 +174,29 @@ python -m http.server 8000
 
 For comprehensive documentation and usage guides, visit [docs.ultralytics.com/llm](https://docs.ultralytics.com).
 
-## 🤝 Contributing
+## 💡 Contribute
 
-We welcome contributions! Please read our [Contributing Guide](https://docs.ultralytics.com/help/contributing/) to get started.
+Ultralytics thrives on community collaboration, and we deeply value your contributions! Whether it's reporting bugs, suggesting features, or submitting code changes, your involvement is crucial.
+
+- **Reporting Issues**: Encounter a bug? Please report it on [GitHub Issues](https://github.com/ultralytics/template/issues).
+- **Feature Requests**: Have an idea for improvement? Share it via [GitHub Issues](https://github.com/ultralytics/template/issues).
+- **Pull Requests**: Want to contribute code? Please read our [Contributing Guide](https://docs.ultralytics.com/help/contributing/) first, then submit a Pull Request.
+- **Feedback**: Share your thoughts and experiences by participating in our official [Survey](https://www.ultralytics.com/survey?utm_source=github&utm_medium=social&utm_campaign=Survey).
+
+A heartfelt thank you 🙏 goes out to all our contributors! Your efforts help make Ultralytics tools better for everyone.
+
+[![Ultralytics open-source contributors](https://raw.githubusercontent.com/ultralytics/assets/main/im/image-contributors.png)](https://github.com/ultralytics/ultralytics/graphs/contributors)
 
 ## 📄 License
 
-Ultralytics offers two licensing options:
+Ultralytics offers two licensing options to accommodate diverse needs:
 
-- **AGPL-3.0 License**: Perfect for students, researchers, and open-source enthusiasts. See [LICENSE](LICENSE) for details.
-- **Enterprise License**: For commercial applications. [Contact us](https://www.ultralytics.com/license) for details.
+- **AGPL-3.0 License**: Ideal for students, researchers, and enthusiasts passionate about open collaboration and knowledge sharing. This [OSI-approved](https://opensource.org/license/agpl-v3) open-source license promotes transparency and community involvement. See the [LICENSE](LICENSE) file for details.
+- **Enterprise License**: Designed for commercial applications, this license permits the seamless integration of Ultralytics software and AI models into commercial products and services, bypassing the copyleft requirements of AGPL-3.0. For commercial use cases, please inquire about an [Ultralytics Enterprise License](https://www.ultralytics.com/license).
 
-## 📮 Support
+## 📮 Contact
 
-- **Bug Reports**: [GitHub Issues](https://github.com/ultralytics/llm/issues)
-- **Discussions**: [Discord](https://discord.com/invite/ultralytics)
-- **Professional Support**: [Ultralytics HUB](https://www.ultralytics.com/hub)
+For bug reports or feature suggestions related to this template or other Ultralytics projects, please use [GitHub Issues](https://github.com/ultralytics/template/issues). For general questions, discussions, and community support, join our [Discord](https://discord.com/invite/ultralytics) server!
 
 <br>
 <div align="center">
