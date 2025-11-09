@@ -231,12 +231,6 @@ class UltralyticsChat {
       .ult-chat-modal[data-mode="search"] .ult-chat-messages{order:3}
 
       .ult-icon-swap{display:flex;align-items:center;justify-content:center}
-
-      .ult-header-search{margin-right:.5rem}
-      .ult-search-button{display:flex;align-items:center;gap:.35rem;padding:.35rem .7rem;background:var(--md-default-bg-color);border:1px solid var(--md-default-fg-color--lighter);border-radius:.4rem;color:var(--md-default-fg-color);font-size:.63rem;cursor:pointer;transition:all .2s ease}
-      .ult-search-button:hover{transform:scale(1.1);filter:brightness(1.2);border-color:var(--md-accent-fg-color)}
-      .ult-search-button svg{flex-shrink:0}
-
       @media (max-width:768px){.ult-backdrop{pointer-events:none}.ult-chat-modal{left:0;top:0;transform:none;width:100vw;height:100vh;border-radius:0;pointer-events:auto;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}.ult-chat-modal.open{transform:none}.ult-actions{display:none}.ult-chat-header{padding:12px 18px}.ult-chat-input-container{padding-bottom:max(16px,env(safe-area-inset-bottom))}}
     `,
     );
