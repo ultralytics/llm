@@ -231,7 +231,7 @@ class UltralyticsChat {
       .ult-chat-modal[data-mode="search"] .ult-chat-messages{order:3}
 
       .ult-icon-swap{display:flex;align-items:center;justify-content:center}
-      @media (max-width:768px){.ult-chat-modal{left:0;top:0;transform:none;width:100vw;height:100vh;border-radius:0}.ult-chat-modal.open{transform:none}.ult-actions{display:none}}
+      @media (max-width:768px){.ult-backdrop{pointer-events:none}.ult-chat-modal{left:0;top:0;transform:none;width:100vw;height:100vh;border-radius:0;pointer-events:auto}.ult-chat-modal.open{transform:none}.ult-actions{display:none}}
     `,
     );
     document.head.appendChild(this.styleElement);
