@@ -1,0 +1,42 @@
+# Ultralytics 🚀 AGPL-3.0 License - https://ultralytics.com/license
+
+name: Minify JavaScript
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'js/chat.js'
+  pull_request:
+    paths:
+      - 'js/chat.js'
+  workflow_dispatch:
+
+jobs:
+  minify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install terser
+        run: npm install -g terser
+
+      - name: Minify chat.js
+        run: terser js/chat.js -o js/chat.min.js -c -m --comments false
+
+      - name: Commit minified file
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          git config --local user.email "web@ultralytics.com"
+          git config --local user.name "UltralyticsAssistant"
+          git add js/chat.min.js
+          git diff --quiet && git diff --staged --quiet || git commit -m "Auto-minify chat.js"
+          git push

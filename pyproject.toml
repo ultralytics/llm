@@ -1,43 +1,24 @@
 # Ultralytics 🚀 AGPL-3.0 License - https://ultralytics.com/license
 
-# Overview:
-# This pyproject.toml file manages the build, packaging, and distribution of the Ultralytics Template library.
-# It defines essential project metadata, dependencies, and settings used to develop and deploy the library.
-
-# Key Sections:
-# - [build-system]: Specifies the build requirements and backend (e.g., setuptools, wheel).
-# - [project]: Includes details like name, version, description, authors, dependencies and more.
-# - [project.optional-dependencies]: Provides additional, optional packages for extended features.
-# - [tool.*]: Configures settings for various tools (pytest, yapf, etc.) used in the project.
-
-# Installation:
-# The Template library can be installed using the command: 'pip install git+https://TOKEN:x-oauth-basic@github.com/ultralytics/template.git@main'
-# For development purposes, you can install the package in editable mode with: 'pip install -e .'
-# This approach allows for real-time code modifications without the need for re-installation.
-
-# Documentation:
-# For comprehensive documentation and usage instructions, visit: https://docs.ultralytics.com
-
 [build-system]
 requires = ["setuptools>=70.0.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
-# Project settings -----------------------------------------------------------------------------------------------------
 [project]
-name = "template"  # Required
+name = "ultralytics-llm"
 dynamic = ["version"]
-description = "Ultralytics Template Python Package"  # Optional
-readme = "README.md"  # Optional
+description = "Ultralytics LLM toolkit for Python and JavaScript"
+readme = "README.md"
 requires-python = ">=3.9"
 license = { file = "LICENSE" }
-keywords = ["Ultralytics", "Template"]  # Optional
+keywords = ["Ultralytics", "LLM", "AI", "Chat", "Assistant"]
 authors = [
-    { name = "Glenn Jocher", email = "glenn.jocher@ultralytics.com" } # Optional
+    { name = "Glenn Jocher", email = "glenn.jocher@ultralytics.com" }
 ]
 maintainers = [
-    { name = "Glenn Jocher", email = "glenn.jocher@ultralytics.com" } # Optional
+    { name = "Glenn Jocher", email = "glenn.jocher@ultralytics.com" }
 ]
-classifiers = [# Optional, for a list of valid classifiers, see https://pypi.org/classifiers/
+classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
     "Intended Audience :: Education",
@@ -57,37 +38,26 @@ classifiers = [# Optional, for a list of valid classifiers, see https://pypi.org
     "Operating System :: Microsoft :: Windows",
 ]
 
-# Required dependencies ------------------------------------------------------------------------------------------------
-dependencies = [
-    "numpy",
-]
+dependencies = []
 
-# Optional dependencies ------------------------------------------------------------------------------------------------
 [project.optional-dependencies]
 dev = [
     "pytest",
-    "pytest-cov",  # coverage with pytest
-    "coverage",  # coverage with unittest
-    "mkdocs",
+    "pytest-cov",
+    "ruff",
 ]
 
-[project.urls]  # Optional
+[project.urls]
 "Homepage" = "https://ultralytics.com"
-"Source" = "https://github.com/ultralytics/template"
+"Source" = "https://github.com/ultralytics/llm"
 "Documentation" = "https://docs.ultralytics.com"
-"Bug Reports" = "https://github.com/ultralytics/template/issues"
-"Changelog" = "https://github.com/ultralytics/template/releases"
+"Bug Reports" = "https://github.com/ultralytics/llm/issues"
 
-[project.scripts]  # Optional
-example-cli-command = "template.module1:main"  # executes `template.module1.main` when "example-cli-command" is run from CLI
-
-# Tools settings -------------------------------------------------------------------------------------------------------
-[tool.setuptools]  # configuration specific to the `setuptools` build backend.
-packages = { find = { where = ["."], include = ["template", "template.*"] } }
-package-data = { "sample" = ["*.yaml"] }
+[tool.setuptools]
+packages = { find = { where = ["."], include = ["ultralytics_llm", "ultralytics_llm.*"] } }
 
 [tool.setuptools.dynamic]
-version = { attr = "template.__version__" }
+version = { attr = "ultralytics_llm.__version__" }
 
 [tool.pytest.ini_options]
 addopts = "--doctest-modules --durations=30 --color=yes"
@@ -105,14 +75,3 @@ docstring-code-format = true
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"
-
-[tool.docformatter]
-wrap-summaries = 120
-wrap-descriptions = 120
-pre-summary-newline = true
-close-quotes-on-newline = true
-in-place = true
-
-[tool.codespell]
-ignore-words-list = "crate,nd,strack,dota,ane,segway,fo,gool,winn,commend"
-skip = '*.csv,*venv*,docs/??/,docs/mkdocs_??.yml'
