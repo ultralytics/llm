@@ -436,8 +436,7 @@ class UltralyticsChat {
     if (this.mode === "search") {
       if (this.refs.input) this.refs.input.placeholder = "Search for...";
       if (tagline)
-        tagline.innerHTML =
-          `<strong style="color: ${this.config.theme.primary}; font-weight: 700;">SEARCH</strong> · Find answers in our docs and guides`;
+        tagline.innerHTML = `<strong style="color: ${this.config.theme.primary}; font-weight: 700;">SEARCH</strong> · Find answers in our docs and guides`;
       const actions = this.qs(".ult-actions", this.refs.modal);
       if (actions) actions.style.display = "none";
       if (this.refs.messages) this.refs.messages.innerHTML = "";
