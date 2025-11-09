@@ -1,118 +1,195 @@
 <a href="https://www.ultralytics.com/"><img src="https://raw.githubusercontent.com/ultralytics/assets/main/logo/Ultralytics_Logotype_Original.svg" width="320" alt="Ultralytics logo"></a>
 
-# 🛠 Ultralytics Python Project Template
+# 🚀 Ultralytics LLM
 
-Welcome to the Ultralytics Python Project Template! This repository provides a standardized foundation for initiating Python projects at [Ultralytics](https://www.ultralytics.com/). It incorporates best practices in project structure, configuration, and essential tooling to streamline development. By using this template, Ultralytics developers can ensure consistency, maintain high quality standards, and accelerate the setup process for new Python-based software. Explore our [Ultralytics Solutions](https://www.ultralytics.com/solutions) to see how we apply these standards in real-world applications.
+**Ultralytics LLM** is a comprehensive toolkit for integrating Large Language Models into your applications. It provides both JavaScript and Python clients for building AI-powered chat interfaces, assistants, and LLM-driven workflows.
 
-[![Template CI](https://github.com/ultralytics/template/actions/workflows/ci.yml/badge.svg)](https://github.com/ultralytics/template/actions/workflows/ci.yml)
-[![Ultralytics Actions](https://github.com/ultralytics/template/actions/workflows/format.yml/badge.svg)](https://github.com/ultralytics/template/actions/workflows/format.yml)
-[![codecov](https://codecov.io/gh/ultralytics/template/graph/badge.svg?token=K9IunpFzjS)](https://codecov.io/gh/ultralytics/template)
+[![CI](https://github.com/ultralytics/llm/actions/workflows/ci.yml/badge.svg)](https://github.com/ultralytics/llm/actions/workflows/ci.yml)
+[![Ultralytics Actions](https://github.com/ultralytics/llm/actions/workflows/format.yml/badge.svg)](https://github.com/ultralytics/llm/actions/workflows/format.yml)
+[![codecov](https://codecov.io/gh/ultralytics/llm/graph/badge.svg?token=CODECOV_TOKEN)](https://codecov.io/gh/ultralytics/llm)
 
 [![Ultralytics Discord](https://img.shields.io/discord/1089800235347353640?logo=discord&logoColor=white&label=Discord&color=blue)](https://discord.com/invite/ultralytics)
 [![Ultralytics Forums](https://img.shields.io/discourse/users?server=https%3A%2F%2Fcommunity.ultralytics.com&logo=discourse&label=Forums&color=blue)](https://community.ultralytics.com/)
 [![Ultralytics Reddit](https://img.shields.io/reddit/subreddit-subscribers/ultralytics?style=flat&logo=reddit&logoColor=white&label=Reddit&color=blue)](https://reddit.com/r/ultralytics)
 
-## 🗂️ Repository Structure
+## 📦 Installation
 
-This template is meticulously organized for intuitive navigation and a clear understanding of project components. Familiarize yourself with the [Python project structure best practices](https://realpython.com/python-application-layouts/) to make the most of this layout.
+### JavaScript (Browser)
 
-- `src/` or `your_package_name/`: Contains the core source code of your Python package, organized into modules. Using a `src` layout is a common practice detailed in [Python packaging guides](https://packaging.python.org/en/latest/tutorials/packaging-projects/#configuring-metadata).
-- `tests/`: Dedicated directory for unit tests and integration tests, crucial for implementing [continuous testing](https://docs.ultralytics.com/help/CI/) practices. Consider using frameworks like [pytest](https://docs.pytest.org/en/stable/) for writing tests.
-- `docs/`: (Optional) Houses project documentation. Tools like [MkDocs](https://www.mkdocs.org/) can be used to generate comprehensive documentation from this directory.
-- `pyproject.toml`: The standard configuration file for Python projects, detailing dependencies, build system requirements, formatting rules, and packaging information as specified by [PEP 518](https://peps.python.org/pep-0518/) and subsequent PEPs.
-- `.gitignore`: Configured to exclude unnecessary files (like `*.pyc` or virtual environment directories) from [Git](https://git-scm.com/) tracking.
-- `LICENSE`: Specifies the open-source license (defaulting to AGPL-3.0) under which the project is released.
-- `.github/workflows/`: Contains [GitHub Actions](https://docs.github.com/en/actions) workflows for automating Continuous Integration and Continuous Deployment (CI/CD) processes. Learn more about [CI/CD concepts](https://www.redhat.com/en/topics/devops/what-is-ci-cd).
-- `.pre-commit-config.yaml`: (Optional) Configuration for [pre-commit hooks](https://pre-commit.com/) to automatically check and enforce code quality standards before commits.
-- `Dockerfile`: (Optional) Defines instructions for building a [Docker](https://www.docker.com/) container image, enabling [containerization](https://www.ultralytics.com/glossary/containerization) of the project environment for consistent deployment.
-- `environment.yml`: (Optional, for Conda users) Manages dependencies for [Conda environments](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html).
+Load the chat widget via jsDelivr CDN:
 
-```plaintext
-your-project/
-│
-├── your_package_name/          # Or src/ for src-layout
-│   ├── __init__.py
-│   ├── module1.py
-│   ├── module2.py
-│   └── ...
-│
-├── tests/                      # Test suite
-│   ├── __init__.py
-│   ├── test_module1.py
-│   └── ...
-│
-├── docs/                       # Documentation files (optional)
-│   └── ...
-│
-├── .github/                    # GitHub Actions workflows
-│   └── workflows/
-│       ├── ci.yml
-|       └── format.yml
-│
-├── .gitignore                  # Git ignore rules
-├── .pre-commit-config.yaml     # Pre-commit hook config (optional)
-├── Dockerfile                  # Docker configuration (optional)
-├── environment.yml             # Conda environment config (optional)
-├── LICENSE                     # Project license file
-├── pyproject.toml              # Project configuration and dependencies
-└── README.md                   # This file
+```html
+<!-- Latest version -->
+<script src="https://cdn.jsdelivr.net/gh/ultralytics/llm@latest/js/chat.min.js"></script>
+
+<!-- Specific version (recommended for production) -->
+<script src="https://cdn.jsdelivr.net/gh/ultralytics/llm@1.0.0/js/chat.min.js"></script>
 ```
 
-### 📦 Source Code Directory (`src/` or `your_package_name/`)
+### Python
 
-The `src/` or `your_package_name/` directory is the heart of your project, containing the Python code that constitutes your package. Adopting a structured layout promotes clean imports and simplifies testing and packaging.
+```bash
+pip install ultralytics-llm
+```
 
-### 🧪 Testing Directory (`tests/`)
+## 🎯 Quick Start
 
-The `tests/` directory is crucial for ensuring code reliability and robustness. It should contain comprehensive unit and integration tests covering various aspects of your package. Effective testing is a cornerstone of quality software development.
+### JavaScript Chat Widget
 
-### 📚 Documentation Directory (`docs/`)
+```html
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Ultralytics Chat</title>
+  </head>
+  <body>
+    <script src="https://cdn.jsdelivr.net/gh/ultralytics/llm@latest/js/chat.min.js"></script>
+    <script>
+      const chat = new UltralyticsChat({
+        apiUrl: "https://your-api-endpoint.com/api/chat",
+        branding: {
+          name: "My AI Assistant",
+          tagline: "Ask me anything!",
+          pillText: "Chat with AI",
+        },
+        theme: {
+          primary: "#042AFF",
+          yellow: "#E1FF25",
+        },
+      });
+    </script>
+  </body>
+</html>
+```
 
-For projects requiring detailed documentation beyond the README, the `docs/` directory is the designated space. Utilizing tools like [Sphinx](https://www.sphinx-doc.org/en/master/) allows for the generation of professional, high-quality documentation from reStructuredText or Markdown files. Check out the [Ultralytics Docs](https://docs.ultralytics.com/) for an example.
+### Python LLM Client
 
-## ✨ Starting a New Project
+```python
+from ultralytics_llm import LLMClient
 
-Kickstart your new Python project using this template with these steps:
+# Coming soon - Python LLM client
+client = LLMClient(api_key="your-api-key")
+response = client.chat("Tell me about YOLO11")
+print(response)
+```
 
-1.  **Create Your Repository**: Use this template on GitHub by clicking the "Use this template" button to generate a new repository for your project. Learn more about [creating a repository from a template](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-repository-from-a-template).
-2.  **Customize**: Tailor the template files (`pyproject.toml`, `README.md`, `.github/workflows/*.yml`, etc.) to match your specific project's name, goals, and requirements.
-3.  **Develop**: Begin adding your source code into the `your_package_name/` (or `src/`) directory and write corresponding tests in the `tests/` directory.
-4.  **Document**: Update this `README.md` thoroughly and, if needed, populate the `docs/` directory with more extensive documentation.
-5.  **Integrate**: Leverage the pre-configured GitHub Actions for automated testing, linting, and other [CI/CD](https://www.ultralytics.com/glossary/continuous-integration-ci) processes to maintain code quality.
+## 🎨 JavaScript Chat Widget Features
 
-## 🔧 Utilizing the Template
+- **🎯 Zero Dependencies**: Standalone vanilla JavaScript, no frameworks required
+- **🌗 Dark Mode**: Automatic theme switching based on system preferences
+- **📱 Responsive**: Works seamlessly on desktop and mobile
+- **⚡ Streaming**: Real-time response streaming
+- **🔍 Search Mode**: Built-in documentation search
+- **💾 Session Management**: Persistent conversation history
+- **♿ Accessible**: WCAG compliant with ARIA labels
+- **🎨 Customizable**: Full theme and branding control
 
-For Ultralytics team members and external contributors:
+## ⚙️ Configuration Options
 
-- Clone the newly created repository based on this template to start working on the project locally.
-- Ensure the `README.md` is updated to accurately reflect the project's purpose, usage, and specifics.
-- Remove or modify optional components (like `Dockerfile`, `environment.yml`) based on the project's deployment and dependency management strategy.
+### JavaScript Widget
 
-With this template, Ultralytics aims to foster a culture of excellence and uniformity in Python software development, ensuring every project starts on a solid foundation aligned with industry standards and organizational best practices. For insights into managing ML projects, explore our [MLOps guide](https://www.ultralytics.com/glossary/machine-learning-operations-mlops).
+```javascript
+const chat = new UltralyticsChat({
+  // API Configuration
+  apiUrl: "/api/chat", // Your chat API endpoint
 
-## 💡 Contribute
+  // Branding
+  branding: {
+    name: "AI Assistant", // Assistant name
+    tagline: "How can I help?", // Tagline text
+    logo: "https://...", // Header logo URL
+    logomark: "https://...", // Pill button logo URL
+    pillText: "Ask AI", // Pill button text
+  },
 
-Ultralytics thrives on community collaboration, and we deeply value your contributions! Whether it's reporting bugs, suggesting features, or submitting code changes, your involvement is crucial.
+  // Theme Colors
+  theme: {
+    primary: "#042AFF", // Primary brand color
+    dark: "#111F68", // Dark theme accent
+    yellow: "#E1FF25", // Highlight color
+    text: "#0b0b0f", // Text color
+  },
 
-- **Reporting Issues**: Encounter a bug? Please report it on [GitHub Issues](https://github.com/ultralytics/template/issues).
-- **Feature Requests**: Have an idea for improvement? Share it via [GitHub Issues](https://github.com/ultralytics/template/issues).
-- **Pull Requests**: Want to contribute code? Please read our [Contributing Guide](https://docs.ultralytics.com/help/contributing/) first, then submit a Pull Request.
-- **Feedback**: Share your thoughts and experiences by participating in our official [Survey](https://www.ultralytics.com/survey?utm_source=github&utm_medium=social&utm_campaign=Survey).
+  // Welcome Message
+  welcome: {
+    title: "Hi!",
+    message: "How can I help you today?",
+    examples: ["What is YOLO11?", "How do I train a model?"],
+  },
 
-A heartfelt thank you 🙏 goes out to all our contributors! Your efforts help make Ultralytics tools better for everyone.
+  // UI Text
+  ui: {
+    placeholder: "Ask anything…",
+    copyText: "Copy thread",
+    downloadText: "Download thread",
+    clearText: "New chat",
+  },
+});
+```
 
-[![Ultralytics open-source contributors](https://raw.githubusercontent.com/ultralytics/assets/main/im/image-contributors.png)](https://github.com/ultralytics/ultralytics/graphs/contributors)
+## 📚 Examples
+
+- **[Basic Chat](examples/js/chat.html)**: Simple chat widget integration
+- **[Python Client](examples/python/basic.py)**: Python LLM client usage (coming soon)
+
+## 🔧 Development
+
+### Build Minified Version
+
+```bash
+npm install -g terser
+terser js/chat.js -o js/chat.min.js -c -m
+```
+
+### Local Testing
+
+```bash
+# Serve examples locally
+python -m http.server 8000
+# Open http://localhost:8000/examples/js/chat.html
+```
+
+## 🌟 Features Roadmap
+
+### JavaScript
+
+- [x] Chat widget with streaming
+- [x] Dark mode support
+- [x] Search mode
+- [x] Session persistence
+- [ ] File uploads
+- [ ] Voice input
+- [ ] Multi-language support
+
+### Python
+
+- [ ] LLM client
+- [ ] Async support
+- [ ] Streaming responses
+- [ ] Tool/function calling
+- [ ] RAG integration
+- [ ] Vector database connectors
+
+## 📖 Documentation
+
+For comprehensive documentation and usage guides, visit [docs.ultralytics.com/llm](https://docs.ultralytics.com).
+
+## 🤝 Contributing
+
+We welcome contributions! Please read our [Contributing Guide](https://docs.ultralytics.com/help/contributing/) to get started.
 
 ## 📄 License
 
-Ultralytics offers two licensing options to accommodate diverse needs:
+Ultralytics offers two licensing options:
 
-- **AGPL-3.0 License**: Ideal for students, researchers, and enthusiasts passionate about open collaboration and knowledge sharing. This [OSI-approved](https://opensource.org/license/agpl-v3) open-source license promotes transparency and community involvement. See the [LICENSE](LICENSE) file for details.
-- **Enterprise License**: Designed for commercial applications, this license permits the seamless integration of Ultralytics software and AI models into commercial products and services, bypassing the copyleft requirements of AGPL-3.0. For commercial use cases, please inquire about an [Ultralytics Enterprise License](https://www.ultralytics.com/license).
+- **AGPL-3.0 License**: Perfect for students, researchers, and open-source enthusiasts. See [LICENSE](LICENSE) for details.
+- **Enterprise License**: For commercial applications. [Contact us](https://www.ultralytics.com/license) for details.
 
-## 📮 Contact
+## 📮 Support
 
-For bug reports or feature suggestions related to this template or other Ultralytics projects, please use [GitHub Issues](https://github.com/ultralytics/template/issues). For general questions, discussions, and community support, join our [Discord](https://discord.com/invite/ultralytics) server!
+- **Bug Reports**: [GitHub Issues](https://github.com/ultralytics/llm/issues)
+- **Discussions**: [Discord](https://discord.com/invite/ultralytics)
+- **Professional Support**: [Ultralytics HUB](https://www.ultralytics.com/hub)
 
 <br>
 <div align="center">
