@@ -1,3 +1,4 @@
+# Ultralytics 🚀 AGPL-3.0 License - https://ultralytics.com/license
 """Ultralytics LLM Client - Python interface for LLM interactions."""
 
 

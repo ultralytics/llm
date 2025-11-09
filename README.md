@@ -39,26 +39,26 @@ pip install ultralytics-llm
 ```html
 <!DOCTYPE html>
 <html>
-<head>
-  <title>Ultralytics Chat</title>
-</head>
-<body>
-  <script src="https://cdn.jsdelivr.net/gh/ultralytics/llm@latest/js/chat.min.js"></script>
-  <script>
-    const chat = new UltralyticsChat({
-      apiUrl: 'https://your-api-endpoint.com/api/chat',
-      branding: {
-        name: 'My AI Assistant',
-        tagline: 'Ask me anything!',
-        pillText: 'Chat with AI'
-      },
-      theme: {
-        primary: '#042AFF',
-        yellow: '#E1FF25'
-      }
-    });
-  </script>
-</body>
+  <head>
+    <title>Ultralytics Chat</title>
+  </head>
+  <body>
+    <script src="https://cdn.jsdelivr.net/gh/ultralytics/llm@latest/js/chat.min.js"></script>
+    <script>
+      const chat = new UltralyticsChat({
+        apiUrl: "https://your-api-endpoint.com/api/chat",
+        branding: {
+          name: "My AI Assistant",
+          tagline: "Ask me anything!",
+          pillText: "Chat with AI",
+        },
+        theme: {
+          primary: "#042AFF",
+          yellow: "#E1FF25",
+        },
+      });
+    </script>
+  </body>
 </html>
 ```
 
@@ -91,42 +91,39 @@ print(response)
 ```javascript
 const chat = new UltralyticsChat({
   // API Configuration
-  apiUrl: '/api/chat',              // Your chat API endpoint
-  
+  apiUrl: "/api/chat", // Your chat API endpoint
+
   // Branding
   branding: {
-    name: 'AI Assistant',            // Assistant name
-    tagline: 'How can I help?',     // Tagline text
-    logo: 'https://...',             // Header logo URL
-    logomark: 'https://...',         // Pill button logo URL
-    pillText: 'Ask AI'              // Pill button text
+    name: "AI Assistant", // Assistant name
+    tagline: "How can I help?", // Tagline text
+    logo: "https://...", // Header logo URL
+    logomark: "https://...", // Pill button logo URL
+    pillText: "Ask AI", // Pill button text
   },
-  
+
   // Theme Colors
   theme: {
-    primary: '#042AFF',              // Primary brand color
-    dark: '#111F68',                 // Dark theme accent
-    yellow: '#E1FF25',              // Highlight color
-    text: '#0b0b0f'                 // Text color
+    primary: "#042AFF", // Primary brand color
+    dark: "#111F68", // Dark theme accent
+    yellow: "#E1FF25", // Highlight color
+    text: "#0b0b0f", // Text color
   },
-  
+
   // Welcome Message
   welcome: {
-    title: 'Hi!',
-    message: 'How can I help you today?',
-    examples: [
-      'What is YOLO11?',
-      'How do I train a model?'
-    ]
+    title: "Hi!",
+    message: "How can I help you today?",
+    examples: ["What is YOLO11?", "How do I train a model?"],
   },
-  
+
   // UI Text
   ui: {
-    placeholder: 'Ask anything…',
-    copyText: 'Copy thread',
-    downloadText: 'Download thread',
-    clearText: 'New chat'
-  }
+    placeholder: "Ask anything…",
+    copyText: "Copy thread",
+    downloadText: "Download thread",
+    clearText: "New chat",
+  },
 });
 ```
 
@@ -155,6 +152,7 @@ python -m http.server 8000
 ## 🌟 Features Roadmap
 
 ### JavaScript
+
 - [x] Chat widget with streaming
 - [x] Dark mode support
 - [x] Search mode
@@ -164,6 +162,7 @@ python -m http.server 8000
 - [ ] Multi-language support
 
 ### Python
+
 - [ ] LLM client
 - [ ] Async support
 - [ ] Streaming responses

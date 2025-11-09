@@ -1,4 +1,4 @@
-// © 2014-2025 Ultralytics Inc. 🚀 All rights reserved. AGPL-3.0 License - https://ultralytics.com/license
+// Ultralytics 🚀 AGPL-3.0 License - https://ultralytics.com/license
 
 class UltralyticsChat {
   constructor(config = {}) {

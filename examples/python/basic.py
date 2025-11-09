@@ -1,3 +1,4 @@
+# Ultralytics 🚀 AGPL-3.0 License - https://ultralytics.com/license
 """Example usage of Ultralytics LLM Python client."""
 
 from ultralytics_llm import LLMClient

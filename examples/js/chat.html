@@ -1,86 +1,96 @@
-<!DOCTYPE html>
+<!doctype html>
+<!-- Ultralytics 🚀 AGPL-3.0 License - https://ultralytics.com/license -->
+
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Ultralytics Chat Widget Example</title>
     <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 40px 20px;
-            line-height: 1.6;
-        }
-        h1 { color: #042AFF; }
-        .info {
-            background: #f5f5f5;
-            padding: 20px;
-            border-radius: 8px;
-            margin: 20px 0;
-        }
-        code {
-            background: #042AFF;
-            color: white;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 0.9em;
-        }
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 40px 20px;
+        line-height: 1.6;
+      }
+      h1 {
+        color: #042aff;
+      }
+      .info {
+        background: #f5f5f5;
+        padding: 20px;
+        border-radius: 8px;
+        margin: 20px 0;
+      }
+      code {
+        background: #042aff;
+        color: white;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 0.9em;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <h1>🚀 Ultralytics Chat Widget</h1>
-    
+
     <div class="info">
-        <h2>Quick Start</h2>
-        <p>This example demonstrates the Ultralytics chat widget. Click the <code>Ask AI</code> button in the bottom-right corner to start chatting!</p>
-        
-        <h3>Features:</h3>
-        <ul>
-            <li>💬 Real-time streaming responses</li>
-            <li>🌗 Automatic dark mode</li>
-            <li>📱 Mobile responsive</li>
-            <li>🔍 Built-in search mode</li>
-            <li>💾 Session persistence</li>
-        </ul>
+      <h2>Quick Start</h2>
+      <p>
+        This example demonstrates the Ultralytics chat widget. Click the
+        <code>Ask AI</code> button in the bottom-right corner to start chatting!
+      </p>
+
+      <h3>Features:</h3>
+      <ul>
+        <li>💬 Real-time streaming responses</li>
+        <li>🌗 Automatic dark mode</li>
+        <li>📱 Mobile responsive</li>
+        <li>🔍 Built-in search mode</li>
+        <li>💾 Session persistence</li>
+      </ul>
     </div>
 
     <!-- Load Ultralytics Chat Widget -->
     <script src="../../js/chat.js"></script>
-    
+
     <script>
-        // Initialize chat widget
-        const chat = new UltralyticsChat({
-            apiUrl: 'https://chat-885297101091.europe-west1.run.app/api/chat',
-            branding: {
-                name: 'Ultralytics AI',
-                tagline: 'Ask anything about Ultralytics, YOLO, and more',
-                logo: 'https://cdn.prod.website-files.com/680a070c3b99253410dd3dcf/680a070c3b99253410dd3e13_logo.svg',
-                logomark: 'https://cdn.prod.website-files.com/646dd1f1a3703e451ba81ecc/64f727ed3fd1e5e074574368_ultralytics-favicon.png',
-                pillText: 'Ask AI'
-            },
-            theme: {
-                primary: '#042AFF',
-                dark: '#111F68',
-                yellow: '#E1FF25',
-                text: '#0b0b0f'
-            },
-            welcome: {
-                title: 'Hi!',
-                message: "I'm an AI assistant trained on documentation, help articles, and other content.<br>Ask me anything about Ultralytics.",
-                examples: [
-                    "What's new in YOLO11?",
-                    "How can I get started with Ultralytics HUB?",
-                    "How does Enterprise Licensing work?"
-                ]
-            },
-            ui: {
-                placeholder: 'Ask anything…',
-                copyText: 'Copy thread',
-                downloadText: 'Download thread',
-                clearText: 'New chat'
-            }
-        });
+      // Initialize chat widget
+      const chat = new UltralyticsChat({
+        apiUrl: "https://chat-885297101091.europe-west1.run.app/api/chat",
+        branding: {
+          name: "Ultralytics AI",
+          tagline: "Ask anything about Ultralytics, YOLO, and more",
+          logo: "https://cdn.prod.website-files.com/680a070c3b99253410dd3dcf/680a070c3b99253410dd3e13_logo.svg",
+          logomark:
+            "https://cdn.prod.website-files.com/646dd1f1a3703e451ba81ecc/64f727ed3fd1e5e074574368_ultralytics-favicon.png",
+          pillText: "Ask AI",
+        },
+        theme: {
+          primary: "#042AFF",
+          dark: "#111F68",
+          yellow: "#E1FF25",
+          text: "#0b0b0f",
+        },
+        welcome: {
+          title: "Hi!",
+          message:
+            "I'm an AI assistant trained on documentation, help articles, and other content.<br>Ask me anything about Ultralytics.",
+          examples: [
+            "What's new in YOLO11?",
+            "How can I get started with Ultralytics HUB?",
+            "How does Enterprise Licensing work?",
+          ],
+        },
+        ui: {
+          placeholder: "Ask anything…",
+          copyText: "Copy thread",
+          downloadText: "Download thread",
+          clearText: "New chat",
+        },
+      });
     </script>
-</body>
+  </body>
 </html>
