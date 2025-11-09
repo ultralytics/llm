@@ -68,16 +68,6 @@ class UltralyticsChat {
     this.listeners.get(el).push({ ev, fn });
   }
 
-  off(el, ev, fn) {
-    if (!el) return;
-    el.removeEventListener(ev, fn);
-    const elListeners = this.listeners.get(el);
-    if (elListeners) {
-      const idx = elListeners.findIndex((l) => l.ev === ev && l.fn === fn);
-      if (idx !== -1) elListeners.splice(idx, 1);
-    }
-  }
-
   el(tag, cls = "", html = "") {
     const e = document.createElement(tag);
     if (cls) e.className = cls;
@@ -447,7 +437,7 @@ class UltralyticsChat {
       if (this.refs.input) this.refs.input.placeholder = "Search for...";
       if (tagline)
         tagline.innerHTML =
-          '<strong style="color: var(--ult-primary); font-weight: 700;">SEARCH</strong> · Find answers in our docs and guides';
+          `<strong style="color: ${this.config.theme.primary}; font-weight: 700;">SEARCH</strong> · Find answers in our docs and guides`;
       const actions = this.qs(".ult-actions", this.refs.modal);
       if (actions) actions.style.display = "none";
       if (this.refs.messages) this.refs.messages.innerHTML = "";
