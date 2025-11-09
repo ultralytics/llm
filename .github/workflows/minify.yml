@@ -3,14 +3,14 @@
 name: Minify JavaScript
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'js/chat.js'
   pull_request:
     paths:
       - 'js/chat.js'
   workflow_dispatch:
+
+permissions:
+  contents: write # Modify code in PRs
+  pull-requests: write # Add comments and labels to PRs
 
 jobs:
   minify:
@@ -19,6 +19,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
+          ref: ${{ github.head_ref }}
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Node.js
@@ -33,7 +34,6 @@ jobs:
         run: terser js/chat.js -o js/chat.min.js -c -m --comments false
 
       - name: Commit minified file
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
           git config --local user.email "web@ultralytics.com"
           git config --local user.name "UltralyticsAssistant"
