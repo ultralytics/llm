@@ -520,15 +520,18 @@ class UltralyticsChat {
     });
   }
 
-  copyThread() {
-    const text = this.messages
+  formatThread() {
+    return this.messages
       .map(
         (m) =>
           `${m.role === "user" ? "You" : this.config.branding.name}: ${m.content}`,
       )
       .join("\n\n---\n\n");
+  }
+
+  copyThread() {
     if (navigator.clipboard?.writeText)
-      navigator.clipboard.writeText(text).catch(console.error);
+      navigator.clipboard.writeText(this.formatThread()).catch(console.error);
   }
 
   copyLastAssistant() {
@@ -552,10 +555,7 @@ class UltralyticsChat {
 
   downloadThread() {
     const { name } = this.config.branding;
-    const text = this.messages
-      .map((m) => `${m.role === "user" ? "You" : name}: ${m.content}`)
-      .join("\n\n---\n\n");
-    const blob = new Blob([text], { type: "text/plain" });
+    const blob = new Blob([this.formatThread()], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
     const a = this.el("a");
     a.href = url;
@@ -586,21 +586,26 @@ class UltralyticsChat {
   }
 
   // -------------------- Search --------------------
-  async performSearch(query) {
-    if (!this.refs.messages) return;
-    this.refs.messages.innerHTML = "";
+  createThinking(label = "Thinking") {
     const thinking = this.el(
       "div",
       "ult-thinking",
-      `<span class="ult-thinking-word">Searching</span><span class="ult-typing"><span></span><span></span><span></span></span><span class="ult-thinking-time">(0.0s)</span>`,
+      `<span class="ult-thinking-word">${label}</span><span class="ult-typing"><span></span><span></span><span></span></span><span class="ult-thinking-time">(0.0s)</span>`,
     );
-    this.refs.messages.appendChild(thinking);
     const timeEl = this.qs(".ult-thinking-time", thinking);
     const t0 = performance.now();
     const tick = setInterval(() => {
       if (timeEl)
         timeEl.textContent = `(${((performance.now() - t0) / 1000).toFixed(1)}s)`;
     }, 100);
+    return { el: thinking, clear: () => clearInterval(tick) };
+  }
+
+  async performSearch(query) {
+    if (!this.refs.messages) return;
+    this.refs.messages.innerHTML = "";
+    const { el: thinking, clear } = this.createThinking("Searching");
+    this.refs.messages.appendChild(thinking);
 
     try {
       const url = this.apiUrl.replace(/\/chat$/, "/search");
@@ -612,7 +617,7 @@ class UltralyticsChat {
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
 
-      clearInterval(tick);
+      clear();
       thinking.remove();
 
       if (!data.results?.length) {
@@ -647,7 +652,7 @@ class UltralyticsChat {
         })
         .join("");
     } catch (e) {
-      clearInterval(tick);
+      clear();
       thinking.remove();
       if (this.refs.messages)
         this.refs.messages.innerHTML = `<div class="ult-message">Search error: ${this.escapeHtml(e.message)}</div>`;
@@ -681,18 +686,8 @@ class UltralyticsChat {
     this.updateComposerState();
 
     const group = this.createMessageGroup("assistant");
-    const thinking = this.el(
-      "div",
-      "ult-thinking",
-      `<span class="ult-thinking-word">Thinking</span><span class="ult-typing"><span></span><span></span><span></span></span><span class="ult-thinking-time">(0.0s)</span>`,
-    );
+    const { el: thinking, clear } = this.createThinking();
     group.appendChild(thinking);
-    const timeEl = this.qs(".ult-thinking-time", thinking);
-    const t0 = performance.now();
-    const tick = setInterval(() => {
-      if (timeEl)
-        timeEl.textContent = `(${((performance.now() - t0) / 1000).toFixed(1)}s)`;
-    }, 100);
     this.scrollToBottom();
 
     this.abortController = new AbortController();
@@ -716,7 +711,7 @@ class UltralyticsChat {
       }
 
       thinking.remove();
-      clearInterval(tick);
+      clear();
 
       const div = this.el("div", "ult-message assistant");
       group.appendChild(div);
@@ -770,7 +765,7 @@ class UltralyticsChat {
       this.messages.push({ role: "assistant", content });
     } catch (e) {
       thinking.remove();
-      clearInterval(tick);
+      clear();
       const msg = this.el(
         "div",
         "ult-message assistant",
