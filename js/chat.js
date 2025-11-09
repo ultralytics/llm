@@ -101,6 +101,7 @@ class UltralyticsChat {
       eventList.forEach(({ ev, fn }) => el.removeEventListener(ev, fn));
     });
     this.listeners.clear();
+    this.styleElement?.remove(); // Remove injected styles
     this.refs.modal?.remove();
     this.refs.backdrop?.remove();
     this.refs.pill?.remove();
@@ -129,7 +130,7 @@ class UltralyticsChat {
   // -------------------- Styles --------------------
   createStyles() {
     const { primary, dark, yellow, text } = this.config.theme;
-    const style = this.el(
+    this.styleElement = this.el(
       "style",
       "",
       `
@@ -223,7 +224,7 @@ class UltralyticsChat {
       @media (max-width:768px){.ult-chat-modal{left:0;top:0;transform:none;width:100vw;height:100vh;border-radius:0}.ult-chat-modal.open{transform:none}.ult-actions{display:none}}
     `,
     );
-    document.head.appendChild(style);
+    document.head.appendChild(this.styleElement);
   }
 
   // -------------------- Icons --------------------
