@@ -6,15 +6,9 @@ class UltralyticsChat {
       apiUrl: config.apiUrl || "/api/chat",
       branding: {
         name: config.branding?.name || "AI",
-        tagline:
-          config.branding?.tagline ||
-          "Ask anything about Ultralytics, YOLO, and more",
-        logo:
-          config.branding?.logo ||
-          "https://cdn.prod.website-files.com/680a070c3b99253410dd3dcf/680a070c3b99253410dd3e13_logo.svg",
-        logomark:
-          config.branding?.logomark ||
-          "https://storage.googleapis.com/organization-image-assets/ultralytics-botAvatarSrcUrl-1729379860806.svg",
+        tagline: config.branding?.tagline || "Ask anything about Ultralytics, YOLO, and more",
+        logo: config.branding?.logo || "https://cdn.prod.website-files.com/680a070c3b99253410dd3dcf/680a070c3b99253410dd3e13_logo.svg",
+        logomark: config.branding?.logomark || "https://storage.googleapis.com/organization-image-assets/ultralytics-botAvatarSrcUrl-1729379860806.svg",
         pillText: config.branding?.pillText || "Ask AI",
       },
       theme: {
@@ -25,14 +19,8 @@ class UltralyticsChat {
       },
       welcome: {
         title: config.welcome?.title || "Hi!",
-        message:
-          config.welcome?.message ||
-          "I'm an AI assistant trained on documentation, help articles, and other content.<br>Ask me anything about Ultralytics.",
-        examples: config.welcome?.examples || [
-          "What's new in YOLO11?",
-          "How do I get started with YOLO?",
-          "Tell me about Enterprise Licensing",
-        ],
+        message: config.welcome?.message || "I'm an AI assistant trained on documentation, help articles, and other content.<br>Ask me anything about Ultralytics.",
+        examples: config.welcome?.examples || ["What's new in YOLO11?", "How do I get started with YOLO?", "Tell me about Enterprise Licensing"],
       },
       ui: {
         placeholder: config.ui?.placeholder || "Ask anything…",
@@ -50,21 +38,30 @@ class UltralyticsChat {
     this.sessionId = this.loadSessionId();
     this.autoScroll = true;
     this.mode = "chat";
-
     this.refs = {};
+    this.listeners = new Map(); // Track listeners for cleanup
     this.init();
   }
 
   // -------------------- Utilities --------------------
-  qs(sel, root = document) {
-    return root.querySelector(sel);
-  }
-  qsa(sel, root = document) {
-    return [...root.querySelectorAll(sel)];
-  }
+  qs = (sel, root = document) => root.querySelector(sel);
+  qsa = (sel, root = document) => [...root.querySelectorAll(sel)];
+
   on(el, ev, fn) {
     el.addEventListener(ev, fn);
+    if (!this.listeners.has(el)) this.listeners.set(el, []);
+    this.listeners.get(el).push({ ev, fn });
   }
+
+  off(el, ev, fn) {
+    el.removeEventListener(ev, fn);
+    const elListeners = this.listeners.get(el);
+    if (elListeners) {
+      const idx = elListeners.findIndex((l) => l.ev === ev && l.fn === fn);
+      if (idx !== -1) elListeners.splice(idx, 1);
+    }
+  }
+
   el(tag, cls = "", html = "") {
     const e = document.createElement(tag);
     if (cls) e.className = cls;
@@ -79,10 +76,13 @@ class UltralyticsChat {
       return null;
     }
   }
+
   saveSessionId(id) {
     try {
       localStorage.setItem("ult-chat-session", id);
-    } catch {}
+    } catch (e) {
+      console.warn("Failed to save session ID:", e);
+    }
   }
 
   // -------------------- Init --------------------
@@ -95,18 +95,29 @@ class UltralyticsChat {
     this.updateComposerState();
   }
 
+  destroy() {
+    this.listeners.forEach((eventList, el) => {
+      eventList.forEach(({ ev, fn }) => el.removeEventListener(ev, fn));
+    });
+    this.listeners.clear();
+    this.refs.modal?.remove();
+    this.refs.backdrop?.remove();
+    this.refs.pill?.remove();
+    this.refs = {};
+  }
+
   // -------------------- Theme --------------------
   syncThemeWithSite() {
     const root = document.documentElement;
-    const applyOS = () => {
+    const applyTheme = () => {
       if (!root.hasAttribute("data-theme")) {
         const dark = matchMedia("(prefers-color-scheme: dark)").matches;
         root.setAttribute("data-theme", dark ? "dark" : "light");
       }
     };
-    applyOS();
+    applyTheme();
     const mql = matchMedia("(prefers-color-scheme: dark)");
-    const handler = () => applyOS();
+    const handler = () => applyTheme();
     try {
       mql.addEventListener("change", handler);
     } catch {
@@ -216,44 +227,31 @@ class UltralyticsChat {
 
   // -------------------- Icons --------------------
   icon(name) {
-    const base =
-      'width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"';
-    const p = {
+    const base = 'width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"';
+    const paths = {
       copy: '<rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>',
-      download:
-        '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>',
-      refresh:
-        '<path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>',
-      close:
-        '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>',
+      download: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>',
+      refresh: '<path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>',
+      close: '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>',
       like: '<path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/>',
-      dislike:
-        '<path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"/>',
-      share:
-        '<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.59 13.51l6.83 3.98"/><path d="M15.41 6.51L8.59 10.49"/>',
-      arrowUp:
-        '<line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/>',
+      dislike: '<path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"/>',
+      share: '<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.59 13.51l6.83 3.98"/><path d="M15.41 6.51L8.59 10.49"/>',
+      arrowUp: '<line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/>',
       square: '<rect x="6" y="6" width="12" height="12" rx="2" ry="2"/>',
     };
-    return `<svg ${base} aria-hidden="true">${p[name] || ""}</svg>`;
+    return `<svg ${base} aria-hidden="true">${paths[name] || ""}</svg>`;
   }
 
   // -------------------- UI --------------------
   createUI() {
-    const { logomark, pillText, logo, name, tagline } = {
-      ...this.config.branding,
-    };
+    const { logomark, pillText, logo, name, tagline } = this.config.branding;
     const { title, message, examples } = this.config.welcome;
     const { placeholder, copyText, downloadText, clearText } = this.config.ui;
 
     this.refs.backdrop = this.el("div", "ult-backdrop");
     document.body.appendChild(this.refs.backdrop);
 
-    this.refs.pill = this.el(
-      "button",
-      "ultralytics-chat-pill",
-      `<span>${pillText}</span><img src="${logomark}" alt="${name}" />`,
-    );
+    this.refs.pill = this.el("button", "ultralytics-chat-pill", `<span>${pillText}</span><img src="${logomark}" alt="${name}" />`);
     this.refs.pill.setAttribute("aria-label", pillText);
     this.refs.pill.title = pillText;
     document.body.appendChild(this.refs.pill);
@@ -312,12 +310,8 @@ class UltralyticsChat {
   }
 
   setExamples(list) {
-    this.refs.examples.innerHTML = list
-      .map((q) => `<button class="ult-example" data-q="${q}">${q}</button>`)
-      .join("");
-    this.qsa(".ult-example", this.refs.examples).forEach((b) =>
-      this.on(b, "click", () => this.sendMessage(b.dataset.q)),
-    );
+    this.refs.examples.innerHTML = list.map((q) => `<button class="ult-example" data-q="${this.escapeHtml(q)}">${this.escapeHtml(q)}</button>`).join("");
+    this.qsa(".ult-example", this.refs.examples).forEach((b) => this.on(b, "click", () => this.sendMessage(b.dataset.q)));
   }
 
   // -------------------- Events --------------------
@@ -329,9 +323,7 @@ class UltralyticsChat {
     this.on(this.qs(".ult-chat-close", m), "click", () => this.toggle());
     this.on(this.qs(".ult-chat-clear", m), "click", () => this.clearSession());
     this.on(this.qs(".ult-chat-copy", m), "click", () => this.copyThread());
-    this.on(this.qs(".ult-chat-download", m), "click", () =>
-      this.downloadThread(),
-    );
+    this.on(this.qs(".ult-chat-download", m), "click", () => this.downloadThread());
 
     this.on(this.refs.messages, "scroll", () => {
       const d = this.refs.messages;
@@ -363,17 +355,12 @@ class UltralyticsChat {
 
     this.on(document, "keydown", (e) => {
       if (this.isOpen && e.key === "Escape") this.toggle(false);
-      if (!this.isOpen && e.metaKey && e.key.toLowerCase() === "k")
-        this.toggle(true);
+      if (!this.isOpen && e.metaKey && e.key.toLowerCase() === "k") this.toggle(true);
     });
 
-    this.on(this.qs(".ult-act-copy", m), "click", () =>
-      this.copyLastAssistant(),
-    );
+    this.on(this.qs(".ult-act-copy", m), "click", () => this.copyLastAssistant());
     this.on(this.qs(".ult-act-like", m), "click", () => this.feedback("up"));
-    this.on(this.qs(".ult-act-dislike", m), "click", () =>
-      this.feedback("down"),
-    );
+    this.on(this.qs(".ult-act-dislike", m), "click", () => this.feedback("down"));
     this.on(this.qs(".ult-act-share", m), "click", () => this.copyThread());
     this.on(this.qs(".ult-act-retry", m), "click", () => this.retryLast());
   }
@@ -405,17 +392,11 @@ class UltralyticsChat {
 
     if (this.mode === "search") {
       this.refs.input.placeholder = "Search for...";
-      tagline.innerHTML =
-        '<strong style="color: var(--ult-primary); font-weight: 700;">SEARCH</strong> · Find answers in our docs and guides';
+      tagline.innerHTML = '<strong style="color: var(--ult-primary); font-weight: 700;">SEARCH</strong> · Find answers in our docs and guides';
       this.qs(".ult-actions", this.refs.modal).style.display = "none";
       this.refs.messages.innerHTML = "";
       this.refs.welcome.innerHTML = `<p>Enter keywords to find relevant documentation, guides, and resources</p>`;
-      this.setExamples([
-        "YOLO quickstart",
-        "model training parameters",
-        "export formats",
-        "dataset configuration",
-      ]);
+      this.setExamples(["YOLO quickstart", "model training parameters", "export formats", "dataset configuration"]);
       this.showWelcome(true);
     } else {
       this.refs.input.placeholder = this.config.ui.placeholder;
@@ -454,12 +435,7 @@ class UltralyticsChat {
     if (holder.dataset.icon === name) return;
     holder.innerHTML = this.icon(name);
     holder.dataset.icon = name;
-    this.refs.send.title =
-      name === "square" && this.isStreaming
-        ? "Stop"
-        : name === "arrowUp"
-          ? "Send"
-          : "Ready";
+    this.refs.send.title = name === "square" && this.isStreaming ? "Stop" : name === "arrowUp" ? "Send" : "Ready";
     this.refs.send.setAttribute("aria-label", this.refs.send.title);
   }
 
@@ -475,42 +451,34 @@ class UltralyticsChat {
   // -------------------- Helpers --------------------
   scrollToBottom() {
     if (!this.autoScroll) return;
-    const d = this.refs.messages;
-    if (d) d.scrollTop = d.scrollHeight;
+    requestAnimationFrame(() => {
+      const d = this.refs.messages;
+      if (d) d.scrollTop = d.scrollHeight;
+    });
   }
 
   copyThread() {
-    const text = this.messages
-      .map(
-        (m) =>
-          `${m.role === "user" ? "You" : this.config.branding.name}: ${m.content}`,
-      )
-      .join("\n\n---\n\n");
+    const text = this.messages.map((m) => `${m.role === "user" ? "You" : this.config.branding.name}: ${m.content}`).join("\n\n---\n\n");
     navigator.clipboard.writeText(text).catch(console.error);
   }
 
   copyLastAssistant() {
-    const last = [...this.messages]
-      .reverse()
-      .find((m) => m.role === "assistant");
+    const last = [...this.messages].reverse().find((m) => m.role === "assistant");
     if (last) navigator.clipboard.writeText(last.content).catch(console.error);
   }
 
   feedback(type) {
     console.log("feedback:", type);
   }
+
   retryLast() {
-    const lastUser = [...this.messages]
-      .reverse()
-      .find((m) => m.role === "user");
+    const lastUser = [...this.messages].reverse().find((m) => m.role === "user");
     if (lastUser) this.sendMessage(lastUser.content);
   }
 
   downloadThread() {
     const { name } = this.config.branding;
-    const text = this.messages
-      .map((m) => `${m.role === "user" ? "You" : name}: ${m.content}`)
-      .join("\n\n---\n\n");
+    const text = this.messages.map((m) => `${m.role === "user" ? "You" : name}: ${m.content}`).join("\n\n---\n\n");
     const blob = new Blob([text], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
     const a = this.el("a");
@@ -525,7 +493,9 @@ class UltralyticsChat {
     this.sessionId = null;
     try {
       localStorage.removeItem("ult-chat-session");
-    } catch {}
+    } catch (e) {
+      console.warn("Failed to clear session:", e);
+    }
     this.refs.messages.innerHTML = "";
     this.showWelcome(true);
     this.updateComposerState();
@@ -542,15 +512,7 @@ class UltralyticsChat {
   // -------------------- Search --------------------
   async performSearch(query) {
     this.refs.messages.innerHTML = "";
-    const thinking = this.el(
-      "div",
-      "ult-thinking",
-      `
-      <span class="ult-thinking-word">Searching</span>
-      <span class="ult-typing"><span></span><span></span><span></span></span>
-      <span class="ult-thinking-time">(0.0s)</span>
-    `,
-    );
+    const thinking = this.el("div", "ult-thinking", `<span class="ult-thinking-word">Searching</span><span class="ult-typing"><span></span><span></span><span></span></span><span class="ult-thinking-time">(0.0s)</span>`);
     this.refs.messages.appendChild(thinking);
     const timeEl = this.qs(".ult-thinking-time", thinking);
     const t0 = performance.now();
@@ -572,33 +534,25 @@ class UltralyticsChat {
       thinking.remove();
 
       if (!data.results?.length) {
-        this.refs.messages.innerHTML =
-          '<div class="ult-message">No results found. Try different keywords.</div>';
+        this.refs.messages.innerHTML = '<div class="ult-message">No results found. Try different keywords.</div>';
         return;
       }
 
       this.refs.messages.innerHTML = data.results
         .map((r) => {
-          const snippet =
-            r.text.length > 150 ? r.text.slice(0, 150) + "..." : r.text;
+          const snippet = r.text.length > 150 ? r.text.slice(0, 150) + "..." : r.text;
           let host = "";
           try {
             host = new URL(r.url).hostname;
           } catch {
             host = r.url;
           }
-          const faviconUrl = host
-            ? `https://www.google.com/s2/favicons?sz=32&domain=${encodeURIComponent(
-                host,
-              )}`
-            : "";
-          const favicon = faviconUrl
-            ? `<img class="ult-search-result-favicon" src="${faviconUrl}" alt="" loading="lazy" />`
-            : "";
+          const faviconUrl = host ? `https://www.google.com/s2/favicons?sz=32&domain=${encodeURIComponent(host)}` : "";
+          const favicon = faviconUrl ? `<img class="ult-search-result-favicon" src="${faviconUrl}" alt="" loading="lazy" />` : "";
           const metaHost = host ? `<span>${this.escapeHtml(host)}</span>` : "";
           return `
           <div class="ult-search-result">
-            <div class="ult-search-result-title">${favicon}<a href="${r.url}" target="_blank" rel="noopener">${this.escapeHtml(r.title)}</a></div>
+            <div class="ult-search-result-title">${favicon}<a href="${this.escapeHtml(r.url)}" target="_blank" rel="noopener">${this.escapeHtml(r.title)}</a></div>
             <div class="ult-search-result-snippet">${this.escapeHtml(snippet)}</div>
             <div class="ult-search-result-meta"><span class="ult-search-result-score">Match: ${(r.score * 100).toFixed(0)}%</span>${metaHost}</div>
           </div>`;
@@ -607,7 +561,7 @@ class UltralyticsChat {
     } catch (e) {
       clearInterval(tick);
       thinking.remove();
-      this.refs.messages.innerHTML = `<div class="ult-message">Search error: ${e.message}</div>`;
+      this.refs.messages.innerHTML = `<div class="ult-message">Search error: ${this.escapeHtml(e.message)}</div>`;
       console.error("Search error:", e);
     }
   }
@@ -622,8 +576,7 @@ class UltralyticsChat {
     if (this.mode === "search") {
       this.refs.input.value = text;
       this.refs.input.style.height = "auto";
-      this.refs.input.style.height =
-        Math.min(this.refs.input.scrollHeight, 140) + "px";
+      this.refs.input.style.height = Math.min(this.refs.input.scrollHeight, 140) + "px";
       await this.performSearch(text);
       this.refs.input.focus();
       return;
@@ -637,15 +590,7 @@ class UltralyticsChat {
     this.updateComposerState();
 
     const group = this.createMessageGroup("assistant");
-    const thinking = this.el(
-      "div",
-      "ult-thinking",
-      `
-      <span class="ult-thinking-word">Thinking</span>
-      <span class="ult-typing"><span></span><span></span><span></span></span>
-      <span class="ult-thinking-time">(0.0s)</span>
-    `,
-    );
+    const thinking = this.el("div", "ult-thinking", `<span class="ult-thinking-word">Thinking</span><span class="ult-typing"><span></span><span></span><span></span></span><span class="ult-thinking-time">(0.0s)</span>`);
     group.appendChild(thinking);
     const timeEl = this.qs(".ult-thinking-time", thinking);
     const t0 = performance.now();
@@ -660,10 +605,7 @@ class UltralyticsChat {
       const res = await fetch(this.apiUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          messages: [{ role: "user", content: text }],
-          session_id: this.sessionId,
-        }),
+        body: JSON.stringify({ messages: [{ role: "user", content: text }], session_id: this.sessionId }),
         signal: this.abortController.signal,
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -702,8 +644,7 @@ class UltralyticsChat {
               throw new Error(parsed.error);
             }
           } catch (e) {
-            if (e.message !== "Unexpected end of JSON input")
-              console.error("Parse error:", e);
+            if (e.message !== "Unexpected end of JSON input") console.error("Parse error:", e);
           }
         }
       }
@@ -711,13 +652,7 @@ class UltralyticsChat {
     } catch (e) {
       thinking.remove();
       clearInterval(tick);
-      const msg = this.el(
-        "div",
-        "ult-message assistant",
-        e.name === "AbortError"
-          ? "Generation stopped."
-          : "Sorry, I encountered an error. Please try again.",
-      );
+      const msg = this.el("div", "ult-message assistant", e.name === "AbortError" ? "Generation stopped." : "Sorry, I encountered an error. Please try again.");
       group.appendChild(msg);
       console.error("Chat error:", e);
     } finally {
@@ -747,11 +682,7 @@ class UltralyticsChat {
 
   addMessageToUI(role, content) {
     const group = this.createMessageGroup(role);
-    const div = this.el(
-      "div",
-      `ult-message ${role === "assistant" ? "assistant" : ""}`,
-      this.renderMarkdown(content),
-    );
+    const div = this.el("div", `ult-message ${role === "assistant" ? "assistant" : ""}`, this.renderMarkdown(content));
     group.appendChild(div);
     return div;
   }
@@ -763,8 +694,7 @@ class UltralyticsChat {
   }
 
   renderMarkdown(src) {
-    const esc = (s) =>
-      s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
     const lines = (src || "").replace(/\r\n?/g, "\n").split("\n");
     let html = "",
       inCode = false,
@@ -895,19 +825,9 @@ class UltralyticsChat {
 
   renderInline(text) {
     if (!text) return "";
-    text = text
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;");
-    text = text.replace(
-      /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,
-      '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>',
-    );
-    text = text.replace(
-      /(?<!["'(])\bhttps?:\/\/[^\s<)]+[^\s<).,;:'")\]]/g,
-      (u) =>
-        `<a href="${u}" target="_blank" rel="noopener noreferrer">${u}</a>`,
-    );
+    text = this.escapeHtml(text);
+    text = text.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+    text = text.replace(/(?<!["'(])\bhttps?:\/\/[^\s<)]+[^\s<).,;:'")\]]/g, (u) => `<a href="${u}" target="_blank" rel="noopener noreferrer">${u}</a>`);
     text = text.replace(/(\*\*|__)(.*?)\1/g, "<strong>$2</strong>");
     text = text.replace(/(\*|_)([^*_]+)\1/g, "<em>$2</em>");
     text = text.replace(/`([^`]+)`/g, "<code>$1</code>");
