@@ -9,6 +9,7 @@ on:
     branches: [main]
     paths:
       - "js/**"
+  workflow_dispatch:
 
 permissions:
   contents: read # Read code in repository
@@ -23,7 +24,19 @@ jobs:
             "js/chat.js"
             "js/chat.min.js"
           )
+          echo "Purging jsdelivr CDN cache for ${{ github.repository }}..."
           for file in "${FILES[@]}"; do
-            curl -X POST "https://purge.jsdelivr.net/gh/${{ github.repository }}@main/$file"
-            echo "Purged: $file"
+            URL="https://purge.jsdelivr.net/gh/${{ github.repository }}@main/$file"
+            echo "Purging: $file"
+            RESPONSE=$(curl -s -w "\n%{http_code}" -X POST "$URL")
+            HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+            BODY=$(echo "$RESPONSE" | head -n-1)
+            if [ "$HTTP_CODE" -eq 200 ]; then
+              echo "✓ Success: $file (HTTP $HTTP_CODE)"
+            else
+              echo "✗ Failed: $file (HTTP $HTTP_CODE)"
+              echo "Response: $BODY"
+            fi
+            sleep 1
           done
+          echo "CDN purge complete"
