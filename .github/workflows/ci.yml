@@ -47,4 +47,10 @@ jobs:
 
       - name: Tests
         run: |
-          pytest tests
+          python -m pytest tests -v --cov=./ --cov-report=xml:pytest-coverage.xml
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./pytest-coverage.xml, # optional (default = coverage.xml)
