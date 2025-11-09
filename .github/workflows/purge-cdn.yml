@@ -1,0 +1,43 @@
+# Ultralytics 🚀 AGPL-3.0 License - https://ultralytics.com/license
+
+# Purge jsdelivr CDN cache when JavaScript files are updated to ensure users get latest versions immediately
+
+name: Purge CDN Cache
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "js/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read # Read code in repository
+
+jobs:
+  purge:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Purge jsdelivr CDN
+        run: |
+          FILES=(
+            "js/chat.js"
+            "js/chat.min.js"
+          )
+          echo "Purging jsdelivr CDN cache for ${{ github.repository }}..."
+          for file in "${FILES[@]}"; do
+            URL="https://purge.jsdelivr.net/gh/${{ github.repository }}@main/$file"
+            echo "Purging: $file"
+            RESPONSE=$(curl -fsSw "\n%{http_code}" -X POST "$URL")
+            HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+            BODY=$(echo "$RESPONSE" | head -n-1)
+            if [ "$HTTP_CODE" -eq 200 ]; then
+              echo "✓ Success: $file (HTTP $HTTP_CODE)"
+            else
+              echo "✗ Failed: $file (HTTP $HTTP_CODE)"
+              echo "Response: $BODY"
+              exit 1
+            fi
+            sleep 1
+          done
+          echo "CDN purge complete"
