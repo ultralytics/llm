@@ -28,7 +28,7 @@ jobs:
           for file in "${FILES[@]}"; do
             URL="https://purge.jsdelivr.net/gh/${{ github.repository }}@main/$file"
             echo "Purging: $file"
-            RESPONSE=$(curl -fsSw "\n%{http_code}" -X POST "$URL")
+            RESPONSE=$(curl -fsSw "\n%{http_code}" "$URL")
             HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
             BODY=$(echo "$RESPONSE" | head -n-1)
             if [ "$HTTP_CODE" -eq 200 ]; then
