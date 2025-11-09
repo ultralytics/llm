@@ -96,6 +96,7 @@ class UltralyticsChat {
   }
 
   destroy() {
+    this.toggle(false); // Force-close to stop streaming and reset page scroll
     this.listeners.forEach((eventList, el) => {
       eventList.forEach(({ ev, fn }) => el.removeEventListener(ev, fn));
     });
