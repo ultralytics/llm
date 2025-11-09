@@ -2,3 +2,6 @@
 """Ultralytics LLM toolkit."""
 
 __version__ = "0.1.0"
+__all__ = ["LLMClient"]
+
+from ultralytics_llm.client import LLMClient

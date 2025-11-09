@@ -38,7 +38,19 @@ jobs:
       - name: Install dependencies
         run: |
           uv pip install --system -e ".[dev]"
-      
-      - name: Test package import
+
+      - name: Import Package
+        shell: python
         run: |
-          python -c "from ultralytics_llm import __version__; print(f'ultralytics-llm {__version__}')"
+          from ultralytics_llm import __version__
+          print(f"ultralytics-llm {__version__}")
+
+      - name: Tests
+        run: |
+          python -m pytest tests -v --cov=./ --cov-report=xml:pytest-coverage.xml
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./pytest-coverage.xml, # optional (default = coverage.xml)
