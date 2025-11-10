@@ -14,6 +14,8 @@
 [![Ultralytics Forums](https://img.shields.io/discourse/users?server=https%3A%2F%2Fcommunity.ultralytics.com&logo=discourse&label=Forums&color=blue)](https://community.ultralytics.com/)
 [![Ultralytics Reddit](https://img.shields.io/reddit/subreddit-subscribers/ultralytics?style=flat&logo=reddit&logoColor=white&label=Reddit&color=blue)](https://reddit.com/r/ultralytics)
 
+<img width="960" height="544" alt="Ultralytics Chat Window" src="https://github.com/user-attachments/assets/359e1138-ca03-4d9a-a1da-a9c1018a4976" />
+
 ## 🎯 Current Status
 
 > **⚠️ Experimental Development**: This repository currently contains our JavaScript chat client for Ultralytics experimentation and internal use. **No official releases yet** - the `main` branch is actively developed and may change without notice.
@@ -43,6 +45,8 @@ Load the chat widget via [jsDelivr CDN](https://www.jsdelivr.com/package/gh/ultr
 > **Note**: Until v1.0.0 release, we recommend pinning to specific commit hashes for production use to avoid breaking changes.
 
 ## 🎯 Quick Start
+
+<img width="960" height="544" alt="Ultralytics Chat Pill" src="https://github.com/user-attachments/assets/ee59ed02-6888-4f59-9a8c-8a21eaee5a38" />
 
 ### JavaScript Chat Widget
 
