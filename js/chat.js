@@ -77,6 +77,17 @@ class UltralyticsChat {
     return e;
   }
 
+  getPageContext() {
+    const meta = (name) =>
+      document.querySelector(`meta[name="${name}"]`)?.content || "";
+    return {
+      url: window.location.href,
+      title: document.title,
+      description: meta("description"),
+      path: window.location.pathname,
+    };
+  }
+
   loadSessionId() {
     try {
       return localStorage.getItem("ult-chat-session");
@@ -713,6 +724,7 @@ class UltralyticsChat {
         body: JSON.stringify({
           messages: [{ role: "user", content: text }],
           session_id: this.sessionId,
+          context: this.getPageContext(),
         }),
         signal: this.abortController.signal,
       });
