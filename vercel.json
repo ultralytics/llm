@@ -4,7 +4,7 @@
   "redirects": [
     {
       "source": "/",
-      "destination": "/examples/js/chat"
+      "destination": "/examples/web/demo"
     }
   ]
 }
