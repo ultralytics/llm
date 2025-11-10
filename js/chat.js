@@ -869,7 +869,7 @@ class UltralyticsChat {
     const codeBlocks = [];
     text = text.replace(/`([^`]+)`/g, (match, code) => {
       codeBlocks.push(code);
-      return `__ULTCODE${codeBlocks.length - 1}__`;
+      return `@@ULTCODE${codeBlocks.length - 1}@@`;
     });
 
     text = text.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
@@ -882,7 +882,7 @@ class UltralyticsChat {
     text = text.replace(/(?<!\*)\*(?!\*)(.+?)\*(?!\*)/g, "<em>$1</em>");
     text = text.replace(/(?<!_)_(?!_)(.+?)_(?!_)/g, "<em>$1</em>");
 
-    text = text.replace(/__ULTCODE(\d+)__/g, (match, idx) => {
+    text = text.replace(/@@ULTCODE(\d+)@@/g, (match, idx) => {
       return `<code>${codeBlocks[idx]}</code>`;
     });
 
