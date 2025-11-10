@@ -3,7 +3,10 @@
 <html lang="en" data-theme="light">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="mobile-web-app-capable" content="yes" />
     <title>Ultralytics Chat — Demo</title>
     <meta name="color-scheme" content="light dark" />
 
@@ -58,6 +61,9 @@
         background: var(--bg);
         color: var(--fg);
         line-height: 1.55;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
       }
       a {
         color: var(--link);
@@ -110,9 +116,10 @@
         border-radius: 999px;
         background: var(--surface);
         color: var(--fg);
-        font-size: 14px;
+        font-size: 16px;
         outline: none;
         transition: all 0.12s ease;
+        touch-action: manipulation;
       }
       .search-input:focus {
         border-color: var(--link);
@@ -130,7 +137,7 @@
       .page {
         max-width: var(--container);
         margin: 32px auto;
-        padding: 0 20px;
+        padding: 0 20px 20px;
         display: grid;
         grid-template-columns: 280px 1fr;
         gap: 24px;
@@ -138,6 +145,8 @@
       @media (max-width: 960px) {
         .page {
           grid-template-columns: 1fr;
+          margin: 20px auto;
+          padding: 0 16px 16px;
         }
       }
 
@@ -152,6 +161,11 @@
         background: var(--surface);
         box-shadow: var(--shadow-1);
         overflow: auto;
+      }
+      @media (max-width: 960px) {
+        .sidebar {
+          display: none;
+        }
       }
       .nav-title {
         font-size: 12px;
@@ -193,6 +207,11 @@
         margin: 0 0 8px;
         letter-spacing: -0.02em;
       }
+      @media (max-width: 640px) {
+        h1 {
+          font-size: 24px;
+        }
+      }
       .lead {
         color: var(--muted);
         margin: 0 0 12px;
@@ -216,10 +235,18 @@
           transform 0.12s ease,
           background 0.12s ease,
           border-color 0.12s ease;
+        touch-action: manipulation;
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
       }
       .btn:hover {
         transform: translateY(-1px);
         background: color-mix(in srgb, var(--surface) 80%, var(--bg));
+      }
+      .btn:active {
+        transform: scale(0.98);
       }
       .btn.primary {
         background: #e1ff25;
@@ -228,6 +255,9 @@
       }
       .btn.primary:hover {
         transform: translateY(-1px) scale(1.01);
+      }
+      .btn.primary:active {
+        transform: scale(0.98);
       }
 
       .grid {
@@ -239,6 +269,7 @@
       @media (max-width: 720px) {
         .grid {
           grid-template-columns: 1fr;
+          gap: 12px;
         }
       }
       .card {
@@ -266,6 +297,7 @@
         padding: 14px;
         overflow: auto;
         margin: 14px 0;
+        -webkit-overflow-scrolling: touch;
       }
       code {
         font-family:
@@ -282,6 +314,17 @@
         border-radius: var(--radius);
         overflow: hidden;
         background: var(--surface);
+        display: block;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+      @media (max-width: 640px) {
+        table {
+          font-size: 13px;
+        }
+        th, td {
+          padding: 8px;
+        }
       }
       thead th {
         text-align: left;
@@ -303,12 +346,17 @@
       .footer {
         max-width: var(--container);
         margin: 40px auto 24px;
-        padding: 0 20px;
+        padding: 0 20px max(24px, env(safe-area-inset-bottom));
         color: var(--muted);
         font-size: 13px;
         display: flex;
         align-items: center;
         gap: 8px;
+      }
+      @media (max-width: 640px) {
+        .footer {
+          padding: 0 16px max(16px, env(safe-area-inset-bottom));
+        }
       }
     </style>
   </head>
