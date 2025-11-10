@@ -7,6 +7,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="description" content="Ultralytics Chat Widget Demo - A lightweight, professional chat client for docs and apps" />
     <title>Ultralytics Chat — Demo</title>
     <meta name="color-scheme" content="light dark" />
 
@@ -68,6 +69,7 @@
       a {
         color: var(--link);
         text-decoration: none;
+        word-break: break-word;
       }
       a:hover {
         text-decoration: underline;
@@ -120,6 +122,8 @@
         outline: none;
         transition: all 0.12s ease;
         touch-action: manipulation;
+        -webkit-appearance: none;
+        appearance: none;
       }
       .search-input:focus {
         border-color: var(--link);
@@ -145,7 +149,7 @@
       @media (max-width: 960px) {
         .page {
           grid-template-columns: 1fr;
-          margin: 20px auto;
+          margin: 16px auto;
           padding: 0 16px 16px;
         }
       }
@@ -201,6 +205,11 @@
         border-radius: var(--radius);
         background: var(--surface);
         box-shadow: var(--shadow-1);
+      }
+      @media (max-width: 640px) {
+        .hero {
+          padding: 16px;
+        }
       }
       h1 {
         font-size: 32px;
@@ -278,6 +287,11 @@
         background: var(--surface);
         padding: 16px;
       }
+      @media (max-width: 640px) {
+        .card {
+          padding: 14px;
+        }
+      }
       .card h3 {
         margin: 0 0 8px;
         font-size: 16px;
@@ -288,6 +302,12 @@
         background: var(--callout);
         padding: 12px 14px;
         margin: 18px 0;
+      }
+      @media (max-width: 640px) {
+        .callout {
+          padding: 10px 12px;
+          margin: 14px 0;
+        }
       }
 
       pre {
@@ -304,6 +324,7 @@
           ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono",
           monospace;
         font-size: 13px;
+        word-break: break-all;
       }
 
       table {
@@ -392,6 +413,7 @@
             placeholder="Search documentation..."
             onclick="openSearch()"
             readonly
+            aria-label="Search documentation"
           />
         </div>
       </div>
@@ -616,10 +638,14 @@ results[0].show()</code></pre>
       })();
 
       function openChat() {
-        if (chatInstance) chatInstance.toggle(true, "chat");
+        if (chatInstance) {
+          chatInstance.toggle(true, "chat");
+        }
       }
       function openSearch() {
-        if (chatInstance) chatInstance.toggle(true, "search");
+        if (chatInstance) {
+          chatInstance.toggle(true, "search");
+        }
       }
 
       window.addEventListener("DOMContentLoaded", () => {

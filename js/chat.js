@@ -63,7 +63,7 @@ class UltralyticsChat {
 
   on(el, ev, fn) {
     if (!el) return;
-    el.addEventListener(ev, fn);
+    el.addEventListener(ev, fn, { passive: ev === 'scroll' || ev === 'touchstart' || ev === 'touchmove' });
     if (!this.listeners.has(el)) this.listeners.set(el, []);
     this.listeners.get(el).push({ ev, fn });
   }
@@ -111,6 +111,14 @@ class UltralyticsChat {
       eventList.forEach(({ ev, fn }) => el.removeEventListener(ev, fn));
     });
     this.listeners.clear();
+    if (this.themeHandler) {
+      const { mql, handler } = this.themeHandler;
+      if (mql.removeEventListener) {
+        mql.removeEventListener("change", handler);
+      } else if (mql.removeListener) {
+        mql.removeListener(handler);
+      }
+    }
     this.styleElement?.remove();
     this.refs.modal?.remove();
     this.refs.backdrop?.remove();
@@ -134,6 +142,7 @@ class UltralyticsChat {
     } else if (mql.addListener) {
       mql.addListener(handler);
     }
+    this.themeHandler = { mql, handler };
   }
 
   // -------------------- Styles --------------------
@@ -144,7 +153,7 @@ class UltralyticsChat {
       "",
       `
       *{box-sizing:border-box}
-      :root{--ult-dark:${dark};--ult-primary:${primary};--ult-yellow:${yellow};--ult-text:${text}}
+      :root{--ult-dark:${dark};--ult-primary:${primary};--ult-yellow:${yellow};--ult-text:${text};--ult-muted:#6b7280}
 
       .ult-backdrop{display:none;position:fixed;inset:0;background:rgba(255,255,255,.07);
         backdrop-filter:blur(3px) saturate(120%) brightness(1.025);-webkit-backdrop-filter:blur(3px) saturate(120%) brightness(1.025);
@@ -178,7 +187,7 @@ class UltralyticsChat {
       html[data-theme=dark] .ult-icon-btn{color:#a1a1aa}
       html[data-theme=dark] .ult-icon-btn:hover{color:#fafafa;background:#17181d}
 
-      .ult-welcome{padding:18px}.ult-welcome h1{font-size:16px;margin:0 0 6px}.ult-welcome p{margin:0;color:#4b5563}
+      .ult-welcome{padding:18px}.ult-welcome h1{font-size:16px;margin:0 0 6px}.ult-welcome p{margin:0 0 8px;color:#4b5563;line-height:1.5}
       html[data-theme=dark] .ult-welcome p{color:#a1a1aa}
       .ult-examples{padding:12px 18px 6px;display:flex;flex-wrap:wrap;gap:10px}
       .ult-example{padding:10px 12px;background:#f7f7f9;border:0;border-radius:999px;cursor:pointer;font-size:12px;color:#0b0b0f;transition:.12s;touch-action:manipulation;-webkit-tap-highlight-color:rgba(0,0,0,.1)}
@@ -186,7 +195,7 @@ class UltralyticsChat {
       .ult-example:active{transform:scale(.98)}
       html[data-theme=dark] .ult-example{background:#131318;color:#fafafa}
 
-      .ult-chat-messages{flex:1;overflow-y:auto;padding:0 18px 18px;display:flex;flex-direction:column;gap:14px;-webkit-overflow-scrolling:touch}
+      .ult-chat-messages{flex:1;overflow-y:auto;padding:0 18px 18px;display:flex;flex-direction:column;gap:14px;-webkit-overflow-scrolling:touch;scroll-behavior:smooth}
       .ult-message-group{display:flex;flex-direction:column;gap:6px}
       .ult-message-label{display:flex;align-items:center;gap:8px;font-size:11px;font-weight:800;color:#6b7280;text-transform:uppercase;letter-spacing:.03em;padding:0 2px}
       html[data-theme=dark] .ult-message-label{color:#a1a1aa}
@@ -194,10 +203,16 @@ class UltralyticsChat {
       .ult-user-icon{color:var(--ult-yellow)}
       .ult-message{font-size:14px;line-height:1.6;color:var(--ult-text);padding:0 2px;word-break:break-word;text-align:left}
       html[data-theme=dark] .ult-message{color:#f5f5f5}
-      .ult-message a{color:var(--ult-primary);text-underline-offset:2px}.ult-message a:hover{text-decoration:underline}
+      .ult-message a{color:var(--ult-primary);text-underline-offset:2px;word-break:break-all}.ult-message a:hover{text-decoration:underline}
       .ult-message strong{font-weight:700;color:var(--ult-text)}
       html[data-theme=dark] .ult-message strong{color:#fafafa}
-      .ult-message pre{background:#0f172a;color:#e5e7eb;padding:10px 12px;border-radius:10px;overflow:auto;margin:6px 0;border:0}
+      .ult-message blockquote{border-left:3px solid var(--ult-primary);padding-left:12px;margin:8px 0;color:var(--ult-muted);font-style:italic}
+      html[data-theme=dark] .ult-message blockquote{color:#a1a1aa}
+      .ult-message ul,.ult-message ol{margin:8px 0;padding-left:24px}
+      .ult-message li{margin:4px 0}
+      .ult-message h1,.ult-message h2,.ult-message h3{margin:12px 0 8px;font-weight:700}
+      .ult-message h1{font-size:18px}.ult-message h2{font-size:16px}.ult-message h3{font-size:14px}
+      .ult-message pre{background:#0f172a;color:#e5e7eb;padding:10px 12px;border-radius:10px;overflow:auto;margin:6px 0;border:0;-webkit-overflow-scrolling:touch}
       .ult-message code{background:#f4f4f5;padding:2px 6px;border-radius:6px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;border:0}
       .ult-message pre code{background:transparent;padding:0;border:0;display:block;color:inherit;font-size:13px}
       html[data-theme=dark] .ult-message code{background:#1e1e22}
@@ -238,7 +253,7 @@ class UltralyticsChat {
       .ult-chat-modal[data-mode="search"] .ult-chat-messages{order:3}
 
       .ult-icon-swap{display:flex;align-items:center;justify-content:center}
-      @media (max-width:768px){.ult-chat-modal{left:0;top:0;transform:none;width:100vw;height:100vh;border-radius:0;pointer-events:auto;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}.ult-chat-modal.open{transform:none}.ult-actions{display:none}.ult-chat-header{padding:12px 18px}.ult-subtle{display:none}.ult-chat-input-container{padding-bottom:max(16px,env(safe-area-inset-bottom))}}
+      @media (max-width:768px){.ult-chat-modal{left:0;top:0;transform:none;width:100vw;height:100vh;border-radius:0;pointer-events:auto;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}.ult-chat-modal.open{transform:none}.ult-actions{display:none}.ult-chat-header{padding:10px 16px}.ult-subtle{display:none}.ult-welcome{padding:16px}.ult-examples{padding:8px 16px 4px;gap:8px}.ult-chat-messages{padding:0 16px 16px;gap:12px}.ult-message-group{gap:4px}.ult-chat-input-container{padding:10px 16px max(16px,env(safe-area-inset-bottom));gap:6px}}
     `,
     );
     document.head.appendChild(this.styleElement);
@@ -398,9 +413,14 @@ class UltralyticsChat {
     });
 
     this.on(document, "keydown", (e) => {
-      if (this.isOpen && e.key === "Escape") this.toggle(false);
-      if (!this.isOpen && e.metaKey && e.key.toLowerCase() === "k")
+      if (this.isOpen && e.key === "Escape") {
+        e.preventDefault();
+        this.toggle(false);
+      }
+      if (!this.isOpen && (e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
         this.toggle(true);
+      }
     });
 
     this.on(this.qs(".ult-act-copy", m), "click", () =>
@@ -475,6 +495,9 @@ class UltralyticsChat {
       this.refs.welcome.style.display = show ? "block" : "none";
     if (this.refs.examples)
       this.refs.examples.style.display = show ? "flex" : "none";
+    if (show && this.refs.messages) {
+      this.refs.messages.scrollTop = 0;
+    }
   }
 
   renderChatHistory() {
@@ -490,7 +513,10 @@ class UltralyticsChat {
     this.autoScroll = false;
     this.messages.forEach((m) => this.addMessageToUI(m.role, m.content));
     this.autoScroll = prevAutoScroll;
-    this.refs.messages.scrollTop = this.refs.messages.scrollHeight;
+    requestAnimationFrame(() => {
+      if (this.refs.messages)
+        this.refs.messages.scrollTop = this.refs.messages.scrollHeight;
+    });
   }
 
   // -------------------- Composer --------------------
@@ -692,11 +718,13 @@ class UltralyticsChat {
     this.updateComposerState();
 
     const group = this.createMessageGroup("assistant");
+    if (!group) return;
     const { el: thinking, clear } = this.createThinking();
     group.appendChild(thinking);
     this.scrollToBottom();
 
     this.abortController = new AbortController();
+    const timeoutId = setTimeout(() => this.abortController?.abort(), 60000);
 
     try {
       const res = await fetch(this.apiUrl, {
@@ -708,6 +736,7 @@ class UltralyticsChat {
         }),
         signal: this.abortController.signal,
       });
+      clearTimeout(timeoutId);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
       const sid = res.headers.get("X-Session-ID");
@@ -770,13 +799,14 @@ class UltralyticsChat {
       this.scrollToBottom();
       this.messages.push({ role: "assistant", content });
     } catch (e) {
+      clearTimeout(timeoutId);
       thinking.remove();
       clear();
       const msg = this.el(
         "div",
         "ult-message assistant",
         e.name === "AbortError"
-          ? "Generation stopped."
+          ? "Request timed out or was stopped."
           : "Sorry, I encountered an error. Please try again.",
       );
       group.appendChild(msg);
