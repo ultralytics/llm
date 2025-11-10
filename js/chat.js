@@ -229,7 +229,7 @@ class UltralyticsChat {
       .ult-chat-modal[data-mode="search"] .ult-chat-messages{order:3}
 
       .ult-icon-swap{display:flex;align-items:center;justify-content:center}
-      @media (max-width:768px){.ult-backdrop{pointer-events:none}.ult-chat-modal{left:0;top:0;transform:none;width:100vw;height:100vh;border-radius:0}.ult-chat-modal.open{transform:none}.ult-actions{display:none}}
+      @media (max-width:768px){.ult-backdrop{pointer-events:none}.ult-chat-modal{left:0;top:0;transform:none;width:100vw;height:100dvh;border-radius:0;position:fixed}.ult-chat-modal.open{transform:none}.ult-actions{display:none}.ult-subtle{display:none!important}.ult-chat-header{padding:12px 16px}.ult-chat-messages{padding:0 16px 12px;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}.ult-welcome{padding:12px 16px}.ult-examples{padding:8px 16px 4px}.ult-chat-input-container{padding:8px 12px 12px}.ult-message-group{gap:4px}}
     `,
     );
     document.head.appendChild(this.styleElement);
@@ -398,7 +398,17 @@ class UltralyticsChat {
     this.refs.modal?.classList.toggle("open", next);
     this.refs.backdrop?.classList.toggle("open", next);
     this.refs.pill?.classList.toggle("hidden", next);
-    document.documentElement.style.overflow = next ? "hidden" : "";
+    if (next) {
+      document.documentElement.style.overflow = "hidden";
+      document.body.style.position = "fixed";
+      document.body.style.width = "100%";
+      document.body.style.top = "0";
+    } else {
+      document.documentElement.style.overflow = "";
+      document.body.style.position = "";
+      document.body.style.width = "";
+      document.body.style.top = "";
+    }
     if (next) {
       this.updateUIForMode();
       if (!this.messages.length) this.showWelcome(true);
