@@ -1,0 +1,615 @@
+<!-- Ultralytics 🚀 AGPL-3.0 License - https://ultralytics.com/license -->
+
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ultralytics Chat — Demo</title>
+    <meta name="color-scheme" content="light dark" />
+
+    <style>
+      /* ---------- Design tokens ---------- */
+      :root {
+        --bg: #ffffff;
+        --fg: #0b0b0f;
+        --muted: #6b7280;
+        --border: #e5e7eb;
+        --surface: #f7f7f9;
+        --link: #042aff;
+        --callout: #eef2ff;
+        --code-bg: #0f172a;
+        --shadow-1:
+          0 10px 24px rgba(2, 6, 23, 0.1), 0 2px 8px rgba(2, 6, 23, 0.06);
+        --radius: 12px;
+        --container: 1200px;
+      }
+      html[data-theme="dark"] {
+        --bg: #0a0a0b;
+        --fg: #f5f5f5;
+        --muted: #a1a1aa;
+        --border: #232327;
+        --surface: #131318;
+        --link: #7aa2ff;
+        --callout: #121826;
+        --code-bg: #0f172a;
+        --shadow-1:
+          0 10px 28px rgba(0, 0, 0, 0.45), 0 2px 10px rgba(0, 0, 0, 0.25);
+      }
+
+      /* ---------- Base ---------- */
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        height: 100%;
+      }
+      body {
+        margin: 0;
+        font-family:
+          Inter,
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          "Segoe UI",
+          Roboto,
+          "Helvetica Neue",
+          Arial;
+        background: var(--bg);
+        color: var(--fg);
+        line-height: 1.55;
+      }
+      a {
+        color: var(--link);
+        text-decoration: none;
+      }
+      a:hover {
+        text-decoration: underline;
+      }
+
+      /* ---------- Layout ---------- */
+      .topbar {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        backdrop-filter: saturate(120%) blur(8px);
+        -webkit-backdrop-filter: saturate(120%) blur(8px);
+        background: color-mix(in srgb, var(--bg) 80%, transparent);
+        border-bottom: 1px solid var(--border);
+      }
+      .topbar-inner {
+        max-width: var(--container);
+        margin: 0 auto;
+        padding: 12px 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 800;
+      }
+      .brand img {
+        width: 20px;
+        height: 20px;
+        border-radius: 4px;
+      }
+
+      .search-box {
+        flex: 1;
+        max-width: 600px;
+        position: relative;
+      }
+      .search-input {
+        width: 100%;
+        padding: 10px 14px 10px 40px;
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        background: var(--surface);
+        color: var(--fg);
+        font-size: 14px;
+        outline: none;
+        transition: all 0.12s ease;
+      }
+      .search-input:focus {
+        border-color: var(--link);
+        box-shadow: 0 0 0 3px color-mix(in srgb, var(--link) 15%, transparent);
+      }
+      .search-icon {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--muted);
+        pointer-events: none;
+      }
+
+      .page {
+        max-width: var(--container);
+        margin: 32px auto;
+        padding: 0 20px;
+        display: grid;
+        grid-template-columns: 280px 1fr;
+        gap: 24px;
+      }
+      @media (max-width: 960px) {
+        .page {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      /* ---------- Sidebar ---------- */
+      .sidebar {
+        position: sticky;
+        top: 72px;
+        height: calc(100dvh - 96px);
+        padding: 16px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        background: var(--surface);
+        box-shadow: var(--shadow-1);
+        overflow: auto;
+      }
+      .nav-title {
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--muted);
+        margin: 6px 0 10px;
+        font-weight: 800;
+      }
+      .nav {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+      .nav li a {
+        display: block;
+        padding: 8px 10px;
+        border-radius: 8px;
+        color: var(--fg);
+      }
+      .nav li a:hover {
+        background: color-mix(in srgb, var(--surface) 60%, transparent);
+        text-decoration: none;
+      }
+
+      /* ---------- Content ---------- */
+      .content {
+        min-width: 0;
+      }
+      .hero {
+        padding: 20px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        background: var(--surface);
+        box-shadow: var(--shadow-1);
+      }
+      h1 {
+        font-size: 32px;
+        margin: 0 0 8px;
+        letter-spacing: -0.02em;
+      }
+      .lead {
+        color: var(--muted);
+        margin: 0 0 12px;
+      }
+      .toolbar {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 12px;
+      }
+      .btn {
+        appearance: none;
+        border: 1px solid var(--border);
+        background: var(--bg);
+        color: var(--fg);
+        border-radius: 10px;
+        padding: 10px 14px;
+        font-weight: 700;
+        cursor: pointer;
+        transition:
+          transform 0.12s ease,
+          background 0.12s ease,
+          border-color 0.12s ease;
+      }
+      .btn:hover {
+        transform: translateY(-1px);
+        background: color-mix(in srgb, var(--surface) 80%, var(--bg));
+      }
+      .btn.primary {
+        background: #e1ff25;
+        color: #111f68;
+        border-color: #dce61f;
+      }
+      .btn.primary:hover {
+        transform: translateY(-1px) scale(1.01);
+      }
+
+      .grid {
+        display: grid;
+        gap: 16px;
+        margin: 20px 0;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      @media (max-width: 720px) {
+        .grid {
+          grid-template-columns: 1fr;
+        }
+      }
+      .card {
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        background: var(--surface);
+        padding: 16px;
+      }
+      .card h3 {
+        margin: 0 0 8px;
+        font-size: 16px;
+      }
+      .callout {
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        background: var(--callout);
+        padding: 12px 14px;
+        margin: 18px 0;
+      }
+
+      pre {
+        background: var(--code-bg);
+        color: #e5e7eb;
+        border-radius: var(--radius);
+        padding: 14px;
+        overflow: auto;
+        margin: 14px 0;
+      }
+      code {
+        font-family:
+          ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono",
+          monospace;
+        font-size: 13px;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 14px 0;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        overflow: hidden;
+        background: var(--surface);
+      }
+      thead th {
+        text-align: left;
+        background: color-mix(in srgb, var(--surface) 75%, var(--bg));
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--muted);
+      }
+      th,
+      td {
+        padding: 12px;
+        border-bottom: 1px solid var(--border);
+      }
+      tr:last-child td {
+        border-bottom: none;
+      }
+
+      .footer {
+        max-width: var(--container);
+        margin: 40px auto 24px;
+        padding: 0 20px;
+        color: var(--muted);
+        font-size: 13px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Top bar -->
+    <header class="topbar">
+      <div class="topbar-inner">
+        <div class="brand">
+          <img
+            src="https://cdn.prod.website-files.com/646dd1f1a3703e451ba81ecc/64f727ed3fd1e5e074574368_ultralytics-favicon.png"
+            alt="Ultralytics"
+          />
+          <span>Ultralytics</span>
+        </div>
+        <div class="search-box">
+          <svg
+            class="search-icon"
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <circle cx="11" cy="11" r="8" />
+            <path d="m21 21-4.35-4.35" />
+          </svg>
+          <input
+            type="text"
+            class="search-input"
+            placeholder="Search documentation..."
+            onclick="openSearch()"
+            readonly
+          />
+        </div>
+      </div>
+    </header>
+
+    <!-- Page -->
+    <main class="page">
+      <aside class="sidebar" aria-label="Section navigation">
+        <div class="nav-title">On this page</div>
+        <ul class="nav">
+          <li><a href="#intro">Introduction</a></li>
+          <li><a href="#install">Install</a></li>
+          <li><a href="#benchmarks">Benchmarks</a></li>
+          <li><a href="#examples">Examples</a></li>
+          <li><a href="#faq">FAQ</a></li>
+        </ul>
+
+        <div class="nav-title" style="margin-top: 16px">Guides</div>
+        <ul class="nav">
+          <li><a href="#inference">YOLO Inference</a></li>
+          <li><a href="#training">Training</a></li>
+          <li><a href="#export">Export</a></li>
+        </ul>
+      </aside>
+
+      <section class="content">
+        <div class="hero" id="intro">
+          <h1>Ultralytics Chat Widget</h1>
+          <p class="lead">
+            A lightweight, professional chat client for docs and apps. Streams
+            tokens, supports markdown, and uses Ultralytics brand UI.
+          </p>
+          <div class="toolbar">
+            <button class="btn" onclick="openChat()">Open Chat</button>
+            <span class="btn" style="pointer-events: none; opacity: 0.7"
+              >Press ⌘ + K to open</span
+            >
+          </div>
+        </div>
+
+        <div class="grid">
+          <div class="card">
+            <h3>Why this widget</h3>
+            <ul>
+              <li>Centered modal with blurred/lightened backdrop for focus</li>
+              <li>Brand-aligned pill launcher with hover zoom only</li>
+              <li>
+                Copy, like/dislike, share, retry actions (dark-mode friendly)
+              </li>
+              <li>Animated Send/Stop icon swap — arrow up ↔ square</li>
+              <li>Minimal custom code, easy to embed in any page</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>Quick start</h3>
+            <p>Add the script and instantiate with your config:</p>
+            <pre><code>&lt;script src="https://cdn.jsdelivr.net/gh/ultralytics/llm@main/js/chat.js"&gt;&lt;/script&gt;
+&lt;script&gt;
+  // Option 1: Full configuration (all optional)
+  const chat = new UltralyticsChat({
+    apiUrl: '/api/chat',
+    branding: {
+      name: 'My AI Assistant',
+      tagline: 'Ask me anything',
+      logo: 'logo.png',
+      pillText: 'Chat',
+    },
+    theme: {
+      primary: '#042AFF',
+      dark: '#111F68',
+      yellow: '#E1FF25',
+      text: '#0b0b0f',
+    },
+  });
+
+  // Option 2: Minimal (uses defaults)
+  // const chat = new UltralyticsChat({ apiUrl: '/api/chat' });
+&lt;/script&gt;</code></pre>
+            <p>Then trigger with:</p>
+            <pre><code>chat.toggle(true); // open
+chat.toggle(false); // close</code></pre>
+          </div>
+        </div>
+
+        <div id="install" class="card">
+          <h3>Install Ultralytics</h3>
+          <p>Use pip to get the latest package:</p>
+          <pre><code>pip install -U ultralytics</code></pre>
+          <div class="callout">
+            Tip: Prefer isolated environments (<code>uv</code>,
+            <code>venv</code>, or <code>conda</code>) for reproducibility.
+          </div>
+        </div>
+
+        <div id="benchmarks" class="card">
+          <h3>Sample Benchmarks (YOLO11)</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Model</th>
+                <th>mAP<sub>50-95</sub></th>
+                <th>Params</th>
+                <th>FPS (A100)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>YOLO11n</td>
+                <td>—</td>
+                <td>—</td>
+                <td>—</td>
+              </tr>
+              <tr>
+                <td>YOLO11s</td>
+                <td>—</td>
+                <td>—</td>
+                <td>—</td>
+              </tr>
+              <tr>
+                <td>YOLO11m</td>
+                <td>—</td>
+                <td>—</td>
+                <td>—</td>
+              </tr>
+              <tr>
+                <td>YOLO11l</td>
+                <td>—</td>
+                <td>—</td>
+                <td>—</td>
+              </tr>
+              <tr>
+                <td>YOLO11x</td>
+                <td>—</td>
+                <td>—</td>
+                <td>—</td>
+              </tr>
+            </tbody>
+          </table>
+          <p class="lead">
+            Numbers depend on dataset and hardware. Replace with your own
+            metrics.
+          </p>
+        </div>
+
+        <div id="examples" class="card">
+          <h3>Code Examples</h3>
+          <p>Inference with Python:</p>
+          <pre><code>from ultralytics import YOLO
+
+model = YOLO("yolo11s.pt")
+results = model("bus.jpg")
+results[0].show()</code></pre>
+
+          <p>Training from CLI:</p>
+          <pre><code>yolo train model=yolo11s.pt data=coco.yaml epochs=100 imgsz=640</code></pre>
+        </div>
+
+        <div id="inference" class="card">
+          <h3>YOLO Inference</h3>
+          <p>
+            Run single-image, directory, or video streams. Use
+            <code>conf</code> and <code>iou</code> to tune precision/recall
+            tradeoffs.
+          </p>
+        </div>
+
+        <div id="training" class="card">
+          <h3>Training</h3>
+          <p>
+            Fine-tune on your datasets. Track runs, compare metrics, and export
+            best checkpoints.
+          </p>
+        </div>
+
+        <div id="export" class="card">
+          <h3>Export</h3>
+          <p>Export to formats like ONNX, TensorRT, CoreML:</p>
+          <pre><code>yolo export model=best.pt format=onnx opset=13 dynamic</code></pre>
+        </div>
+
+        <div id="faq" class="card">
+          <h3>FAQ</h3>
+          <p>
+            <strong>How does the chat integrate with docs?</strong><br />
+            It's a self-contained client that calls your API. Pass in RAG
+            context or knowledge base sources on the server side.
+          </p>
+          <p>
+            <strong>Does it support dark mode?</strong><br />
+            Yes. It follows the page's <code>data-theme</code> attribute and
+            inherits CSS variables.
+          </p>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <span>Need help?</span
+      ><a href="#" onclick="openChat();return false;">Ask Ultralytics AI</a>
+    </footer>
+
+    <!-- Chat client -->
+    <script src="../../js/chat.js"></script>
+    <script>
+      let chatInstance;
+
+      function applySystemTheme() {
+        const dark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+        document.documentElement.setAttribute(
+          "data-theme",
+          dark ? "dark" : "light",
+        );
+      }
+
+      (function bindSystemThemeListener() {
+        const mql = window.matchMedia("(prefers-color-scheme: dark)");
+        try {
+          mql.addEventListener("change", applySystemTheme);
+        } catch {
+          mql.addListener(applySystemTheme);
+        }
+      })();
+
+      function openChat() {
+        if (chatInstance) chatInstance.toggle(true, "chat");
+      }
+      function openSearch() {
+        if (chatInstance) chatInstance.toggle(true, "search");
+      }
+
+      window.addEventListener("DOMContentLoaded", () => {
+        applySystemTheme();
+        chatInstance = new UltralyticsChat({
+          apiUrl: "https://chat-885297101091.europe-west1.run.app/api/chat",
+          branding: {
+            name: "Ultralytics AI",
+            tagline: "Ask anything about Ultralytics, YOLO, and more",
+            logo: "https://cdn.prod.website-files.com/680a070c3b99253410dd3dcf/680a070c3b99253410dd3e13_logo.svg",
+            logomark:
+              "https://cdn.prod.website-files.com/646dd1f1a3703e451ba81ecc/64f727ed3fd1e5e074574368_ultralytics-favicon.png",
+            pillText: "Ask AI",
+          },
+          theme: {
+            primary: "#042AFF",
+            dark: "#111F68",
+            yellow: "#E1FF25",
+            text: "#0b0b0f",
+          },
+          welcome: {
+            title: "Hi!",
+            message:
+              "I'm an AI assistant trained on documentation, help articles, and other content.<br>Ask me anything about Ultralytics.",
+            examples: [
+              "What's new in SAM3?",
+              "How do I get started with YOLO?",
+              "Tell me about Enterprise Licensing",
+            ],
+          },
+          ui: {
+            placeholder: "Ask anything…",
+            copyText: "Copy thread",
+            downloadText: "Download thread",
+            clearText: "New chat",
+          },
+        });
+      });
+    </script>
+  </body>
+</html>
