@@ -906,7 +906,7 @@ class UltralyticsChat {
       }
     };
     for (let raw of lines) {
-      const fence = raw.match(/^```(\w+)?\s*$/);
+      const fence = raw.match(/^\s*```(\w+)?\s*$/);
       if (fence) {
         if (inCode) {
           html += `</code></pre>`;
