@@ -191,13 +191,13 @@ POST /api/chat
 
 ```json
 {
-    "messages": [
-        {
-            "role": "user",
-            "content": "What is YOLO11?"
-        }
-    ],
-    "session_id": "optional-session-id"
+  "messages": [
+    {
+      "role": "user",
+      "content": "What is YOLO11?"
+    }
+  ],
+  "session_id": "optional-session-id"
 }
 ```
 
@@ -227,7 +227,7 @@ POST /api/search
 
 ```json
 {
-    "query": "YOLO training parameters"
+  "query": "YOLO training parameters"
 }
 ```
 
@@ -235,14 +235,14 @@ POST /api/search
 
 ```json
 {
-    "results": [
-        {
-            "title": "Training Configuration",
-            "url": "https://...",
-            "text": "Snippet of matching content...",
-            "score": 0.95
-        }
-    ]
+  "results": [
+    {
+      "title": "Training Configuration",
+      "url": "https://...",
+      "text": "Snippet of matching content...",
+      "score": 0.95
+    }
+  ]
 }
 ```
 
@@ -252,9 +252,9 @@ POST /api/search
 
 ```javascript
 try {
-    await chat.sendMessage("test");
+  await chat.sendMessage("test");
 } catch (error) {
-    console.error("Chat error:", error);
+  console.error("Chat error:", error);
 }
 ```
 
@@ -321,11 +321,11 @@ TypeScript definitions will be available in future releases.
 
 ```typescript
 interface UltralyticsConfig {
-    apiUrl?: string;
-    branding?: BrandingConfig;
-    theme?: ThemeConfig;
-    welcome?: WelcomeConfig;
-    ui?: UIConfig;
+  apiUrl?: string;
+  branding?: BrandingConfig;
+  theme?: ThemeConfig;
+  welcome?: WelcomeConfig;
+  ui?: UIConfig;
 }
 ```
 
