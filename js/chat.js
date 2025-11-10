@@ -51,6 +51,7 @@ class UltralyticsChat {
     this.sessionId = this.loadSessionId();
     this.autoScroll = true;
     this.mode = "chat";
+    this.scrollY = 0;
     this.refs = {};
     this.listeners = new Map();
     this.inputDebounceTimer = null;
@@ -434,15 +435,17 @@ class UltralyticsChat {
     this.refs.backdrop?.classList.toggle("open", next);
     this.refs.pill?.classList.toggle("hidden", next);
     if (next) {
+      this.scrollY = window.scrollY;
       document.documentElement.style.overflow = "hidden";
       document.body.style.position = "fixed";
       document.body.style.width = "100%";
-      document.body.style.top = "0";
+      document.body.style.top = `-${this.scrollY}px`;
     } else {
       document.documentElement.style.overflow = "";
       document.body.style.position = "";
       document.body.style.width = "";
       document.body.style.top = "";
+      window.scrollTo(0, this.scrollY);
     }
     if (next) {
       this.updateUIForMode();
