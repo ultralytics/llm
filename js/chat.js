@@ -3,9 +3,7 @@
 class UltralyticsChat {
   constructor(config = {}) {
     this.config = {
-      apiUrl:
-        config.apiUrl ||
-        "https://chat-885297101091.europe-west1.run.app/api/chat",
+      apiUrl: config.apiUrl || "https://chat-885297101091.europe-west1.run.app/api/chat",
       maxMessageLength: config.maxMessageLength || 10000,
       branding: {
         name: config.branding?.name || "AI",
@@ -342,7 +340,7 @@ class UltralyticsChat {
           <button class="ult-action-btn ult-act-share" title="Share" aria-label="Share">${this.icon("share")}</button>
           <button class="ult-action-btn ult-act-retry" title="Try again" aria-label="Try again">${this.icon("refresh")}</button>
         </div>
-        <textarea class="ult-chat-input" placeholder="${this.escapeHtml(placeholder)}" rows="1" maxlength="${this.config.maxMessageLength}"></textarea>
+        <textarea id="ult-chat-input" name="message" class="ult-chat-input" placeholder="${this.escapeHtml(placeholder)}" rows="1" maxlength="${this.config.maxMessageLength}" autocomplete="off"></textarea>
         <button class="ult-chat-send" title="Ready" aria-label="Ready">
           <span class="ult-icon-swap" data-icon="square">${this.icon("square")}</span>
         </button>
