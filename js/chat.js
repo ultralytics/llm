@@ -63,7 +63,9 @@ class UltralyticsChat {
 
   on(el, ev, fn) {
     if (!el) return;
-    el.addEventListener(ev, fn, { passive: ev === 'scroll' || ev === 'touchstart' || ev === 'touchmove' });
+    el.addEventListener(ev, fn, {
+      passive: ev === "scroll" || ev === "touchstart" || ev === "touchmove",
+    });
     if (!this.listeners.has(el)) this.listeners.set(el, []);
     this.listeners.get(el).push({ ev, fn });
   }
@@ -417,7 +419,11 @@ class UltralyticsChat {
         e.preventDefault();
         this.toggle(false);
       }
-      if (!this.isOpen && (e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+      if (
+        !this.isOpen &&
+        (e.metaKey || e.ctrlKey) &&
+        e.key.toLowerCase() === "k"
+      ) {
         e.preventDefault();
         this.toggle(true);
       }
