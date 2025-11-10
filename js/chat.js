@@ -3,7 +3,7 @@
 class UltralyticsChat {
   constructor(config = {}) {
     this.config = {
-      apiUrl: config.apiUrl || "/api/chat",
+      apiUrl: config.apiUrl || "https://chat-885297101091.europe-west1.run.app",
       maxMessageLength: config.maxMessageLength || 10000,
       branding: {
         name: config.branding?.name || "AI",
