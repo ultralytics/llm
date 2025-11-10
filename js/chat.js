@@ -340,7 +340,7 @@ class UltralyticsChat {
           <button class="ult-action-btn ult-act-share" title="Share" aria-label="Share">${this.icon("share")}</button>
           <button class="ult-action-btn ult-act-retry" title="Try again" aria-label="Try again">${this.icon("refresh")}</button>
         </div>
-        <textarea id="ult-chat-input" name="message" class="ult-chat-input" placeholder="${this.escapeHtml(placeholder)}" rows="1" maxlength="${this.config.maxMessageLength}" autocomplete="off"></textarea>
+        <textarea name="message" class="ult-chat-input" placeholder="${this.escapeHtml(placeholder)}" rows="1" maxlength="${this.config.maxMessageLength}" autocomplete="off"></textarea>
         <button class="ult-chat-send" title="Ready" aria-label="Ready">
           <span class="ult-icon-swap" data-icon="square">${this.icon("square")}</span>
         </button>
