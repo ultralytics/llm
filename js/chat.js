@@ -111,17 +111,41 @@ class UltralyticsChat {
     this.syncThemeWithSite();
     this.showWelcome(true);
     this.updateComposerState();
+    this.observeDOM();
+  }
+
+  observeDOM() {
+    let scheduled = false;
+    const observer = new MutationObserver((mutations) => {
+      if (scheduled) return;
+      for (const mutation of mutations) {
+        for (const node of mutation.removedNodes) {
+          if (node === this.refs.pill || node === this.refs.modal || node === this.refs.backdrop) {
+            scheduled = true;
+            requestAnimationFrame(() => {
+              this.ensureUI();
+              scheduled = false;
+            });
+            return;
+          }
+        }
+      }
+    });
+    observer.observe(document.body, { childList: true });
+    this.domObserver = observer;
+  }
+
+  ensureUI() {
+    if (this.refs.pill && !document.body.contains(this.refs.pill)) document.body.appendChild(this.refs.pill);
+    if (this.refs.modal && !document.body.contains(this.refs.modal)) document.body.appendChild(this.refs.modal);
+    if (this.refs.backdrop && !document.body.contains(this.refs.backdrop)) document.body.appendChild(this.refs.backdrop);
   }
 
   destroy() {
     this.toggle(false);
-    if (this.inputDebounceTimer) {
-      clearTimeout(this.inputDebounceTimer);
-      this.inputDebounceTimer = null;
-    }
-    this.listeners.forEach((eventList, el) => {
-      eventList.forEach(({ ev, fn }) => el.removeEventListener(ev, fn));
-    });
+    if (this.inputDebounceTimer) clearTimeout(this.inputDebounceTimer);
+    this.domObserver?.disconnect();
+    this.listeners.forEach((eventList, el) => eventList.forEach(({ ev, fn }) => el.removeEventListener(ev, fn)));
     this.listeners.clear();
     this.styleElement?.remove();
     this.refs.modal?.remove();
