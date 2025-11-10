@@ -111,30 +111,25 @@ class UltralyticsChat {
     this.syncThemeWithSite();
     this.showWelcome(true);
     this.updateComposerState();
-    this.observeDOM();
+    this.watchForRemoval();
   }
 
-  observeDOM() {
-    let scheduled = false;
-    const observer = new MutationObserver((mutations) => {
-      if (scheduled) return;
-      for (const mutation of mutations) {
-        for (const node of mutation.removedNodes) {
-          if (
-            node === this.refs.pill ||
-            node === this.refs.modal ||
-            node === this.refs.backdrop
-          ) {
-            scheduled = true;
-            requestAnimationFrame(() => {
-              this.ensureUI();
-              scheduled = false;
-            });
-            return;
-          }
-        }
+  watchForRemoval() {
+    const observer = new MutationObserver(() => {
+      if (this.styleElement?.parentNode !== document.head) {
+        document.head.appendChild(this.styleElement);
+      }
+      if (this.refs.pill?.parentNode !== document.body) {
+        document.body.appendChild(this.refs.pill);
+      }
+      if (this.refs.modal?.parentNode !== document.body) {
+        document.body.appendChild(this.refs.modal);
+      }
+      if (this.refs.backdrop?.parentNode !== document.body) {
+        document.body.appendChild(this.refs.backdrop);
       }
     });
+    observer.observe(document.head, { childList: true });
     observer.observe(document.body, { childList: true });
     this.domObserver = observer;
   }
