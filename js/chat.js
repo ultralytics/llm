@@ -78,7 +78,8 @@ class UltralyticsChat {
   }
 
   getPageContext() {
-    const meta = (name) => document.querySelector(`meta[name="${name}"]`)?.content || "";
+    const meta = (name) =>
+      document.querySelector(`meta[name="${name}"]`)?.content || "";
     return {
       url: window.location.href,
       title: document.title,
