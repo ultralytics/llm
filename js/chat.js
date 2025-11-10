@@ -1008,7 +1008,7 @@ class UltralyticsChat {
       '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>',
     );
     text = text.replace(
-      /(?<!href=")(?<!src=")\b(https?:\/\/[^\s<>.,;:'")\]!?]+)(?=[<\s.,;:'")\]!?]|$)/g,
+      /(?<!href=")(?<!src=")\b(https?:\/\/[^\s<>'")\]]+?)(?=[.,;:!?]*(?:\s|<|'|"|$))/g,
       '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>',
     );
     text = text.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
