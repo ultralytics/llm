@@ -5,17 +5,20 @@
     <meta charset="UTF-8" />
     <meta
       name="viewport"
-      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=overlays-content"
     />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="format-detection" content="telephone=no, address=no, email=no" />
     <meta
       name="description"
       content="Ultralytics Chat Widget Demo - A lightweight, professional chat client for docs and apps"
     />
-    <title>Ultralytics Chat — Demo</title>
     <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0a0a0b" media="(prefers-color-scheme: dark)" />
+    <title>Ultralytics Chat — Demo</title>
 
     <style>
       /* ---------- Design tokens ---------- */
@@ -28,10 +31,11 @@
         --link: #042aff;
         --callout: #eef2ff;
         --code-bg: #0f172a;
-        --shadow-1:
-          0 10px 24px rgba(2, 6, 23, 0.1), 0 2px 8px rgba(2, 6, 23, 0.06);
+        --shadow-1: 0 10px 24px rgba(2, 6, 23, 0.1), 0 2px 8px rgba(2, 6, 23, 0.06);
         --radius: 12px;
         --container: 1200px;
+        --safe-top: env(safe-area-inset-top, 0px);
+        --safe-bottom: env(safe-area-inset-bottom, 0px);
       }
       html[data-theme="dark"] {
         --bg: #0a0a0b;
@@ -42,43 +46,31 @@
         --link: #7aa2ff;
         --callout: #121826;
         --code-bg: #0f172a;
-        --shadow-1:
-          0 10px 28px rgba(0, 0, 0, 0.45), 0 2px 10px rgba(0, 0, 0, 0.25);
+        --shadow-1: 0 10px 28px rgba(0, 0, 0, 0.45), 0 2px 10px rgba(0, 0, 0, 0.25);
       }
 
       /* ---------- Base ---------- */
-      * {
-        box-sizing: border-box;
-      }
-      html,
-      body {
-        height: 100%;
-      }
+      * { box-sizing: border-box; }
+      html, body { height: 100%; }
       body {
         margin: 0;
-        font-family:
-          Inter,
-          ui-sans-serif,
-          system-ui,
-          -apple-system,
-          "Segoe UI",
-          Roboto,
-          "Helvetica Neue",
-          Arial;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
         background: var(--bg);
         color: var(--fg);
         line-height: 1.55;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
         -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+        padding-top: max(0px, var(--safe-top));
       }
-      a {
-        color: var(--link);
-        text-decoration: none;
-        word-break: break-word;
-      }
-      a:hover {
-        text-decoration: underline;
+      a { color: var(--link); text-decoration: none; word-break: break-word; }
+      a:hover { text-decoration: underline; }
+      input, button { font-size: 16px; } /* prevent iOS zoom */
+
+      /* Reduce motion for users who prefer it */
+      @media (prefers-reduced-motion: reduce) {
+        * { animation-duration: 0.001s !important; transition-duration: 0.001s !important; }
+        .btn:hover, .btn.primary:hover { transform: none !important; }
       }
 
       /* ---------- Layout ---------- */
@@ -88,303 +80,145 @@
         z-index: 20;
         backdrop-filter: saturate(120%) blur(8px);
         -webkit-backdrop-filter: saturate(120%) blur(8px);
-        background: color-mix(in srgb, var(--bg) 80%, transparent);
+        background: color-mix(in srgb, var(--bg) 82%, transparent);
         border-bottom: 1px solid var(--border);
       }
       .topbar-inner {
         max-width: var(--container);
         margin: 0 auto;
-        padding: 12px 20px;
+        padding: calc(8px + var(--safe-top)) 16px 10px;
         display: flex;
         align-items: center;
         justify-content: space-between;
-        gap: 12px;
+        gap: 10px;
       }
       .brand {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        font-weight: 800;
+        display: flex; align-items: center; gap: 8px; font-weight: 800; min-width: 0;
       }
-      .brand img {
-        width: 20px;
-        height: 20px;
-        border-radius: 4px;
-      }
+      .brand img { width: 20px; height: 20px; border-radius: 4px; }
+      .brand span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-      .search-box {
-        flex: 1;
-        max-width: 600px;
-        position: relative;
-      }
+      .search-box { flex: 1; max-width: 600px; position: relative; }
       .search-input {
         width: 100%;
-        padding: 10px 14px 10px 40px;
+        padding: 12px 14px 12px 40px;
         border: 1px solid var(--border);
         border-radius: 999px;
         background: var(--surface);
         color: var(--fg);
         font-size: 16px;
         outline: none;
-        transition: all 0.12s ease;
+        transition: box-shadow 0.12s ease, border-color 0.12s ease;
         touch-action: manipulation;
-        -webkit-appearance: none;
-        appearance: none;
+        -webkit-appearance: none; appearance: none;
       }
-      .search-input:focus {
+      .search-input:focus-visible {
         border-color: var(--link);
         box-shadow: 0 0 0 3px color-mix(in srgb, var(--link) 15%, transparent);
       }
       .search-icon {
-        position: absolute;
-        left: 14px;
-        top: 50%;
-        transform: translateY(-50%);
-        color: var(--muted);
-        pointer-events: none;
+        position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+        color: var(--muted); pointer-events: none;
+      }
+      /* Compact top bar on very small screens */
+      @media (max-width: 420px) {
+        .topbar-inner { gap: 6px; padding-left: 12px; padding-right: 12px; }
+        .search-input { padding-left: 36px; }
       }
 
       .page {
         max-width: var(--container);
-        margin: 32px auto;
-        padding: 0 20px 20px;
+        margin: 24px auto;
+        padding: 0 16px 16px;
         display: grid;
         grid-template-columns: 280px 1fr;
-        gap: 24px;
+        gap: 20px;
       }
       @media (max-width: 960px) {
-        .page {
-          grid-template-columns: 1fr;
-          margin: 16px auto;
-          padding: 0 16px 16px;
-        }
+        .page { grid-template-columns: 1fr; margin: 12px auto; }
       }
 
       /* ---------- Sidebar ---------- */
       .sidebar {
         position: sticky;
-        top: 72px;
-        height: calc(100dvh - 96px);
-        padding: 16px;
+        top: calc(56px + var(--safe-top));
+        height: calc(100dvh - 96px - var(--safe-top));
+        padding: 14px;
         border: 1px solid var(--border);
         border-radius: var(--radius);
         background: var(--surface);
         box-shadow: var(--shadow-1);
         overflow: auto;
+        -webkit-overflow-scrolling: touch;
       }
-      @media (max-width: 960px) {
-        .sidebar {
-          display: none;
-        }
-      }
+      @media (max-width: 960px) { .sidebar { display: none; } }
       .nav-title {
-        font-size: 12px;
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-        color: var(--muted);
-        margin: 6px 0 10px;
-        font-weight: 800;
+        font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em;
+        color: var(--muted); margin: 6px 0 10px; font-weight: 800;
       }
-      .nav {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-      }
-      .nav li a {
-        display: block;
-        padding: 8px 10px;
-        border-radius: 8px;
-        color: var(--fg);
-      }
-      .nav li a:hover {
-        background: color-mix(in srgb, var(--surface) 60%, transparent);
-        text-decoration: none;
-      }
+      .nav { list-style: none; padding: 0; margin: 0; }
+      .nav li a { display: block; padding: 10px 10px; border-radius: 8px; color: var(--fg); }
+      .nav li a:hover { background: color-mix(in srgb, var(--surface) 60%, transparent); text-decoration: none; }
 
       /* ---------- Content ---------- */
-      .content {
-        min-width: 0;
-      }
+      .content { min-width: 0; }
       .hero {
-        padding: 20px;
+        padding: 16px;
         border: 1px solid var(--border);
         border-radius: var(--radius);
         background: var(--surface);
         box-shadow: var(--shadow-1);
       }
-      @media (max-width: 640px) {
-        .hero {
-          padding: 16px;
-        }
-      }
-      h1 {
-        font-size: 32px;
-        margin: 0 0 8px;
-        letter-spacing: -0.02em;
-      }
-      @media (max-width: 640px) {
-        h1 {
-          font-size: 24px;
-        }
-      }
-      .lead {
-        color: var(--muted);
-        margin: 0 0 12px;
-      }
-      .toolbar {
-        display: flex;
-        gap: 10px;
-        flex-wrap: wrap;
-        margin-top: 12px;
-      }
-      .btn {
-        appearance: none;
-        border: 1px solid var(--border);
-        background: var(--bg);
-        color: var(--fg);
-        border-radius: 10px;
-        padding: 10px 14px;
-        font-weight: 700;
-        cursor: pointer;
-        transition:
-          transform 0.12s ease,
-          background 0.12s ease,
-          border-color 0.12s ease;
-        touch-action: manipulation;
-        min-height: 44px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-      }
-      .btn:hover {
-        transform: translateY(-1px);
-        background: color-mix(in srgb, var(--surface) 80%, var(--bg));
-      }
-      .btn:active {
-        transform: scale(0.98);
-      }
-      .btn.primary {
-        background: #e1ff25;
-        color: #111f68;
-        border-color: #dce61f;
-      }
-      .btn.primary:hover {
-        transform: translateY(-1px) scale(1.01);
-      }
-      .btn.primary:active {
-        transform: scale(0.98);
-      }
+      h1 { font-size: 28px; margin: 0 0 8px; letter-spacing: -0.02em; }
+      @media (max-width: 640px) { h1 { font-size: 22px; } }
+      .lead { color: var(--muted); margin: 0 0 12px; }
 
-      .grid {
-        display: grid;
-        gap: 16px;
-        margin: 20px 0;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+      .toolbar { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
+      .btn {
+        appearance: none; border: 1px solid var(--border); background: var(--bg); color: var(--fg);
+        border-radius: 10px; padding: 10px 14px; font-weight: 700; cursor: pointer;
+        transition: transform 0.12s ease, background 0.12s ease, border-color 0.12s ease;
+        touch-action: manipulation; min-height: 44px; display: inline-flex; align-items: center; justify-content: center;
       }
-      @media (max-width: 720px) {
-        .grid {
-          grid-template-columns: 1fr;
-          gap: 12px;
-        }
-      }
-      .card {
-        border: 1px solid var(--border);
-        border-radius: var(--radius);
-        background: var(--surface);
-        padding: 16px;
-      }
-      @media (max-width: 640px) {
-        .card {
-          padding: 14px;
-        }
-      }
-      .card h3 {
-        margin: 0 0 8px;
-        font-size: 16px;
-      }
-      .callout {
-        border: 1px solid var(--border);
-        border-radius: var(--radius);
-        background: var(--callout);
-        padding: 12px 14px;
-        margin: 18px 0;
-      }
-      @media (max-width: 640px) {
-        .callout {
-          padding: 10px 12px;
-          margin: 14px 0;
-        }
-      }
+      .btn:hover { transform: translateY(-1px); background: color-mix(in srgb, var(--surface) 80%, var(--bg)); }
+      .btn:active { transform: scale(0.98); }
+      .btn:focus-visible { outline: none; box-shadow: 0 0 0 3px color-mix(in srgb, var(--link) 15%, transparent); }
+      .btn.primary { background: #e1ff25; color: #111f68; border-color: #dce61f; }
+      .btn.primary:hover { transform: translateY(-1px) scale(1.01); }
+      .btn.primary:active { transform: scale(0.98); }
+      @media (max-width: 520px) { .toolbar .btn { flex: 1 1 auto; } }
+
+      .grid { display: grid; gap: 14px; margin: 16px 0; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      @media (max-width: 720px) { .grid { grid-template-columns: 1fr; gap: 12px; } }
+      .card { border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); padding: 14px; }
+      .card h3 { margin: 0 0 8px; font-size: 16px; }
+
+      .callout { border: 1px solid var(--border); border-radius: var(--radius); background: var(--callout); padding: 10px 12px; margin: 14px 0; }
 
       pre {
-        background: var(--code-bg);
-        color: #e5e7eb;
-        border-radius: var(--radius);
-        padding: 14px;
-        overflow: auto;
-        margin: 14px 0;
-        -webkit-overflow-scrolling: touch;
+        background: var(--code-bg); color: #e5e7eb; border-radius: var(--radius);
+        padding: 12px; overflow: auto; margin: 12px 0; -webkit-overflow-scrolling: touch;
       }
-      code {
-        font-family:
-          ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono",
-          monospace;
-        font-size: 13px;
-        word-break: break-all;
-      }
+      code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; font-size: 13px; word-break: break-all; }
 
       table {
-        width: 100%;
-        border-collapse: collapse;
-        margin: 14px 0;
-        border: 1px solid var(--border);
-        border-radius: var(--radius);
-        overflow: hidden;
-        background: var(--surface);
-        display: block;
-        overflow-x: auto;
+        width: 100%; border-collapse: collapse; margin: 12px 0; border: 1px solid var(--border);
+        border-radius: var(--radius); overflow: hidden; background: var(--surface); display: block; overflow-x: auto;
         -webkit-overflow-scrolling: touch;
       }
-      @media (max-width: 640px) {
-        table {
-          font-size: 13px;
-        }
-        th,
-        td {
-          padding: 8px;
-        }
-      }
+      @media (max-width: 640px) { table { font-size: 13px; } th, td { padding: 8px; } }
       thead th {
-        text-align: left;
-        background: color-mix(in srgb, var(--surface) 75%, var(--bg));
-        font-size: 12px;
-        text-transform: uppercase;
-        letter-spacing: 0.06em;
-        color: var(--muted);
+        text-align: left; background: color-mix(in srgb, var(--surface) 75%, var(--bg));
+        font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
       }
-      th,
-      td {
-        padding: 12px;
-        border-bottom: 1px solid var(--border);
-      }
-      tr:last-child td {
-        border-bottom: none;
-      }
+      th, td { padding: 12px; border-bottom: 1px solid var(--border); }
+      tr:last-child td { border-bottom: none; }
 
       .footer {
         max-width: var(--container);
-        margin: 40px auto 24px;
-        padding: 0 20px max(24px, env(safe-area-inset-bottom));
-        color: var(--muted);
-        font-size: 13px;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-      }
-      @media (max-width: 640px) {
-        .footer {
-          padding: 0 16px max(16px, env(safe-area-inset-bottom));
-        }
+        margin: 32px auto 16px;
+        padding: 0 16px max(20px, var(--safe-bottom));
+        color: var(--muted); font-size: 13px; display: flex; align-items: center; gap: 8px;
       }
     </style>
   </head>
@@ -396,20 +230,16 @@
           <img
             src="https://cdn.prod.website-files.com/646dd1f1a3703e451ba81ecc/64f727ed3fd1e5e074574368_ultralytics-favicon.png"
             alt="Ultralytics"
+            loading="lazy"
+            decoding="async"
           />
           <span>Ultralytics</span>
         </div>
         <div class="search-box">
           <svg
             class="search-icon"
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
+            width="18" height="18" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"
           >
             <circle cx="11" cy="11" r="8" />
             <path d="m21 21-4.35-4.35" />
@@ -417,10 +247,11 @@
           <input
             type="text"
             class="search-input"
-            placeholder="Search documentation..."
+            placeholder="Search documentation…"
             onclick="openSearch()"
             readonly
             aria-label="Search documentation"
+            role="searchbox"
           />
         </div>
       </div>
@@ -450,14 +281,11 @@
         <div class="hero" id="intro">
           <h1>Ultralytics Chat Widget</h1>
           <p class="lead">
-            A lightweight, professional chat client for docs and apps. Streams
-            tokens, supports markdown, and uses Ultralytics brand UI.
+            A lightweight, professional chat client for docs and apps. Streams tokens, supports markdown, and uses Ultralytics brand UI.
           </p>
           <div class="toolbar">
-            <button class="btn" onclick="openChat()">Open Chat</button>
-            <span class="btn" style="pointer-events: none; opacity: 0.7"
-              >Press ⌘ + K to open</span
-            >
+            <button class="btn" onclick="openChat()" aria-label="Open chat">Open Chat</button>
+            <span class="btn" style="pointer-events: none; opacity: 0.72">Press ⌘ + K to open</span>
           </div>
         </div>
 
@@ -467,9 +295,7 @@
             <ul>
               <li>Centered modal with blurred/lightened backdrop for focus</li>
               <li>Brand-aligned pill launcher with hover zoom only</li>
-              <li>
-                Copy, like/dislike, share, retry actions (dark-mode friendly)
-              </li>
+              <li>Copy, like/dislike, share, retry actions (dark-mode friendly)</li>
               <li>Animated Send/Stop icon swap — arrow up ↔ square</li>
               <li>Minimal custom code, easy to embed in any page</li>
             </ul>
@@ -510,8 +336,7 @@ chat.toggle(false); // close</code></pre>
           <p>Use pip to get the latest package:</p>
           <pre><code>pip install -U ultralytics</code></pre>
           <div class="callout">
-            Tip: Prefer isolated environments (<code>uv</code>,
-            <code>venv</code>, or <code>conda</code>) for reproducibility.
+            Tip: Prefer isolated environments (<code>uv</code>, <code>venv</code>, or <code>conda</code>) for reproducibility.
           </div>
         </div>
 
@@ -527,42 +352,14 @@ chat.toggle(false); // close</code></pre>
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td>YOLO11n</td>
-                <td>—</td>
-                <td>—</td>
-                <td>—</td>
-              </tr>
-              <tr>
-                <td>YOLO11s</td>
-                <td>—</td>
-                <td>—</td>
-                <td>—</td>
-              </tr>
-              <tr>
-                <td>YOLO11m</td>
-                <td>—</td>
-                <td>—</td>
-                <td>—</td>
-              </tr>
-              <tr>
-                <td>YOLO11l</td>
-                <td>—</td>
-                <td>—</td>
-                <td>—</td>
-              </tr>
-              <tr>
-                <td>YOLO11x</td>
-                <td>—</td>
-                <td>—</td>
-                <td>—</td>
-              </tr>
+              <tr><td>YOLO11n</td><td>—</td><td>—</td><td>—</td></tr>
+              <tr><td>YOLO11s</td><td>—</td><td>—</td><td>—</td></tr>
+              <tr><td>YOLO11m</td><td>—</td><td>—</td><td>—</td></tr>
+              <tr><td>YOLO11l</td><td>—</td><td>—</td><td>—</td></tr>
+              <tr><td>YOLO11x</td><td>—</td><td>—</td><td>—</td></tr>
             </tbody>
           </table>
-          <p class="lead">
-            Numbers depend on dataset and hardware. Replace with your own
-            metrics.
-          </p>
+          <p class="lead">Numbers depend on dataset and hardware. Replace with your own metrics.</p>
         </div>
 
         <div id="examples" class="card">
@@ -580,19 +377,12 @@ results[0].show()</code></pre>
 
         <div id="inference" class="card">
           <h3>YOLO Inference</h3>
-          <p>
-            Run single-image, directory, or video streams. Use
-            <code>conf</code> and <code>iou</code> to tune precision/recall
-            tradeoffs.
-          </p>
+          <p>Run single-image, directory, or video streams. Use <code>conf</code> and <code>iou</code> to tune precision/recall tradeoffs.</p>
         </div>
 
         <div id="training" class="card">
           <h3>Training</h3>
-          <p>
-            Fine-tune on your datasets. Track runs, compare metrics, and export
-            best checkpoints.
-          </p>
+          <p>Fine-tune on your datasets. Track runs, compare metrics, and export best checkpoints.</p>
         </div>
 
         <div id="export" class="card">
@@ -603,23 +393,15 @@ results[0].show()</code></pre>
 
         <div id="faq" class="card">
           <h3>FAQ</h3>
-          <p>
-            <strong>How does the chat integrate with docs?</strong><br />
-            It's a self-contained client that calls your API. Pass in RAG
-            context or knowledge base sources on the server side.
-          </p>
-          <p>
-            <strong>Does it support dark mode?</strong><br />
-            Yes. It follows the page's <code>data-theme</code> attribute and
-            inherits CSS variables.
-          </p>
+          <p><strong>How does the chat integrate with docs?</strong><br />It's a self-contained client that calls your API. Pass in RAG context or knowledge base sources on the server side.</p>
+          <p><strong>Does it support dark mode?</strong><br />Yes. It follows the page's <code>data-theme</code> attribute and inherits CSS variables.</p>
         </div>
       </section>
     </main>
 
     <footer class="footer">
-      <span>Need help?</span
-      ><a href="#" onclick="openChat();return false;">Ask Ultralytics AI</a>
+      <span>Need help?</span>
+      <a href="#" onclick="openChat();return false;">Ask Ultralytics AI</a>
     </footer>
 
     <!-- Chat client -->
@@ -629,31 +411,24 @@ results[0].show()</code></pre>
 
       function applySystemTheme() {
         const dark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-        document.documentElement.setAttribute(
-          "data-theme",
-          dark ? "dark" : "light",
-        );
+        const theme = dark ? "dark" : "light";
+        document.documentElement.setAttribute("data-theme", theme);
       }
 
       (function bindSystemThemeListener() {
         const mql = window.matchMedia("(prefers-color-scheme: dark)");
-        try {
-          mql.addEventListener("change", applySystemTheme);
-        } catch {
-          mql.addListener(applySystemTheme);
-        }
+        try { mql.addEventListener("change", applySystemTheme); } catch { mql.addListener(applySystemTheme); }
       })();
 
-      function openChat() {
-        if (chatInstance) {
-          chatInstance.toggle(true, "chat");
-        }
-      }
-      function openSearch() {
-        if (chatInstance) {
-          chatInstance.toggle(true, "search");
-        }
-      }
+      function openChat() { if (chatInstance) chatInstance.toggle(true, "chat"); }
+      function openSearch() { if (chatInstance) chatInstance.toggle(true, "search"); }
+
+      // Avoid iOS overscroll rubber-banding inside modals/containers
+      document.addEventListener("touchmove", (e) => {
+        const el = e.target.closest("pre, table, .sidebar");
+        if (el) return; // allow native scroll inside these
+        // otherwise, let the page scroll normally
+      }, { passive: true });
 
       window.addEventListener("DOMContentLoaded", () => {
         applySystemTheme();
@@ -663,32 +438,16 @@ results[0].show()</code></pre>
             name: "Ultralytics AI",
             tagline: "Ask anything about Ultralytics, YOLO, and more",
             logo: "https://cdn.prod.website-files.com/680a070c3b99253410dd3dcf/680a070c3b99253410dd3e13_logo.svg",
-            logomark:
-              "https://cdn.prod.website-files.com/646dd1f1a3703e451ba81ecc/64f727ed3fd1e5e074574368_ultralytics-favicon.png",
+            logomark: "https://cdn.prod.website-files.com/646dd1f1a3703e451ba81ecc/64f727ed3fd1e5e074574368_ultralytics-favicon.png",
             pillText: "Ask AI",
           },
-          theme: {
-            primary: "#042AFF",
-            dark: "#111F68",
-            yellow: "#E1FF25",
-            text: "#0b0b0f",
-          },
+          theme: { primary: "#042AFF", dark: "#111F68", yellow: "#E1FF25", text: "#0b0b0f" },
           welcome: {
             title: "Hi!",
-            message:
-              "I'm an AI assistant trained on documentation, help articles, and other content.<br>Ask me anything about Ultralytics.",
-            examples: [
-              "What's new in SAM3?",
-              "How do I get started with YOLO?",
-              "Tell me about Enterprise Licensing",
-            ],
+            message: "I'm an AI assistant trained on documentation, help articles, and other content.<br>Ask me anything about Ultralytics.",
+            examples: ["What's new in SAM3?", "How do I get started with YOLO?", "Tell me about Enterprise Licensing"],
           },
-          ui: {
-            placeholder: "Ask anything…",
-            copyText: "Copy thread",
-            downloadText: "Download thread",
-            clearText: "New chat",
-          },
+          ui: { placeholder: "Ask anything…", copyText: "Copy thread", downloadText: "Download thread", clearText: "New chat" },
         });
       });
     </script>
