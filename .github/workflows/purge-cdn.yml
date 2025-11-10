@@ -26,7 +26,7 @@ jobs:
           )
           echo "Purging jsdelivr CDN cache for ${{ github.repository }}..."
           for file in "${FILES[@]}"; do
-            URL="https://purge.jsdelivr.net/gh/${{ github.repository }}@main/$file"
+            URL="https://purge.jsdelivr.net/gh/${{ github.repository }}@master/$file"
             echo "Purging: $file"
             RESPONSE=$(curl -fsSw "\n%{http_code}" "$URL")
             HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
