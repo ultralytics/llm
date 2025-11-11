@@ -29,20 +29,30 @@
 Load the chat widget via [jsDelivr CDN](https://www.jsdelivr.com/package/gh/ultralytics/llm):
 
 ```html
-<!-- Latest main branch (experimental, may change) -->
-<script src="https://cdn.jsdelivr.net/gh/ultralytics/llm@main/js/chat.min.js"></script>
+<!-- Latest stable release (recommended for production) -->
+<script src="https://cdn.jsdelivr.net/gh/ultralytics/llm@latest/js/chat.min.js"></script>
 
-<!-- Specific commit (stable) -->
-<script src="https://cdn.jsdelivr.net/gh/ultralytics/llm@COMMIT_HASH/js/chat.min.js"></script>
+<!-- Specific version (guaranteed stability) -->
+<script src="https://cdn.jsdelivr.net/gh/ultralytics/llm@v0.1.0/js/chat.min.js"></script>
+
+<!-- Main branch (experimental, for testing) -->
+<script src="https://cdn.jsdelivr.net/gh/ultralytics/llm@main/js/chat.min.js"></script>
 ```
 
 **CDN Links:**
 
 - 🔍 **Browse files**: [jsdelivr.com/package/gh/ultralytics/llm](https://www.jsdelivr.com/package/gh/ultralytics/llm)
 - 📊 **View stats**: Check download counts and version usage
-- 🔗 **Main branch**: `https://cdn.jsdelivr.net/gh/ultralytics/llm@main/js/chat.min.js`
+- 🏷️ **Latest release**: `https://cdn.jsdelivr.net/gh/ultralytics/llm@latest/js/chat.min.js`
+- 🔬 **Main branch**: `https://cdn.jsdelivr.net/gh/ultralytics/llm@main/js/chat.min.js`
 
-> **Note**: Until v1.0.0 release, we recommend pinning to specific commit hashes for production use to avoid breaking changes.
+**Versioning Strategy:**
+
+- `@latest` - Always points to the newest tagged release (cache purged on new releases)
+- `@v0.1.0` - Specific version tags (permanent cache, high reliability)
+- `@main` - Latest development code (12-hour cache, auto-purged on push)
+
+> **Note**: For production, use `@latest` or pin to a specific version tag. The `@main` branch is for testing and may contain breaking changes.
 
 ## 🎯 Quick Start
 
@@ -57,7 +67,7 @@ Load the chat widget via [jsDelivr CDN](https://www.jsdelivr.com/package/gh/ultr
     <title>Ultralytics Chat</title>
   </head>
   <body>
-    <script src="https://cdn.jsdelivr.net/gh/ultralytics/llm@main/js/chat.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/ultralytics/llm@latest/js/chat.min.js"></script>
     <script>
       const chat = new UltralyticsChat({
         apiUrl: "https://your-api-endpoint.com/api/chat",

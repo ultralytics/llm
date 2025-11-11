@@ -12,7 +12,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read # Read code in repository
+  contents: read
 
 jobs:
   purge:
@@ -20,27 +20,43 @@ jobs:
     steps:
       - name: Purge jsdelivr CDN
         run: |
-          FILES=(
-            "js/chat.js"
-            "js/chat.min.js"
-          )
-          BRANCHES=("main" "master")
+          set -e
+          FILES=("js/chat.js" "js/chat.min.js")
+          VERSIONS=("main" "master" "latest")
+          
           echo "Purging jsdelivr CDN cache for ${{ github.repository }}..."
+          SUCCESS=0
+          FAILED=0
+          
           for file in "${FILES[@]}"; do
-            for branch in "${BRANCHES[@]}"; do
-              URL="https://purge.jsdelivr.net/gh/${{ github.repository }}@$branch/$file"
-              echo "Purging: $file ($branch)"
-              RESPONSE=$(curl -fsSw "\n%{http_code}" "$URL")
+            for version in "${VERSIONS[@]}"; do
+              URL="https://purge.jsdelivr.net/gh/${{ github.repository }}@$version/$file"
+              echo "Purging: $file@$version"
+              
+              # Use curl with error handling
+              RESPONSE=$(curl -fsSw "\n%{http_code}" "$URL" 2>&1 || echo -e "\n000")
               HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
               BODY=$(echo "$RESPONSE" | head -n-1)
-              if [ "$HTTP_CODE" -eq 200 ]; then
-                echo "✓ Success: $file@$branch (HTTP $HTTP_CODE)"
+              
+              if [ "$HTTP_CODE" = "200" ]; then
+                echo "✓ Success: $file@$version (HTTP $HTTP_CODE)"
+                ((SUCCESS++))
               else
-                echo "✗ Failed: $file@$branch (HTTP $HTTP_CODE)"
-                echo "Response: $BODY"
-                exit 1
+                echo "✗ Failed: $file@$version (HTTP $HTTP_CODE)"
+                [ -n "$BODY" ] && echo "Response: $BODY"
+                ((FAILED++))
               fi
               sleep 1
             done
           done
-          echo "CDN purge complete"
+          
+          echo ""
+          echo "CDN purge summary: $SUCCESS successful, $FAILED failed"
+          
+          # Don't fail the workflow if some purges fail (CDN might not have cached yet)
+          if [ $SUCCESS -eq 0 ]; then
+            echo "Error: All CDN purges failed"
+            exit 1
+          elif [ $FAILED -gt 0 ]; then
+            echo "Warning: Some purges failed but at least one succeeded"
+          fi
