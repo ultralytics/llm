@@ -1,6 +1,7 @@
 # Ultralytics 🚀 AGPL-3.0 License - https://ultralytics.com/license
 
-# This workflow automatically publishes a new repository tag and purges jsdelivr CDN cache
+# Ultralytics Actions https://github.com/ultralytics/actions
+# This workflow automatically publishes a new repository tag and release
 
 name: Tag and Release
 
@@ -11,11 +12,16 @@ on:
   workflow_dispatch:
     inputs:
       tag_name:
-        description: "Tag name (e.g., v0.1.0)"
+        description: "Tag name (e.g., v0.0.0)"
         required: true
         type: string
       publish_tag:
         description: "Publish new tag"
+        required: true
+        type: boolean
+        default: true
+      publish_release:
+        description: "Publish new release"
         required: true
         type: boolean
         default: true
@@ -30,6 +36,7 @@ jobs:
         uses: actions/checkout@v5
         with:
           fetch-depth: 0
+          token: ${{ secrets._GITHUB_TOKEN }}
 
       - name: Git config
         run: |
@@ -47,50 +54,26 @@ jobs:
             echo "tag_exists=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: Validate tag format
-        if: steps.check_tag.outputs.tag_exists == 'false' && github.event.inputs.publish_tag == 'true'
-        run: |
-          TAG="${{ github.event.inputs.tag_name }}"
-          if ! [[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            echo "Error: Invalid tag format '$TAG'. Use v0.1.0 format"
-            exit 1
-          fi
-
       - name: Publish new tag
-        if: steps.check_tag.outputs.tag_exists == 'false' && github.event.inputs.publish_tag == 'true'
+        if: steps.check_tag.outputs.tag_exists == 'false'
         run: |
-          git tag -a "${{ github.event.inputs.tag_name }}" -m "Release ${{ github.event.inputs.tag_name }}"
+          git tag -a "${{ github.event.inputs.tag_name }}" -m "$(git log -1 --pretty=%B)"
           git push origin "${{ github.event.inputs.tag_name }}"
 
-      - name: Purge jsdelivr CDN cache
-        if: steps.check_tag.outputs.tag_exists == 'false' && github.event.inputs.publish_tag == 'true'
-        run: |
-          set -e
-          FILES=("js/chat.js" "js/chat.min.js")
-          VERSIONS=("main" "latest" "${{ github.event.inputs.tag_name }}")
-          
-          echo "Purging jsdelivr CDN cache for ${{ github.repository }}..."
-          SUCCESS=0
-          FAILED=0
-          
-          for file in "${FILES[@]}"; do
-            for version in "${VERSIONS[@]}"; do
-              URL="https://purge.jsdelivr.net/gh/${{ github.repository }}@$version/$file"
-              echo "Purging: $file@$version"
-              
-              RESPONSE=$(curl -fsSw "\n%{http_code}" "$URL" 2>&1 || echo -e "\n000")
-              HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
-              
-              if [ "$HTTP_CODE" = "200" ]; then
-                echo "✓ Success: $file@$version"
-                ((SUCCESS++))
-              else
-                echo "✗ Failed: $file@$version (HTTP $HTTP_CODE)"
-                ((FAILED++))
-              fi
-              sleep 1
-            done
-          done
-          
-          echo ""
-          echo "CDN purge summary: $SUCCESS successful, $FAILED failed"
+      - name: Set up Python environment
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.x"
+
+      - uses: astral-sh/setup-uv@v7
+
+      - name: Install dependencies
+        run: uv pip install --system ultralytics-actions
+
+      - name: Publish new release
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets._GITHUB_TOKEN }}
+          CURRENT_TAG: ${{ github.event.inputs.tag_name }}
+        run: ultralytics-actions-summarize-release
+        shell: bash
