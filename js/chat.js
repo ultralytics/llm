@@ -292,22 +292,22 @@ class UltralyticsChat {
         body.ult-modal-open{position:fixed!important;width:100%!important;overflow:hidden!important;-webkit-overflow-scrolling:touch}
         .ult-actions{display:none}
         .ult-subtle{display:none!important}
-        .ult-chat-header{padding:12px 14px;min-height:56px;flex-shrink:0;border-bottom:1px solid #eceff5}
+        .ult-chat-header{padding:10px 12px;min-height:52px;flex-shrink:0;border-bottom:1px solid #eceff5}
         html[data-theme=dark] .ult-chat-header{border-bottom-color:#1c1c22}
         .ult-chat-title{gap:8px;flex:1;min-width:0}
-        .ult-chat-title img{max-height:28px;max-width:140px}
+        .ult-chat-title img{max-height:26px;max-width:140px}
         .ult-header-actions{gap:4px;flex-shrink:0}
         .ult-icon-btn{width:40px;height:40px;border-radius:8px}
         .ult-icon-btn svg{width:18px;height:18px}
-        .ult-chat-messages{flex:1;min-height:0;padding:12px 14px;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
-        .ult-welcome{padding:12px 14px}
+        .ult-chat-messages{flex:1;min-height:0;padding:0 14px 12px;overflow-y:auto;overflow-x:hidden;overscroll-behavior-y:contain;-webkit-overflow-scrolling:touch}
+        .ult-welcome{padding:16px 0 8px}
         .ult-welcome h1{font-size:16px;margin:0 0 6px}
-        .ult-welcome p{font-size:14px}
-        .ult-examples{padding:8px 14px 6px;gap:8px}
+        .ult-welcome p{font-size:14px;margin:0;line-height:1.4}
+        .ult-examples{padding:8px 0 12px;gap:8px}
         .ult-example{padding:9px 12px;font-size:12px}
-        .ult-chat-input-container{padding:12px 14px 14px;flex-shrink:0;gap:10px;border-top:1px solid #eceff5;background:#fff}
+        .ult-chat-input-container{padding:10px 14px 12px;flex-shrink:0;gap:10px;border-top:1px solid #eceff5;background:#fff}
         html[data-theme=dark] .ult-chat-input-container{border-top-color:#1c1c22;background:#0a0a0b}
-        .ult-chat-input{padding:10px 12px;font-size:16px;max-height:120px;border-radius:10px}
+        .ult-chat-input{padding:10px 12px;font-size:16px;max-height:110px;border-radius:10px}
         .ult-chat-send{width:40px;height:40px;border-radius:10px}
         .ult-chat-send svg{width:18px;height:18px}
         .ult-message-group{gap:4px}
