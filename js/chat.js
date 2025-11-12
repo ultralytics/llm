@@ -316,26 +316,27 @@ class UltralyticsChat {
       @media (max-width:768px){
         html.ult-modal-open,html.ult-modal-open body{overflow:hidden!important;position:fixed!important;width:100%!important;height:100%!important}
         .ult-backdrop.open{display:block;opacity:1}
-        .ult-chat-modal{position:fixed;inset:0;width:100%;height:100%;max-width:100%;max-height:100%;border-radius:0;transform:none!important;
-          padding:0;padding-top:env(safe-area-inset-top,0);padding-right:env(safe-area-inset-right,0);padding-bottom:env(safe-area-inset-bottom,0);padding-left:env(safe-area-inset-left,0)}
+        .ult-chat-modal{position:fixed;inset:0;width:100%;height:100vh;height:100dvh;max-width:100%;max-height:100vh;max-height:100dvh;border-radius:0;transform:none!important;
+          padding:0;padding-top:env(safe-area-inset-top,0);padding-right:env(safe-area-inset-right,0);padding-bottom:env(safe-area-inset-bottom,0);padding-left:env(safe-area-inset-left,0);
+          touch-action:none}
         .ult-chat-modal.open{transform:none!important}
         .ult-actions{display:none}
         .ult-subtle{display:none!important}
-        .ult-chat-header{padding:10px 12px;min-height:52px;flex-shrink:0}
+        .ult-chat-header{padding:10px 12px;min-height:52px;flex-shrink:0;touch-action:pan-y}
         .ult-chat-title{gap:8px;flex:1;min-width:0}
         .ult-chat-title img{max-height:26px;max-width:140px}
         .ult-header-actions{gap:4px;flex-shrink:0}
-        .ult-icon-btn{width:36px;height:36px;border-radius:8px}
+        .ult-icon-btn{width:36px;height:36px;border-radius:8px;touch-action:manipulation}
         .ult-icon-btn svg{width:16px;height:16px}
-        .ult-chat-messages{flex:1 1 auto;min-height:0;padding:0 12px 10px;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;overflow-y:auto;overflow-x:hidden}
+        .ult-chat-messages{flex:1 1 auto;min-height:0;padding:0 12px 10px;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;overflow-y:auto;overflow-x:hidden;touch-action:pan-y}
         .ult-welcome{padding:10px 12px;flex-shrink:0}
         .ult-welcome h1{font-size:15px;margin:0 0 4px}
         .ult-welcome p{font-size:13px}
         .ult-examples{padding:6px 12px 4px;gap:8px;flex-shrink:0}
-        .ult-example{padding:8px 10px;font-size:11px}
-        .ult-chat-input-container{padding:8px 10px 10px;flex-shrink:0}
-        .ult-chat-input{padding:8px 10px;font-size:13px;max-height:100px}
-        .ult-chat-send{width:36px;height:36px}
+        .ult-example{padding:8px 10px;font-size:11px;touch-action:manipulation}
+        .ult-chat-input-container{padding:8px 10px 10px;flex-shrink:0;touch-action:pan-y}
+        .ult-chat-input{padding:8px 10px;font-size:13px;max-height:100px;touch-action:manipulation}
+        .ult-chat-send{width:36px;height:36px;touch-action:manipulation}
         .ult-chat-send svg{width:16px;height:16px}
         .ult-message-group{gap:3px}
         .ult-message-label{font-size:10px;gap:6px;padding:0}
@@ -511,6 +512,7 @@ class UltralyticsChat {
       if (!this.isOpen && e.metaKey && e.key.toLowerCase() === "k")
         this.toggle(true);
     });
+    this.handleAndroidBackButton();
     this.on(this.qs(".ult-act-copy", m), "click", () =>
       this.copyLastAssistant(),
     );
@@ -522,6 +524,19 @@ class UltralyticsChat {
     this.on(this.qs(".ult-act-retry", m), "click", () => this.retryLast());
   }
 
+  handleAndroidBackButton() {
+    const handler = () => {
+      if (this.isOpen && this.isMobile()) {
+        this.toggle(false);
+        history.pushState(null, "", location.href);
+      }
+    };
+    this.on(window, "popstate", handler);
+    if (this.isOpen) {
+      history.pushState(null, "", location.href);
+    }
+  }
+
   toggle(forceOpen = null, mode = null) {
     const next = forceOpen === null ? !this.isOpen : !!forceOpen;
     this.isOpen = next;
@@ -531,6 +546,9 @@ class UltralyticsChat {
     this.refs.pill?.classList.toggle("hidden", next);
     if (next) {
       this.lockScroll();
+      if (this.isMobile()) {
+        history.pushState(null, "", location.href);
+      }
     } else {
       this.unlockScroll();
     }
