@@ -65,6 +65,7 @@ Load the chat widget via [jsDelivr CDN](https://www.jsdelivr.com/package/gh/ultr
 <html>
   <head>
     <title>Ultralytics Chat</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   </head>
   <body>
     <script src="https://cdn.jsdelivr.net/gh/ultralytics/llm@latest/js/chat.min.js"></script>
@@ -88,13 +89,14 @@ Load the chat widget via [jsDelivr CDN](https://www.jsdelivr.com/package/gh/ultr
 
 ## 🎨 JavaScript Chat Features
 
-- **🎯 Zero Dependencies**: Standalone vanilla JavaScript (~900 lines), no frameworks required
+- **🎯 Zero Dependencies**: Standalone vanilla JavaScript (~1000 lines), no frameworks required
+- **📱 Mobile Optimized**: Full iOS & Android support with orientation handling, safe area insets, and back button integration
 - **🌗 Dark Mode**: Automatic theme switching based on system preferences
-- **📱 Responsive**: Works seamlessly on desktop and mobile (WebKit, Blink, Gecko)
+- **💻 Responsive**: Desktop modal and mobile full-screen layouts (WebKit, Blink, Gecko)
 - **⚡ Streaming**: Real-time SSE response streaming with abort support
 - **🔍 Search Mode**: Built-in documentation search capability
 - **💾 Session Management**: Persistent conversation history via localStorage
-- **♿ Accessible**: WCAG compliant with ARIA labels
+- **♿ Accessible**: WCAG compliant with ARIA labels and keyboard navigation
 - **🎨 Customizable**: Full theme and branding control
 - **🔒 Security**: XSS protection with HTML escaping, input length limits
 
@@ -165,6 +167,30 @@ Headers:
 X-Session-ID: session-uuid (for persistence)
 ```
 
+## 📱 Mobile Support
+
+### iOS (Safari, Chrome, Firefox)
+
+- ✅ Safe area insets for notched devices
+- ✅ Keyboard handling with auto-resize
+- ✅ Home indicator padding
+- ✅ Smooth scrolling optimization
+
+### Android (Chrome, Samsung Internet, Firefox)
+
+- ✅ Back button integration (History API)
+- ✅ Dynamic viewport height (address bar handling)
+- ✅ Touch action optimization
+- ✅ Gesture navigation support
+- ✅ Split-screen and multi-window modes
+
+### Cross-Platform
+
+- ✅ Portrait/landscape orientation changes
+- ✅ Full-screen mobile modal (no horizontal scroll)
+- ✅ Background scroll lock when open
+- ✅ Keyboard shortcuts (desktop: Cmd/Ctrl+K, ESC)
+
 ## 🔧 Development
 
 ### Build Minified Version
@@ -189,8 +215,9 @@ Tested and working on:
 - ✅ Chrome/Edge 90+ (Blink)
 - ✅ Safari 14+ (WebKit)
 - ✅ Firefox 88+ (Gecko)
-- ✅ Mobile Safari (iOS 14+)
-- ✅ Chrome Mobile (Android 5+)
+- ✅ Mobile Safari (iOS 12+)
+- ✅ Chrome Mobile (Android 8+)
+- ✅ Samsung Internet (Android 8+)
 
 ## 🌟 Roadmap
 
@@ -201,6 +228,7 @@ Tested and working on:
 - [x] Search mode
 - [x] Session persistence
 - [x] Production-ready security & performance
+- [x] Full mobile support (iOS & Android)
 - [ ] File upload support
 - [ ] Voice input
 - [ ] Multi-language support
