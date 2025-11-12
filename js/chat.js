@@ -754,10 +754,31 @@ class UltralyticsChat {
       listOpen = false,
       inQuote = false,
       paraOpen = false;
-    const closePara = () => paraOpen && ((html += "</p>"), (paraOpen = false));
-    const openPara = () => !paraOpen && ((html += "<p>"), (paraOpen = true));
-    const closeList = () => listOpen && ((html += listType === "ol" ? "</ol>" : "</ul>"), (listOpen = false), (listType = null));
-    const closeQuote = () => inQuote && ((html += "</blockquote>"), (inQuote = false));
+      const closePara = () => {
+          if (paraOpen) {
+            html += "</p>";
+            paraOpen = false;
+          }
+        };
+        const openPara = () => {
+          if (!paraOpen) {
+            html += "<p>";
+            paraOpen = true;
+          }
+        };
+        const closeList = () => {
+          if (listOpen) {
+            html += listType === "ol" ? "</ol>" : "</ul>";
+            listOpen = false;
+            listType = null;
+          }
+        };
+        const closeQuote = () => {
+          if (inQuote) {
+            html += "</blockquote>";
+            inQuote = false;
+          }
+        };
     for (let raw of lines) {
       const fence = raw.match(/^\s*```(\w+)?\s*$/);
       if (fence) {
