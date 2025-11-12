@@ -5,7 +5,7 @@ name: Minify JavaScript
 on:
   pull_request:
     paths:
-      - "jsa/chat.js"
+      - "js/chat.js"
   workflow_dispatch:
 
 permissions:
