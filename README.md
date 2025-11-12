@@ -33,7 +33,7 @@ Load the chat widget via [jsDelivr CDN](https://www.jsdelivr.com/package/gh/ultr
 <script src="https://cdn.jsdelivr.net/gh/ultralytics/llm@latest/js/chat.min.js"></script>
 
 <!-- Specific version (guaranteed stability) -->
-<script src="https://cdn.jsdelivr.net/gh/ultralytics/llm@v0.1.0/js/chat.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/ultralytics/llm@v0.0.1/js/chat.min.js"></script>
 
 <!-- Main branch (experimental, for testing) -->
 <script src="https://cdn.jsdelivr.net/gh/ultralytics/llm@main/js/chat.min.js"></script>
@@ -49,7 +49,7 @@ Load the chat widget via [jsDelivr CDN](https://www.jsdelivr.com/package/gh/ultr
 **Versioning Strategy:**
 
 - `@latest` - Always points to the newest tagged release (cache purged on new releases)
-- `@v0.1.0` - Specific version tags (permanent cache, high reliability)
+- `@v0.0.1` - Specific version tags (permanent cache, high reliability)
 - `@main` - Latest development code (12-hour cache, auto-purged on push)
 
 > **Note**: For production, use `@latest` or pin to a specific version tag. The `@main` branch is for testing and may contain breaking changes.
