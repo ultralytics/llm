@@ -241,7 +241,7 @@ class UltralyticsChat {
 
       .ult-chat-modal{position:fixed;left:50%;top:50%;width:min(760px,calc(100vw - 40px));height:min(80vh,820px);background:#fff;border:0;border-radius:16px;
         box-shadow:0 24px 60px rgba(2,6,23,.25),0 8px 24px rgba(2,6,23,.18);z-index:10001;transform:translate(-50%,-50%) scale(.98);opacity:0;transition:transform .18s,opacity .18s;
-        flex-direction:column;overflow:hidden;text-align:left;display:none}
+        flex-direction:column;overflow:hidden;overflow-x:hidden;text-align:left;display:none}
       .ult-chat-modal.open{display:flex;opacity:1;transform:translate(-50%,-50%) scale(1)}
       html[data-theme=dark] .ult-chat-modal{background:#0a0a0b}
 
@@ -316,10 +316,13 @@ class UltralyticsChat {
       @media (max-width:768px){
         html.ult-modal-open,html.ult-modal-open body{overflow:hidden!important;position:fixed!important;width:100%!important;height:100%!important}
         .ult-backdrop.open{display:block;opacity:1}
-        .ult-chat-modal{position:fixed;inset:0;width:100%;height:100vh;height:100dvh;max-width:100%;max-height:100vh;max-height:100dvh;border-radius:0;transform:none!important;
+        .ult-chat-modal{position:fixed;inset:0;width:100vw;width:100dvw;height:100vh;height:100dvh;max-width:100vw;max-width:100dvw;max-height:100vh;max-height:100dvh;border-radius:0;transform:none!important;
           padding:0;padding-top:env(safe-area-inset-top,0);padding-right:env(safe-area-inset-right,0);padding-bottom:env(safe-area-inset-bottom,0);padding-left:env(safe-area-inset-left,0);
-          touch-action:none}
+          touch-action:none;overflow-x:hidden!important;justify-content:flex-start}
         .ult-chat-modal.open{transform:none!important}
+        .ult-chat-modal[data-mode="search"] .ult-chat-input-container,
+        .ult-chat-modal[data-mode="search"] .ult-welcome,
+        .ult-chat-modal[data-mode="search"] .ult-examples{order:initial!important}
         .ult-actions{display:none}
         .ult-subtle{display:none!important}
         .ult-chat-header{padding:10px 12px;min-height:52px;flex-shrink:0;touch-action:pan-y}
@@ -329,7 +332,8 @@ class UltralyticsChat {
         .ult-icon-btn{width:36px;height:36px;border-radius:8px;touch-action:manipulation}
         .ult-icon-btn svg{width:16px;height:16px}
         .ult-chat-messages{flex:1 1 auto;min-height:0;padding:0 12px 10px;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;overflow-y:auto;overflow-x:hidden;touch-action:pan-y}
-        .ult-welcome{padding:10px 12px;flex-shrink:0}
+        .ult-chat-messages:empty{flex:1 1 100px}
+        .ult-welcome{padding:12px 12px 8px;flex-shrink:0;margin-top:auto}
         .ult-welcome h1{font-size:15px;margin:0 0 4px}
         .ult-welcome p{font-size:13px}
         .ult-examples{padding:6px 12px 4px;gap:8px;flex-shrink:0}
