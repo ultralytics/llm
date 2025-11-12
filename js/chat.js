@@ -299,15 +299,15 @@ class UltralyticsChat {
         .ult-header-actions{gap:4px;flex-shrink:0}
         .ult-icon-btn{width:40px;height:40px;border-radius:8px}
         .ult-icon-btn svg{width:18px;height:18px}
-        .ult-chat-messages{flex:0 0 auto;min-height:0;padding:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior-y:contain;-webkit-overflow-scrolling:touch}
-        .ult-chat-modal:not(.welcome-mode) .ult-chat-messages{flex:1 1 auto}
+        .ult-chat-messages{flex:1 1 auto;min-height:0;padding:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior-y:contain;-webkit-overflow-scrolling:touch}
+        .ult-chat-modal.welcome-mode .ult-chat-messages{flex:0 0 auto;overflow:visible}
         .ult-welcome{padding:12px 14px 0}
         .ult-welcome h1{font-size:16px;margin:0 0 6px}
         .ult-welcome p{font-size:14px;margin:0;line-height:1.4}
         .ult-examples{padding:8px 14px;gap:8px}
-        .welcome-mode .ult-examples{flex:1;display:flex;flex-wrap:wrap;align-content:flex-start}
         .ult-example{padding:9px 12px;font-size:12px}
         .ult-chat-input-container{padding:10px 14px 12px;flex-shrink:0;gap:10px;border-top:1px solid #eceff5;background:#fff}
+        .ult-chat-modal.welcome-mode .ult-chat-input-container{margin-top:auto}
         html[data-theme=dark] .ult-chat-input-container{border-top-color:#1c1c22;background:#0a0a0b}
         .ult-chat-input{padding:10px 12px;font-size:16px;max-height:110px;border-radius:10px}
         .ult-chat-send{width:40px;height:40px;border-radius:10px}
