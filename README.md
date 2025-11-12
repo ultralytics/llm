@@ -33,7 +33,7 @@ Load the chat widget via [jsDelivr CDN](https://www.jsdelivr.com/package/gh/ultr
 <script src="https://cdn.jsdelivr.net/gh/ultralytics/llm@latest/js/chat.min.js"></script>
 
 <!-- Specific version (guaranteed stability) -->
-<script src="https://cdn.jsdelivr.net/gh/ultralytics/llm@v/js/chat.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/ultralytics/llm@v0.0.1/js/chat.min.js"></script>
 
 <!-- Main branch (experimental, for testing) -->
 <script src="https://cdn.jsdelivr.net/gh/ultralytics/llm@main/js/chat.min.js"></script>
