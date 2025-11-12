@@ -118,12 +118,13 @@ class UltralyticsChat {
   ensureViewport() {
     let viewport = document.querySelector('meta[name="viewport"]');
     if (!viewport) {
-      viewport = document.createElement('meta');
-      viewport.name = 'viewport';
+      viewport = document.createElement("meta");
+      viewport.name = "viewport";
       document.head.appendChild(viewport);
     }
-    if (!viewport.content.includes('maximum-scale')) {
-      viewport.content = 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no';
+    if (!viewport.content.includes("maximum-scale")) {
+      viewport.content =
+        "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no";
     }
   }
 
@@ -494,11 +495,11 @@ class UltralyticsChat {
     this.refs.pill?.classList.toggle("hidden", next);
     if (next) {
       this.scrollY = window.scrollY;
-      document.body.classList.add('ult-modal-open');
+      document.body.classList.add("ult-modal-open");
       document.body.style.top = `-${this.scrollY}px`;
     } else {
-      document.body.classList.remove('ult-modal-open');
-      document.body.style.top = '';
+      document.body.classList.remove("ult-modal-open");
+      document.body.style.top = "";
       window.scrollTo(0, this.scrollY);
     }
     if (next) {
