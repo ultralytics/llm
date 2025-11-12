@@ -305,7 +305,7 @@ class UltralyticsChat {
       arrowUp: '<line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/>',
       square: '<rect x="6" y="6" width="12" height="12" rx="2" ry="2"/>',
     };
-    return `<svg width="18" height="18" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name] || ""}</svg>`;
+    return `<svg width="18" height="18" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" fill="none">${paths[name] || ""}</svg>`;
   }
 
   createUI() {
