@@ -11,7 +11,7 @@ class UltralyticsChat {
         name: config.branding?.name || "AI",
         tagline:
           config.branding?.tagline ||
-          "Ask anything about Ultralytics, YOLO, and more",
+          "Ask anything about Ultralytics, YOLO, and more DEBUG",
         logo:
           config.branding?.logo ||
           "https://cdn.prod.website-files.com/680a070c3b99253410dd3dcf/680a070c3b99253410dd3e13_logo.svg",
