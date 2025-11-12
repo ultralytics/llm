@@ -22,7 +22,7 @@ jobs:
         run: |
           set -e
           FILES=("js/chat.js" "js/chat.min.js")
-          VERSIONS=("main" "master" "latest")
+          VERSIONS=("main" "latest")
           
           echo "Purging jsdelivr CDN cache for ${{ github.repository }}..."
           SUCCESS=0
