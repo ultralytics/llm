@@ -62,6 +62,7 @@ class UltralyticsChat {
 
   qs = (sel, root = document) => root.querySelector(sel);
   qsa = (sel, root = document) => [...root.querySelectorAll(sel)];
+  isMobile = () => window.innerWidth <= 768;
 
   on(el, ev, fn) {
     if (!el) return;
@@ -112,6 +113,47 @@ class UltralyticsChat {
     this.showWelcome(true);
     this.updateComposerState();
     this.watchForRemoval();
+    this.handleOrientationChange();
+  }
+
+  handleOrientationChange() {
+    const handler = () => {
+      if (this.isOpen) {
+        this.lockScroll();
+      }
+    };
+    this.on(window, "resize", handler);
+    if ("onorientationchange" in window) {
+      this.on(window, "orientationchange", handler);
+    }
+  }
+
+  lockScroll() {
+    this.scrollY = window.scrollY;
+    if (this.isMobile()) {
+      document.body.style.position = "";
+      document.body.style.top = "";
+      document.body.style.width = "";
+      document.documentElement.style.overflow = "";
+      document.documentElement.classList.add("ult-modal-open");
+    } else {
+      document.documentElement.classList.remove("ult-modal-open");
+      document.body.style.position = "fixed";
+      document.body.style.top = `-${this.scrollY}px`;
+      document.body.style.width = "100%";
+      document.documentElement.style.overflow = "hidden";
+    }
+  }
+
+  unlockScroll() {
+    if (this.isMobile()) {
+      document.documentElement.classList.remove("ult-modal-open");
+    }
+    document.documentElement.style.overflow = "";
+    document.body.style.position = "";
+    document.body.style.width = "";
+    document.body.style.top = "";
+    window.scrollTo(0, this.scrollY);
   }
 
   watchForRemoval() {
@@ -203,7 +245,7 @@ class UltralyticsChat {
       .ult-chat-modal.open{display:flex;opacity:1;transform:translate(-50%,-50%) scale(1)}
       html[data-theme=dark] .ult-chat-modal{background:#0a0a0b}
 
-      .ult-chat-header{padding:16px 18px;display:flex;justify-content:space-between;align-items:center}
+      .ult-chat-header{padding:16px 18px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
       .ult-chat-title{display:flex;align-items:center;gap:10px}
       .ult-chat-title img{max-height:32px;max-width:180px}
       .ult-subtle{font-size:12px;color:#6b7280} html[data-theme=dark] .ult-subtle{color:#a1a1aa}
@@ -213,14 +255,14 @@ class UltralyticsChat {
       html[data-theme=dark] .ult-icon-btn{color:#a1a1aa}
       html[data-theme=dark] .ult-icon-btn:hover{color:#fafafa;background:#17181d}
 
-      .ult-welcome{padding:18px}.ult-welcome h1{font-size:16px;margin:0 0 6px}.ult-welcome p{margin:0;color:#4b5563}
+      .ult-welcome{padding:18px;flex-shrink:0}.ult-welcome h1{font-size:16px;margin:0 0 6px}.ult-welcome p{margin:0;color:#4b5563}
       html[data-theme=dark] .ult-welcome p{color:#a1a1aa}
-      .ult-examples{padding:12px 18px 6px;display:flex;flex-wrap:wrap;gap:10px}
+      .ult-examples{padding:12px 18px 6px;display:flex;flex-wrap:wrap;gap:10px;flex-shrink:0}
       .ult-example{padding:10px 12px;background:#f7f7f9;border:0;border-radius:999px;cursor:pointer;font-size:12px;color:#0b0b0f;transition:.12s;touch-action:manipulation}
       .ult-example:hover{transform:translateY(-1px);filter:brightness(.98)}
       html[data-theme=dark] .ult-example{background:#131318;color:#fafafa}
 
-      .ult-chat-messages{flex:1;overflow-y:auto;padding:0 18px 18px;display:flex;flex-direction:column;gap:14px;-webkit-overflow-scrolling:touch}
+      .ult-chat-messages{flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;padding:0 18px 18px;display:flex;flex-direction:column;gap:14px;-webkit-overflow-scrolling:touch}
       .ult-message-group{display:flex;flex-direction:column;gap:6px}
       .ult-message-label{display:flex;align-items:center;gap:8px;font-size:11px;font-weight:800;color:#6b7280;text-transform:uppercase;letter-spacing:.03em;padding:0 2px}
       html[data-theme=dark] .ult-message-label{color:#a1a1aa}
@@ -255,7 +297,7 @@ class UltralyticsChat {
       .ult-thinking{display:inline-flex;align-items:center;gap:8px;padding:6px 0;color:#6b7280;font-size:13px}
       html[data-theme=dark] .ult-thinking{color:#a1a1aa}
 
-      .ult-chat-input-container{padding:12px 12px 16px;display:flex;gap:8px;align-items:flex-end}
+      .ult-chat-input-container{padding:12px 12px 16px;display:flex;gap:8px;align-items:flex-end;flex-shrink:0}
       .ult-actions{display:flex;gap:6px;align-items:center}
       .ult-action-btn,.ult-chat-send{background:#f1f2f6;border:0;border-radius:12px;width:44px;height:44px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.12s;flex-shrink:0;touch-action:manipulation}
       .ult-action-btn:hover,.ult-chat-send:hover{transform:translateY(-1px);filter:brightness(.98)}
@@ -272,24 +314,26 @@ class UltralyticsChat {
 
       .ult-icon-swap{display:flex;align-items:center;justify-content:center}
       @media (max-width:768px){
-        .ult-backdrop{pointer-events:none}
-        .ult-chat-modal{position:fixed;left:0;top:0;right:0;bottom:0;width:100vw;height:100dvh;max-width:100vw;max-height:100dvh;border-radius:0;transform:none!important}
+        html.ult-modal-open,html.ult-modal-open body{overflow:hidden!important;position:fixed!important;width:100%!important;height:100%!important}
+        .ult-backdrop.open{display:block;opacity:1}
+        .ult-chat-modal{position:fixed;inset:0;width:100%;height:100%;max-width:100%;max-height:100%;border-radius:0;transform:none!important;
+          padding:0;padding-top:env(safe-area-inset-top,0);padding-right:env(safe-area-inset-right,0);padding-bottom:env(safe-area-inset-bottom,0);padding-left:env(safe-area-inset-left,0)}
         .ult-chat-modal.open{transform:none!important}
         .ult-actions{display:none}
         .ult-subtle{display:none!important}
-        .ult-chat-header{padding:10px 12px;min-height:52px}
+        .ult-chat-header{padding:10px 12px;min-height:52px;flex-shrink:0}
         .ult-chat-title{gap:8px;flex:1;min-width:0}
         .ult-chat-title img{max-height:26px;max-width:140px}
         .ult-header-actions{gap:4px;flex-shrink:0}
         .ult-icon-btn{width:36px;height:36px;border-radius:8px}
         .ult-icon-btn svg{width:16px;height:16px}
-        .ult-chat-messages{padding:0 12px 10px;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
-        .ult-welcome{padding:10px 12px}
+        .ult-chat-messages{flex:1 1 auto;min-height:0;padding:0 12px 10px;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;overflow-y:auto;overflow-x:hidden}
+        .ult-welcome{padding:10px 12px;flex-shrink:0}
         .ult-welcome h1{font-size:15px;margin:0 0 4px}
         .ult-welcome p{font-size:13px}
-        .ult-examples{padding:6px 12px 4px;gap:8px}
+        .ult-examples{padding:6px 12px 4px;gap:8px;flex-shrink:0}
         .ult-example{padding:8px 10px;font-size:11px}
-        .ult-chat-input-container{padding:8px 10px 10px}
+        .ult-chat-input-container{padding:8px 10px 10px;flex-shrink:0}
         .ult-chat-input{padding:8px 10px;font-size:13px;max-height:100px}
         .ult-chat-send{width:36px;height:36px}
         .ult-chat-send svg{width:16px;height:16px}
@@ -306,6 +350,16 @@ class UltralyticsChat {
         .ult-search-result-meta{font-size:10px}
         .ultralytics-chat-pill{right:12px;bottom:24px;padding:12px 18px;font-size:16px}
         .ultralytics-chat-pill img{width:26px;height:26px}
+        @supports (padding:max(0px)){
+          .ultralytics-chat-pill{bottom:max(24px,env(safe-area-inset-bottom))}
+        }
+      }
+      @media (max-width:768px) and (orientation:landscape){
+        .ult-chat-header{padding:6px 12px;min-height:44px}
+        .ult-chat-input-container{padding:6px 10px 8px}
+        .ult-chat-input{max-height:60px;font-size:14px}
+        .ult-welcome{padding:8px 12px}
+        .ult-examples{padding:4px 12px 2px}
       }
     `,
     );
@@ -476,17 +530,9 @@ class UltralyticsChat {
     this.refs.backdrop?.classList.toggle("open", next);
     this.refs.pill?.classList.toggle("hidden", next);
     if (next) {
-      this.scrollY = window.scrollY;
-      document.documentElement.style.overflow = "hidden";
-      document.body.style.position = "fixed";
-      document.body.style.width = "100%";
-      document.body.style.top = `-${this.scrollY}px`;
+      this.lockScroll();
     } else {
-      document.documentElement.style.overflow = "";
-      document.body.style.position = "";
-      document.body.style.width = "";
-      document.body.style.top = "";
-      window.scrollTo(0, this.scrollY);
+      this.unlockScroll();
     }
     if (next) {
       this.updateUIForMode();
