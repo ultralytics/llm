@@ -118,13 +118,12 @@ class UltralyticsChat {
   ensureViewport() {
     let viewport = document.querySelector('meta[name="viewport"]');
     if (!viewport) {
-      viewport = document.createElement("meta");
-      viewport.name = "viewport";
+      viewport = document.createElement('meta');
+      viewport.name = 'viewport';
       document.head.appendChild(viewport);
     }
-    if (!viewport.content.includes("maximum-scale")) {
-      viewport.content =
-        "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no";
+    if (!viewport.content.includes('maximum-scale')) {
+      viewport.content = 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no';
     }
   }
 
@@ -300,11 +299,11 @@ class UltralyticsChat {
         .ult-header-actions{gap:4px;flex-shrink:0}
         .ult-icon-btn{width:40px;height:40px;border-radius:8px}
         .ult-icon-btn svg{width:18px;height:18px}
-        .ult-chat-messages{flex:1;min-height:0;padding:0 14px 12px;overflow-y:auto;overflow-x:hidden;overscroll-behavior-y:contain;-webkit-overflow-scrolling:touch}
-        .ult-welcome{padding:16px 0 8px}
+        .ult-chat-messages{flex:1;min-height:0;padding:12px 14px 0;overflow-y:auto;overflow-x:hidden;overscroll-behavior-y:contain;-webkit-overflow-scrolling:touch}
+        .ult-welcome{padding:0 0 8px}
         .ult-welcome h1{font-size:16px;margin:0 0 6px}
         .ult-welcome p{font-size:14px;margin:0;line-height:1.4}
-        .ult-examples{padding:8px 0 12px;gap:8px}
+        .ult-examples{padding:0 0 4px;gap:8px}
         .ult-example{padding:9px 12px;font-size:12px}
         .ult-chat-input-container{padding:10px 14px 12px;flex-shrink:0;gap:10px;border-top:1px solid #eceff5;background:#fff}
         html[data-theme=dark] .ult-chat-input-container{border-top-color:#1c1c22;background:#0a0a0b}
@@ -495,11 +494,11 @@ class UltralyticsChat {
     this.refs.pill?.classList.toggle("hidden", next);
     if (next) {
       this.scrollY = window.scrollY;
-      document.body.classList.add("ult-modal-open");
+      document.body.classList.add('ult-modal-open');
       document.body.style.top = `-${this.scrollY}px`;
     } else {
-      document.body.classList.remove("ult-modal-open");
-      document.body.style.top = "";
+      document.body.classList.remove('ult-modal-open');
+      document.body.style.top = '';
       window.scrollTo(0, this.scrollY);
     }
     if (next) {
