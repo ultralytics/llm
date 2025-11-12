@@ -3,22 +3,46 @@
 class UltralyticsChat {
   constructor(config = {}) {
     this.config = {
-      apiUrl: config.apiUrl || "https://chat-885297101091.europe-west1.run.app/api/chat",
+      apiUrl:
+        config.apiUrl ||
+        "https://chat-885297101091.europe-west1.run.app/api/chat",
       maxMessageLength: config.maxMessageLength || 10000,
       branding: {
         name: config.branding?.name || "AI",
-        tagline: config.branding?.tagline || "Ask anything about Ultralytics, YOLO, and more",
-        logo: config.branding?.logo || "https://cdn.prod.website-files.com/680a070c3b99253410dd3dcf/680a070c3b99253410dd3e13_logo.svg",
-        logomark: config.branding?.logomark || "https://storage.googleapis.com/organization-image-assets/ultralytics-botAvatarSrcUrl-1729379860806.svg",
+        tagline:
+          config.branding?.tagline ||
+          "Ask anything about Ultralytics, YOLO, and more",
+        logo:
+          config.branding?.logo ||
+          "https://cdn.prod.website-files.com/680a070c3b99253410dd3dcf/680a070c3b99253410dd3e13_logo.svg",
+        logomark:
+          config.branding?.logomark ||
+          "https://storage.googleapis.com/organization-image-assets/ultralytics-botAvatarSrcUrl-1729379860806.svg",
         pillText: config.branding?.pillText || "Ask AI",
       },
-      theme: { primary: config.theme?.primary || "#042AFF", dark: config.theme?.dark || "#111F68", yellow: config.theme?.yellow || "#E1FF25", text: config.theme?.text || "#0b0b0f" },
+      theme: {
+        primary: config.theme?.primary || "#042AFF",
+        dark: config.theme?.dark || "#111F68",
+        yellow: config.theme?.yellow || "#E1FF25",
+        text: config.theme?.text || "#0b0b0f",
+      },
       welcome: {
         title: config.welcome?.title || "Hi!",
-        message: config.welcome?.message || "I'm an AI assistant trained on documentation, help articles, and other content.<br>Ask me anything about Ultralytics.",
-        examples: config.welcome?.examples || ["What's new in YOLO11?","How do I get started with YOLO?","Tell me about Enterprise Licensing"],
+        message:
+          config.welcome?.message ||
+          "I'm an AI assistant trained on documentation, help articles, and other content.<br>Ask me anything about Ultralytics.",
+        examples: config.welcome?.examples || [
+          "What's new in YOLO11?",
+          "How do I get started with YOLO?",
+          "Tell me about Enterprise Licensing",
+        ],
       },
-      ui: { placeholder: config.ui?.placeholder || "Ask anything…", copyText: config.ui?.copyText || "Copy thread", downloadText: config.ui?.downloadText || "Download thread", clearText: config.ui?.clearText || "New chat" },
+      ui: {
+        placeholder: config.ui?.placeholder || "Ask anything…",
+        copyText: config.ui?.copyText || "Copy thread",
+        downloadText: config.ui?.downloadText || "Download thread",
+        clearText: config.ui?.clearText || "New chat",
+      },
     };
 
     this.apiUrl = this.config.apiUrl;
@@ -35,48 +59,113 @@ class UltralyticsChat {
     this.inputDebounceTimer = null;
 
     this.visualViewportHandler = () => this.updateViewportVars();
-    this.touchBlocker = (e) => { if (!this.refs.modal?.contains(e.target)) e.preventDefault(); };
+    this.touchBlocker = (e) => {
+      if (!this.refs.modal?.contains(e.target)) e.preventDefault();
+    };
     this.originalViewportMetaContent = null;
 
     this.init();
   }
 
-  qs = (s, r=document) => r.querySelector(s);
-  qsa = (s, r=document) => [...r.querySelectorAll(s)];
-  on(el, ev, fn, opts) { if (!el) return; el.addEventListener(ev, fn, opts); if (!this.listeners.has(el)) this.listeners.set(el, []); this.listeners.get(el).push({ev,fn,opts}); }
-  el(tag, cls="", html=""){ const e=document.createElement(tag); if(cls) e.className=cls; if(html) e.innerHTML=html; return e; }
-  getPageContext(){ const meta=n=>document.querySelector(`meta[name="${n}"]`)?.content||""; return {url:location.href,title:document.title,description:meta("description"),path:location.pathname}; }
-  loadSessionId(){ try{return localStorage.getItem("ult-chat-session");}catch{return null;} }
-  saveSessionId(id){ try{localStorage.setItem("ult-chat-session", id);}catch(e){console.warn("Failed to save session ID:",e);} }
-
-  init(){ this.createStyles(); this.createUI(); this.attachEvents(); this.syncThemeWithSite(); this.showWelcome(true); this.updateComposerState(); this.watchForRemoval(); }
-
-  watchForRemoval(){
-    const ob=new MutationObserver(()=>{ if(this.styleElement?.parentNode!==document.head) document.head.appendChild(this.styleElement);
-      if(this.refs.pill?.parentNode!==document.body) document.body.appendChild(this.refs.pill);
-      if(this.refs.modal?.parentNode!==document.body) document.body.appendChild(this.refs.modal);
-      if(this.refs.backdrop?.parentNode!==document.body) document.body.appendChild(this.refs.backdrop); });
-    ob.observe(document.head,{childList:true}); ob.observe(document.body,{childList:true}); this.domObserver=ob;
+  qs = (s, r = document) => r.querySelector(s);
+  qsa = (s, r = document) => [...r.querySelectorAll(s)];
+  on(el, ev, fn, opts) {
+    if (!el) return;
+    el.addEventListener(ev, fn, opts);
+    if (!this.listeners.has(el)) this.listeners.set(el, []);
+    this.listeners.get(el).push({ ev, fn, opts });
+  }
+  el(tag, cls = "", html = "") {
+    const e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (html) e.innerHTML = html;
+    return e;
+  }
+  getPageContext() {
+    const meta = (n) =>
+      document.querySelector(`meta[name="${n}"]`)?.content || "";
+    return {
+      url: location.href,
+      title: document.title,
+      description: meta("description"),
+      path: location.pathname,
+    };
+  }
+  loadSessionId() {
+    try {
+      return localStorage.getItem("ult-chat-session");
+    } catch {
+      return null;
+    }
+  }
+  saveSessionId(id) {
+    try {
+      localStorage.setItem("ult-chat-session", id);
+    } catch (e) {
+      console.warn("Failed to save session ID:", e);
+    }
   }
 
-  destroy(){
+  init() {
+    this.createStyles();
+    this.createUI();
+    this.attachEvents();
+    this.syncThemeWithSite();
+    this.showWelcome(true);
+    this.updateComposerState();
+    this.watchForRemoval();
+  }
+
+  watchForRemoval() {
+    const ob = new MutationObserver(() => {
+      if (this.styleElement?.parentNode !== document.head)
+        document.head.appendChild(this.styleElement);
+      if (this.refs.pill?.parentNode !== document.body)
+        document.body.appendChild(this.refs.pill);
+      if (this.refs.modal?.parentNode !== document.body)
+        document.body.appendChild(this.refs.modal);
+      if (this.refs.backdrop?.parentNode !== document.body)
+        document.body.appendChild(this.refs.backdrop);
+    });
+    ob.observe(document.head, { childList: true });
+    ob.observe(document.body, { childList: true });
+    this.domObserver = ob;
+  }
+
+  destroy() {
     this.toggle(false);
-    if(this.inputDebounceTimer) clearTimeout(this.inputDebounceTimer);
+    if (this.inputDebounceTimer) clearTimeout(this.inputDebounceTimer);
     this.domObserver?.disconnect();
-    this.listeners.forEach((lst,el)=>lst.forEach(({ev,fn,opts})=>el.removeEventListener(ev,fn,opts)));
+    this.listeners.forEach((lst, el) =>
+      lst.forEach(({ ev, fn, opts }) => el.removeEventListener(ev, fn, opts)),
+    );
     this.listeners.clear();
-    this.styleElement?.remove(); this.refs.modal?.remove(); this.refs.backdrop?.remove(); this.refs.pill?.remove(); this.refs={};
+    this.styleElement?.remove();
+    this.refs.modal?.remove();
+    this.refs.backdrop?.remove();
+    this.refs.pill?.remove();
+    this.refs = {};
   }
 
-  syncThemeWithSite(){
-    const root=document.documentElement, mql=matchMedia("(prefers-color-scheme: dark)");
-    const apply=()=>{ if(!root.hasAttribute("data-theme")) root.setAttribute("data-theme", mql.matches?"dark":"light"); };
-    apply(); (mql.addEventListener?mql.addEventListener("change",apply):mql.addListener(apply));
+  syncThemeWithSite() {
+    const root = document.documentElement,
+      mql = matchMedia("(prefers-color-scheme: dark)");
+    const apply = () => {
+      if (!root.hasAttribute("data-theme"))
+        root.setAttribute("data-theme", mql.matches ? "dark" : "light");
+    };
+    apply();
+    mql.addEventListener
+      ? mql.addEventListener("change", apply)
+      : mql.addListener(apply);
   }
 
-  createStyles(){
+  createStyles() {
     const { primary, dark, yellow, text } = this.config.theme;
-    this.styleElement=this.el("style","",`
+    this.styleElement = this.el(
+      "style",
+      "",
+      `
       *{box-sizing:border-box}
       :root{--ult-dark:${dark};--ult-primary:${primary};--ult-yellow:${yellow};--ult-text:${text};--ult-vh:1dvh;--ult-kb:0px}
       html,body{max-width:100%;overflow-x:hidden;-webkit-text-size-adjust:100%}
@@ -202,24 +291,55 @@ class UltralyticsChat {
         .ultralytics-chat-pill{right:12px;bottom:24px;padding:12px 18px;font-size:16px}
         .ultralytics-chat-pill img{width:26px;height:26px}
       }
-    `);
+    `,
+    );
     document.head.appendChild(this.styleElement);
   }
 
-  icon(name){ const base='width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"';
-    const paths={copy:'<rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>',download:'<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>',refresh:'<path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>',close:'<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>',like:'<path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0 2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/>',dislike:'<path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"/>',share:'<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.59 13.51l6.83 3.98"/><path d="M15.41 6.51L8.59 10.49"/>',arrowUp:'<line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/>',square:'<rect x="6" y="6" width="12" height="12" rx="2" ry="2"/>'}; return `<svg ${base} aria-hidden="true">${paths[name]||""}</svg>`; }
+  icon(name) {
+    const base =
+      'width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"';
+    const paths = {
+      copy: '<rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>',
+      download:
+        '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>',
+      refresh:
+        '<path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>',
+      close:
+        '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>',
+      like: '<path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0 2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/>',
+      dislike:
+        '<path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"/>',
+      share:
+        '<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.59 13.51l6.83 3.98"/><path d="M15.41 6.51L8.59 10.49"/>',
+      arrowUp:
+        '<line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/>',
+      square: '<rect x="6" y="6" width="12" height="12" rx="2" ry="2"/>',
+    };
+    return `<svg ${base} aria-hidden="true">${paths[name] || ""}</svg>`;
+  }
 
-  createUI(){
+  createUI() {
     const { logomark, pillText, logo, name, tagline } = this.config.branding;
     const { title, message, examples } = this.config.welcome;
     const { placeholder, copyText, downloadText, clearText } = this.config.ui;
 
-    this.refs.backdrop=this.el("div","ult-backdrop"); document.body.appendChild(this.refs.backdrop);
+    this.refs.backdrop = this.el("div", "ult-backdrop");
+    document.body.appendChild(this.refs.backdrop);
 
-    this.refs.pill=this.el("button","ultralytics-chat-pill",`<span>${this.escapeHtml(pillText)}</span><img src="${this.escapeHtml(logomark)}" alt="${this.escapeHtml(name)}" />`);
-    this.refs.pill.setAttribute("aria-label", pillText); this.refs.pill.title=pillText; document.body.appendChild(this.refs.pill);
+    this.refs.pill = this.el(
+      "button",
+      "ultralytics-chat-pill",
+      `<span>${this.escapeHtml(pillText)}</span><img src="${this.escapeHtml(logomark)}" alt="${this.escapeHtml(name)}" />`,
+    );
+    this.refs.pill.setAttribute("aria-label", pillText);
+    this.refs.pill.title = pillText;
+    document.body.appendChild(this.refs.pill);
 
-    this.refs.modal=this.el("div","ult-chat-modal",`
+    this.refs.modal = this.el(
+      "div",
+      "ult-chat-modal",
+      `
       <div class="ult-chat-header">
         <div class="ult-chat-title">
           <img src="${this.escapeHtml(logo)}" alt="${this.escapeHtml(name)}" />
@@ -248,290 +368,713 @@ class UltralyticsChat {
         <textarea name="message" class="ult-chat-input" placeholder="${this.escapeHtml(placeholder)}" rows="1" maxlength="${this.config.maxMessageLength}" autocomplete="off"></textarea>
         <button class="ult-chat-send" title="Ready" aria-label="Ready"><span class="ult-icon-swap" data-icon="square">${this.icon("square")}</span></button>
       </div>
-    `);
-    this.refs.modal.setAttribute("role","dialog"); this.refs.modal.setAttribute("aria-modal","true"); document.body.appendChild(this.refs.modal);
+    `,
+    );
+    this.refs.modal.setAttribute("role", "dialog");
+    this.refs.modal.setAttribute("aria-modal", "true");
+    document.body.appendChild(this.refs.modal);
 
-    this.refs.messages=this.qs("#ult-messages",this.refs.modal);
-    this.refs.welcome=this.qs("#ult-welcome",this.refs.modal);
-    this.refs.examples=this.qs("#ult-examples",this.refs.modal);
-    this.refs.input=this.qs(".ult-chat-input",this.refs.modal);
-    this.refs.send=this.qs(".ult-chat-send",this.refs.modal);
+    this.refs.messages = this.qs("#ult-messages", this.refs.modal);
+    this.refs.welcome = this.qs("#ult-welcome", this.refs.modal);
+    this.refs.examples = this.qs("#ult-examples", this.refs.modal);
+    this.refs.input = this.qs(".ult-chat-input", this.refs.modal);
+    this.refs.send = this.qs(".ult-chat-send", this.refs.modal);
 
     this.setExamples(examples);
   }
 
-  setExamples(list){
-    if(!this.refs.examples) return;
-    this.refs.examples.innerHTML=list.map(q=>`<button class="ult-example" data-q="${this.escapeHtml(q)}">${this.escapeHtml(q)}</button>`).join("");
-    this.qsa(".ult-example",this.refs.examples).forEach(b=>this.on(b,"click",()=>this.sendMessage(b.dataset.q)));
+  setExamples(list) {
+    if (!this.refs.examples) return;
+    this.refs.examples.innerHTML = list
+      .map(
+        (q) =>
+          `<button class="ult-example" data-q="${this.escapeHtml(q)}">${this.escapeHtml(q)}</button>`,
+      )
+      .join("");
+    this.qsa(".ult-example", this.refs.examples).forEach((b) =>
+      this.on(b, "click", () => this.sendMessage(b.dataset.q)),
+    );
   }
 
-  attachEvents(){
-    const m=this.refs.modal;
-    this.on(this.refs.pill,"click",()=>this.toggle(true,"chat"));
-    this.on(this.refs.backdrop,"click",()=>this.toggle());
-    this.on(this.qs(".ult-chat-close",m),"click",()=>this.toggle());
-    this.on(this.qs(".ult-chat-clear",m),"click",()=>this.clearSession());
-    this.on(this.qs(".ult-chat-copy",m),"click",()=>this.copyThread());
-    this.on(this.qs(".ult-chat-download",m),"click",()=>this.downloadThread());
-    this.on(this.refs.messages,"scroll",()=>{ const d=this.refs.messages; this.autoScroll=d.scrollHeight-d.scrollTop-d.clientHeight<100; });
-    this.on(this.refs.input,"input",(e)=>{ const t=e.target; t.style.height="auto"; t.style.height=Math.min(t.scrollHeight,140)+"px"; clearTimeout(this.inputDebounceTimer); this.inputDebounceTimer=setTimeout(()=>this.updateComposerState(),50); });
-    this.on(this.refs.send,"click",()=>{ if(this.isStreaming) this.stopStreaming(); else this.sendMessage(this.refs.input.value.trim()); });
-    this.on(this.refs.input,"keydown",(e)=>{ if(e.key==="Enter"&&!e.shiftKey){ e.preventDefault(); this.sendMessage(this.refs.input.value.trim()); } if(e.key==="Escape"){ e.preventDefault(); this.toggle(false); } });
-    this.on(this.refs.input,"focus",()=>{ this.autoScroll=true; this.scrollToBottom(); });
-    this.on(document,"keydown",(e)=>{ if(this.isOpen && e.key==="Escape") this.toggle(false); if(!this.isOpen && e.metaKey && e.key.toLowerCase()==="k") this.toggle(true); });
-    this.on(this.qs(".ult-act-copy",m),"click",()=>this.copyLastAssistant());
-    this.on(this.qs(".ult-act-like",m),"click",()=>this.feedback("up"));
-    this.on(this.qs(".ult-act-dislike",m),"click",()=>this.feedback("down"));
-    this.on(this.qs(".ult-act-share",m),"click",()=>this.copyThread());
-    this.on(this.qs(".ult-act-retry",m),"click",()=>this.retryLast());
+  attachEvents() {
+    const m = this.refs.modal;
+    this.on(this.refs.pill, "click", () => this.toggle(true, "chat"));
+    this.on(this.refs.backdrop, "click", () => this.toggle());
+    this.on(this.qs(".ult-chat-close", m), "click", () => this.toggle());
+    this.on(this.qs(".ult-chat-clear", m), "click", () => this.clearSession());
+    this.on(this.qs(".ult-chat-copy", m), "click", () => this.copyThread());
+    this.on(this.qs(".ult-chat-download", m), "click", () =>
+      this.downloadThread(),
+    );
+    this.on(this.refs.messages, "scroll", () => {
+      const d = this.refs.messages;
+      this.autoScroll = d.scrollHeight - d.scrollTop - d.clientHeight < 100;
+    });
+    this.on(this.refs.input, "input", (e) => {
+      const t = e.target;
+      t.style.height = "auto";
+      t.style.height = Math.min(t.scrollHeight, 140) + "px";
+      clearTimeout(this.inputDebounceTimer);
+      this.inputDebounceTimer = setTimeout(
+        () => this.updateComposerState(),
+        50,
+      );
+    });
+    this.on(this.refs.send, "click", () => {
+      if (this.isStreaming) this.stopStreaming();
+      else this.sendMessage(this.refs.input.value.trim());
+    });
+    this.on(this.refs.input, "keydown", (e) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        this.sendMessage(this.refs.input.value.trim());
+      }
+      if (e.key === "Escape") {
+        e.preventDefault();
+        this.toggle(false);
+      }
+    });
+    this.on(this.refs.input, "focus", () => {
+      this.autoScroll = true;
+      this.scrollToBottom();
+    });
+    this.on(document, "keydown", (e) => {
+      if (this.isOpen && e.key === "Escape") this.toggle(false);
+      if (!this.isOpen && e.metaKey && e.key.toLowerCase() === "k")
+        this.toggle(true);
+    });
+    this.on(this.qs(".ult-act-copy", m), "click", () =>
+      this.copyLastAssistant(),
+    );
+    this.on(this.qs(".ult-act-like", m), "click", () => this.feedback("up"));
+    this.on(this.qs(".ult-act-dislike", m), "click", () =>
+      this.feedback("down"),
+    );
+    this.on(this.qs(".ult-act-share", m), "click", () => this.copyThread());
+    this.on(this.qs(".ult-act-retry", m), "click", () => this.retryLast());
   }
 
-  lockPageScroll(){
-    this.scrollY=window.scrollY;
+  lockPageScroll() {
+    this.scrollY = window.scrollY;
     document.documentElement.classList.add("ult-locked");
     document.body.classList.add("ult-locked");
-    document.body.style.top=`-${this.scrollY}px`;
-    this.on(window,"touchmove",this.touchBlocker,{passive:false});
-    const vv=window.visualViewport||window;
-    this.on(vv,"resize",this.visualViewportHandler);
-    this.on(vv,"scroll",this.visualViewportHandler);
+    document.body.style.top = `-${this.scrollY}px`;
+    this.on(window, "touchmove", this.touchBlocker, { passive: false });
+    const vv = window.visualViewport || window;
+    this.on(vv, "resize", this.visualViewportHandler);
+    this.on(vv, "scroll", this.visualViewportHandler);
     this.updateViewportVars();
     this.forceViewportMeta(true);
   }
 
-  unlockPageScroll(){
-    document.documentElement.classList.remove("ult-locked","ult-kb-open");
+  unlockPageScroll() {
+    document.documentElement.classList.remove("ult-locked", "ult-kb-open");
     document.body.classList.remove("ult-locked");
-    document.body.style.top="";
-    window.scrollTo(0,this.scrollY||0);
-    window.removeEventListener("touchmove",this.touchBlocker,{passive:false});
-    const vv=window.visualViewport||window;
-    vv.removeEventListener?.("resize",this.visualViewportHandler);
-    vv.removeEventListener?.("scroll",this.visualViewportHandler);
+    document.body.style.top = "";
+    window.scrollTo(0, this.scrollY || 0);
+    window.removeEventListener("touchmove", this.touchBlocker, {
+      passive: false,
+    });
+    const vv = window.visualViewport || window;
+    vv.removeEventListener?.("resize", this.visualViewportHandler);
+    vv.removeEventListener?.("scroll", this.visualViewportHandler);
     // Clear inline VV pinning
-    if(this.refs.modal){ const s=this.refs.modal.style; s.top=""; s.left=""; s.width=""; s.height=""; }
-    if(this.refs.backdrop){ const s=this.refs.backdrop.style; s.top=""; s.left=""; s.width=""; s.height=""; }
+    if (this.refs.modal) {
+      const s = this.refs.modal.style;
+      s.top = "";
+      s.left = "";
+      s.width = "";
+      s.height = "";
+    }
+    if (this.refs.backdrop) {
+      const s = this.refs.backdrop.style;
+      s.top = "";
+      s.left = "";
+      s.width = "";
+      s.height = "";
+    }
     this.forceViewportMeta(false);
   }
 
-  updateViewportVars(){
-    const vv=window.visualViewport;
-    const vhUnit=(vv?vv.height:window.innerHeight)*0.01;
+  updateViewportVars() {
+    const vv = window.visualViewport;
+    const vhUnit = (vv ? vv.height : window.innerHeight) * 0.01;
     document.documentElement.style.setProperty("--ult-vh", vhUnit + "px");
-    const kb=vv?Math.max(0, window.innerHeight - vv.height):0;
+    const kb = vv ? Math.max(0, window.innerHeight - vv.height) : 0;
     document.documentElement.style.setProperty("--ult-kb", kb + "px");
     const kbOpen = kb > 10; // threshold
     document.documentElement.classList.toggle("ult-kb-open", kbOpen);
 
     // Pad messages so composer stays visible
-    if(this.refs.messages) this.refs.messages.style.paddingBottom=`calc(12px + env(safe-area-inset-bottom) + var(--ult-kb))`;
+    if (this.refs.messages)
+      this.refs.messages.style.paddingBottom = `calc(12px + env(safe-area-inset-bottom) + var(--ult-kb))`;
 
     // Pin modal & backdrop to visual viewport (prevents “jump to top” on iOS)
-    if(vv && this.isOpen && this.refs.modal && this.refs.backdrop){
-      const setRect = (el) => { el.style.top = vv.offsetTop + "px"; el.style.left = vv.offsetLeft + "px"; el.style.width = vv.width + "px"; el.style.height = vv.height + "px"; };
-      setRect(this.refs.modal); setRect(this.refs.backdrop);
+    if (vv && this.isOpen && this.refs.modal && this.refs.backdrop) {
+      const setRect = (el) => {
+        el.style.top = vv.offsetTop + "px";
+        el.style.left = vv.offsetLeft + "px";
+        el.style.width = vv.width + "px";
+        el.style.height = vv.height + "px";
+      };
+      setRect(this.refs.modal);
+      setRect(this.refs.backdrop);
     }
 
     // Nudge scroll to keep caret visible
-    if(this.autoScroll) this.scrollToBottom();
+    if (this.autoScroll) this.scrollToBottom();
   }
 
-  forceViewportMeta(lock){
-    let tag=document.querySelector('meta[name="viewport"]');
-    if(!tag){ tag=document.createElement("meta"); tag.name="viewport"; document.head.appendChild(tag); }
-    if(lock){
-      if(this.originalViewportMetaContent===null) this.originalViewportMetaContent=tag.getAttribute("content")||"";
-      tag.setAttribute("content","width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover, user-scalable=no");
-      window.scrollTo(0,0);
-    }else{
-      if(this.originalViewportMetaContent!==null) tag.setAttribute("content", this.originalViewportMetaContent || "width=device-width, initial-scale=1, viewport-fit=cover");
-      this.originalViewportMetaContent=null;
+  forceViewportMeta(lock) {
+    let tag = document.querySelector('meta[name="viewport"]');
+    if (!tag) {
+      tag = document.createElement("meta");
+      tag.name = "viewport";
+      document.head.appendChild(tag);
+    }
+    if (lock) {
+      if (this.originalViewportMetaContent === null)
+        this.originalViewportMetaContent = tag.getAttribute("content") || "";
+      tag.setAttribute(
+        "content",
+        "width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover, user-scalable=no",
+      );
+      window.scrollTo(0, 0);
+    } else {
+      if (this.originalViewportMetaContent !== null)
+        tag.setAttribute(
+          "content",
+          this.originalViewportMetaContent ||
+            "width=device-width, initial-scale=1, viewport-fit=cover",
+        );
+      this.originalViewportMetaContent = null;
     }
   }
 
-  toggle(forceOpen=null, mode=null){
-    const next = forceOpen===null ? !this.isOpen : !!forceOpen;
+  toggle(forceOpen = null, mode = null) {
+    const next = forceOpen === null ? !this.isOpen : !!forceOpen;
     this.isOpen = next;
-    if(mode) this.mode = mode;
+    if (mode) this.mode = mode;
     this.refs.modal?.classList.toggle("open", next);
     this.refs.backdrop?.classList.toggle("open", next);
     this.refs.pill?.classList.toggle("hidden", next);
-    if(next){
+    if (next) {
       this.lockPageScroll();
       this.updateUIForMode();
-      if(!this.messages.length) this.showWelcome(true);
+      if (!this.messages.length) this.showWelcome(true);
       this.refs.input?.focus();
       this.updateComposerState();
     } else {
-      if(this.isStreaming) this.stopStreaming();
+      if (this.isStreaming) this.stopStreaming();
       this.unlockPageScroll();
     }
   }
 
-  updateUIForMode(){
-    if(!this.refs.modal) return;
-    const tagline=this.qs(".ult-subtle",this.refs.modal);
-    this.refs.modal.dataset.mode=this.mode;
-    if(this.mode==="search"){
-      if(this.refs.input) this.refs.input.placeholder="Search for...";
-      if(tagline) tagline.innerHTML=`<strong style="color:${this.config.theme.primary};font-weight:700;">SEARCH</strong> · Find answers in our docs and guides`;
-      const actions=this.qs(".ult-actions",this.refs.modal); if(actions) actions.style.display="none";
-      if(this.refs.messages) this.refs.messages.innerHTML="";
-      if(this.refs.welcome) this.refs.welcome.innerHTML=`<p>Enter keywords to find relevant documentation, guides, and resources</p>`;
-      this.setExamples(["YOLO quickstart","model training parameters","export formats","dataset configuration"]);
+  updateUIForMode() {
+    if (!this.refs.modal) return;
+    const tagline = this.qs(".ult-subtle", this.refs.modal);
+    this.refs.modal.dataset.mode = this.mode;
+    if (this.mode === "search") {
+      if (this.refs.input) this.refs.input.placeholder = "Search for...";
+      if (tagline)
+        tagline.innerHTML = `<strong style="color:${this.config.theme.primary};font-weight:700;">SEARCH</strong> · Find answers in our docs and guides`;
+      const actions = this.qs(".ult-actions", this.refs.modal);
+      if (actions) actions.style.display = "none";
+      if (this.refs.messages) this.refs.messages.innerHTML = "";
+      if (this.refs.welcome)
+        this.refs.welcome.innerHTML = `<p>Enter keywords to find relevant documentation, guides, and resources</p>`;
+      this.setExamples([
+        "YOLO quickstart",
+        "model training parameters",
+        "export formats",
+        "dataset configuration",
+      ]);
       this.showWelcome(true);
     } else {
-      if(this.refs.input) this.refs.input.placeholder=this.config.ui.placeholder;
-      if(tagline) tagline.textContent=this.config.branding.tagline;
-      const actions=this.qs(".ult-actions",this.refs.modal); if(actions) actions.style.display="";
+      if (this.refs.input)
+        this.refs.input.placeholder = this.config.ui.placeholder;
+      if (tagline) tagline.textContent = this.config.branding.tagline;
+      const actions = this.qs(".ult-actions", this.refs.modal);
+      if (actions) actions.style.display = "";
       const { title, message, examples } = this.config.welcome;
-      if(this.refs.welcome) this.refs.welcome.innerHTML=`<h1>${this.escapeHtml(title)}</h1><p>${message}</p>`;
+      if (this.refs.welcome)
+        this.refs.welcome.innerHTML = `<h1>${this.escapeHtml(title)}</h1><p>${message}</p>`;
       this.setExamples(examples);
       this.renderChatHistory();
     }
   }
 
-  showWelcome(show){ if(this.refs.welcome) this.refs.welcome.style.display=show?"block":"none"; if(this.refs.examples) this.refs.examples.style.display=show?"flex":"none"; }
-  renderChatHistory(){ if(!this.refs.messages) return; this.refs.messages.innerHTML=""; if(!this.messages.length){ this.showWelcome(true); return; } this.showWelcome(false); const prev=this.autoScroll; this.autoScroll=false; this.messages.forEach(m=>this.addMessageToUI(m.role,m.content)); this.autoScroll=prev; this.refs.messages.scrollTop=this.refs.messages.scrollHeight; }
-  swapSendIcon(name){ const holder=this.qs(".ult-icon-swap",this.refs.send); if(!holder||holder.dataset.icon===name) return; holder.innerHTML=this.icon(name); holder.dataset.icon=name; this.refs.send.title=name==="square"&&this.isStreaming?"Stop":name==="arrowUp"?"Send":"Ready"; this.refs.send.setAttribute("aria-label",this.refs.send.title); }
-  updateComposerState(){ const hasText=!!this.refs.input?.value.trim().length; if(this.isStreaming){ this.swapSendIcon("square"); return; } this.swapSendIcon(hasText?"arrowUp":"square"); }
-  scrollToBottom(){ if(!this.autoScroll||!this.refs.messages) return; requestAnimationFrame(()=>{ if(this.refs.messages) this.refs.messages.scrollTop=this.refs.messages.scrollHeight; }); }
-  formatThread(){ return this.messages.map(m=>`${m.role==="user"?"You":this.config.branding.name}: ${m.content}`).join("\n\n---\n\n"); }
-  copyThread(){ if(navigator.clipboard?.writeText) navigator.clipboard.writeText(this.formatThread()).catch(console.error); }
-  copyLastAssistant(){ const last=[...this.messages].reverse().find(m=>m.role==="assistant"); if(last && navigator.clipboard?.writeText) navigator.clipboard.writeText(last.content).catch(console.error); }
-  feedback(type){ console.log("feedback:", type); }
-  retryLast(){ const lastUser=[...this.messages].reverse().find(m=>m.role==="user"); if(lastUser) this.sendMessage(lastUser.content); }
-  downloadThread(){ const { name }=this.config.branding; const blob=new Blob([this.formatThread()],{type:"text/plain"}); const url=URL.createObjectURL(blob); const a=this.el("a"); a.href=url; a.download=`${name.toLowerCase().replace(/\s+/g,"-")}-chat-${new Date().toISOString().slice(0,10)}.txt`; a.click(); URL.revokeObjectURL(url); }
-  clearSession(){ this.messages=[]; this.sessionId=null; try{localStorage.removeItem("ult-chat-session");}catch(e){console.warn("Failed to clear session:",e);} if(this.refs.messages) this.refs.messages.innerHTML=""; this.showWelcome(true); this.updateComposerState(); }
-  stopStreaming(){ if(this.abortController) this.abortController.abort(); this.isStreaming=false; this.abortController=null; this.updateComposerState(); this.refs.input?.focus(); }
-
-  createThinking(label="Thinking"){
-    const thinking=this.el("div","ult-thinking",`<span class="ult-thinking-word">${label}</span><span class="ult-typing"><span></span><span></span><span></span></span><span class="ult-thinking-time">(0.0s)</span>`);
-    const timeEl=this.qs(".ult-thinking-time",thinking);
-    const t0=performance.now();
-    const tick=setInterval(()=>{ if(timeEl){ const secs=((performance.now()-t0)/1000).toFixed(1); timeEl.textContent='(' + secs + 's)'; }},100);
-    return { el:thinking, clear:()=>clearInterval(tick) };
+  showWelcome(show) {
+    if (this.refs.welcome)
+      this.refs.welcome.style.display = show ? "block" : "none";
+    if (this.refs.examples)
+      this.refs.examples.style.display = show ? "flex" : "none";
+  }
+  renderChatHistory() {
+    if (!this.refs.messages) return;
+    this.refs.messages.innerHTML = "";
+    if (!this.messages.length) {
+      this.showWelcome(true);
+      return;
+    }
+    this.showWelcome(false);
+    const prev = this.autoScroll;
+    this.autoScroll = false;
+    this.messages.forEach((m) => this.addMessageToUI(m.role, m.content));
+    this.autoScroll = prev;
+    this.refs.messages.scrollTop = this.refs.messages.scrollHeight;
+  }
+  swapSendIcon(name) {
+    const holder = this.qs(".ult-icon-swap", this.refs.send);
+    if (!holder || holder.dataset.icon === name) return;
+    holder.innerHTML = this.icon(name);
+    holder.dataset.icon = name;
+    this.refs.send.title =
+      name === "square" && this.isStreaming
+        ? "Stop"
+        : name === "arrowUp"
+          ? "Send"
+          : "Ready";
+    this.refs.send.setAttribute("aria-label", this.refs.send.title);
+  }
+  updateComposerState() {
+    const hasText = !!this.refs.input?.value.trim().length;
+    if (this.isStreaming) {
+      this.swapSendIcon("square");
+      return;
+    }
+    this.swapSendIcon(hasText ? "arrowUp" : "square");
+  }
+  scrollToBottom() {
+    if (!this.autoScroll || !this.refs.messages) return;
+    requestAnimationFrame(() => {
+      if (this.refs.messages)
+        this.refs.messages.scrollTop = this.refs.messages.scrollHeight;
+    });
+  }
+  formatThread() {
+    return this.messages
+      .map(
+        (m) =>
+          `${m.role === "user" ? "You" : this.config.branding.name}: ${m.content}`,
+      )
+      .join("\n\n---\n\n");
+  }
+  copyThread() {
+    if (navigator.clipboard?.writeText)
+      navigator.clipboard.writeText(this.formatThread()).catch(console.error);
+  }
+  copyLastAssistant() {
+    const last = [...this.messages]
+      .reverse()
+      .find((m) => m.role === "assistant");
+    if (last && navigator.clipboard?.writeText)
+      navigator.clipboard.writeText(last.content).catch(console.error);
+  }
+  feedback(type) {
+    console.log("feedback:", type);
+  }
+  retryLast() {
+    const lastUser = [...this.messages]
+      .reverse()
+      .find((m) => m.role === "user");
+    if (lastUser) this.sendMessage(lastUser.content);
+  }
+  downloadThread() {
+    const { name } = this.config.branding;
+    const blob = new Blob([this.formatThread()], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = this.el("a");
+    a.href = url;
+    a.download = `${name.toLowerCase().replace(/\s+/g, "-")}-chat-${new Date().toISOString().slice(0, 10)}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+  clearSession() {
+    this.messages = [];
+    this.sessionId = null;
+    try {
+      localStorage.removeItem("ult-chat-session");
+    } catch (e) {
+      console.warn("Failed to clear session:", e);
+    }
+    if (this.refs.messages) this.refs.messages.innerHTML = "";
+    this.showWelcome(true);
+    this.updateComposerState();
+  }
+  stopStreaming() {
+    if (this.abortController) this.abortController.abort();
+    this.isStreaming = false;
+    this.abortController = null;
+    this.updateComposerState();
+    this.refs.input?.focus();
   }
 
-  async performSearch(query){
-    if(!this.refs.messages) return;
-    this.refs.messages.innerHTML="";
-    const { el:thinking, clear } = this.createThinking("Searching");
+  createThinking(label = "Thinking") {
+    const thinking = this.el(
+      "div",
+      "ult-thinking",
+      `<span class="ult-thinking-word">${label}</span><span class="ult-typing"><span></span><span></span><span></span></span><span class="ult-thinking-time">(0.0s)</span>`,
+    );
+    const timeEl = this.qs(".ult-thinking-time", thinking);
+    const t0 = performance.now();
+    const tick = setInterval(() => {
+      if (timeEl) {
+        const secs = ((performance.now() - t0) / 1000).toFixed(1);
+        timeEl.textContent = "(" + secs + "s)";
+      }
+    }, 100);
+    return { el: thinking, clear: () => clearInterval(tick) };
+  }
+
+  async performSearch(query) {
+    if (!this.refs.messages) return;
+    this.refs.messages.innerHTML = "";
+    const { el: thinking, clear } = this.createThinking("Searching");
     this.refs.messages.appendChild(thinking);
-    try{
-      const url=this.apiUrl.replace(/\/chat$/, "/search");
-      const res=await fetch(url,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({query})});
-      if(!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data=await res.json();
-      clear(); thinking.remove();
-      if(!data.results?.length){ this.refs.messages.innerHTML='<div class="ult-message">No results found. Try different keywords.</div>'; return; }
-      this.refs.messages.innerHTML=data.results.map(r=>{
-        const snippet=r.text?.length>150? r.text.slice(0,150)+"..." : r.text||"";
-        let host=""; try{ host=new URL(r.url).hostname; }catch{ host=""; }
-        const fav=host?`<img class="ult-search-result-favicon" src="https://www.google.com/s2/favicons?sz=32&domain=${encodeURIComponent(host)}" alt="" loading="lazy" />`:"";
-        const metaHost=host?`<span>${this.escapeHtml(host)}</span>`:"";
-        return `<div class="ult-search-result"><div class="ult-search-result-title">${fav}<a href="${this.escapeHtml(r.url)}" target="_blank" rel="noopener">${this.escapeHtml(r.title||"")}</a></div><div class="ult-search-result-snippet">${this.escapeHtml(snippet)}</div><div class="ult-search-result-meta"><span class="ult-search-result-score">Match: ${((r.score||0)*100).toFixed(0)}%</span>${metaHost}</div></div>`;
-      }).join("");
-    }catch(e){
-      clear(); thinking.remove();
-      if(this.refs.messages) this.refs.messages.innerHTML=`<div class="ult-message">Search error: ${this.escapeHtml(e.message)}</div>`;
+    try {
+      const url = this.apiUrl.replace(/\/chat$/, "/search");
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query }),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      clear();
+      thinking.remove();
+      if (!data.results?.length) {
+        this.refs.messages.innerHTML =
+          '<div class="ult-message">No results found. Try different keywords.</div>';
+        return;
+      }
+      this.refs.messages.innerHTML = data.results
+        .map((r) => {
+          const snippet =
+            r.text?.length > 150 ? r.text.slice(0, 150) + "..." : r.text || "";
+          let host = "";
+          try {
+            host = new URL(r.url).hostname;
+          } catch {
+            host = "";
+          }
+          const fav = host
+            ? `<img class="ult-search-result-favicon" src="https://www.google.com/s2/favicons?sz=32&domain=${encodeURIComponent(host)}" alt="" loading="lazy" />`
+            : "";
+          const metaHost = host ? `<span>${this.escapeHtml(host)}</span>` : "";
+          return `<div class="ult-search-result"><div class="ult-search-result-title">${fav}<a href="${this.escapeHtml(r.url)}" target="_blank" rel="noopener">${this.escapeHtml(r.title || "")}</a></div><div class="ult-search-result-snippet">${this.escapeHtml(snippet)}</div><div class="ult-search-result-meta"><span class="ult-search-result-score">Match: ${((r.score || 0) * 100).toFixed(0)}%</span>${metaHost}</div></div>`;
+        })
+        .join("");
+    } catch (e) {
+      clear();
+      thinking.remove();
+      if (this.refs.messages)
+        this.refs.messages.innerHTML = `<div class="ult-message">Search error: ${this.escapeHtml(e.message)}</div>`;
       console.error("Search error:", e);
     }
   }
 
-  async sendMessage(text){
-    if(!text || this.isStreaming || !this.refs.input || !this.refs.messages) return;
-    this.showWelcome(false); this.autoScroll=true;
-    if(this.mode==="search"){
-      this.refs.input.value=text; this.refs.input.style.height="auto"; this.refs.input.style.height=Math.min(this.refs.input.scrollHeight,140)+"px";
-      await this.performSearch(text); this.refs.input.focus(); return;
+  async sendMessage(text) {
+    if (!text || this.isStreaming || !this.refs.input || !this.refs.messages)
+      return;
+    this.showWelcome(false);
+    this.autoScroll = true;
+    if (this.mode === "search") {
+      this.refs.input.value = text;
+      this.refs.input.style.height = "auto";
+      this.refs.input.style.height =
+        Math.min(this.refs.input.scrollHeight, 140) + "px";
+      await this.performSearch(text);
+      this.refs.input.focus();
+      return;
     }
-    this.messages.push({role:"user",content:text});
-    this.addMessageToUI("user",text);
-    this.refs.input.value=""; this.refs.input.style.height="auto";
-    this.isStreaming=true; this.updateComposerState();
-    const group=this.createMessageGroup("assistant");
-    const { el:thinking, clear } = this.createThinking(); group.appendChild(thinking);
-    this.scrollToBottom(); this.abortController=new AbortController();
-    try{
-      const res=await fetch(this.apiUrl,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({messages:[{role:"user",content:text}],session_id:this.sessionId,context:this.getPageContext()}),signal:this.abortController.signal});
-      if(!res.ok) throw new Error(`HTTP ${res.status}`);
-      const sid=res.headers.get("X-Session-ID"); if(sid && !this.sessionId){ this.sessionId=sid; this.saveSessionId(sid); }
-      thinking.remove(); clear();
-      const div=this.el("div","ult-message assistant"); group.appendChild(div);
-      const reader=res.body?.getReader(); if(!reader) throw new Error("No response stream");
-      const decoder=new TextDecoder(); let content=""; let renderTimer=null; const renderDelay=30;
-      const schedule=()=>{ if(renderTimer) return; renderTimer=setTimeout(()=>{ div.innerHTML=this.renderMarkdown(content); this.scrollToBottom(); renderTimer=null; },renderDelay); };
-      while(true){ const {done,value}=await reader.read(); if(done) break; const chunk=decoder.decode(value,{stream:true});
-        for(const line of chunk.split("\n")){ if(!line.startsWith("data: ")) continue; const data=line.slice(6); if(data==="[DONE]") continue;
-          try{ const parsed=JSON.parse(data); if(parsed.content){ content+=parsed.content; schedule(); } else if(parsed.error){ throw new Error(parsed.error); } }
-          catch(e){ if(e.message!=="Unexpected end of JSON input") console.error("Parse error:",e); }
-        } }
-      if(renderTimer){ clearTimeout(renderTimer); renderTimer=null; }
-      div.innerHTML=this.renderMarkdown(content); this.scrollToBottom(); this.messages.push({role:"assistant",content});
-    }catch(e){
-      thinking.remove(); clear();
-      const msg=this.el("div","ult-message assistant", e.name==="AbortError"?"Generation stopped.":"Sorry, I encountered an error. Please try again."); group.appendChild(msg);
+    this.messages.push({ role: "user", content: text });
+    this.addMessageToUI("user", text);
+    this.refs.input.value = "";
+    this.refs.input.style.height = "auto";
+    this.isStreaming = true;
+    this.updateComposerState();
+    const group = this.createMessageGroup("assistant");
+    const { el: thinking, clear } = this.createThinking();
+    group.appendChild(thinking);
+    this.scrollToBottom();
+    this.abortController = new AbortController();
+    try {
+      const res = await fetch(this.apiUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          messages: [{ role: "user", content: text }],
+          session_id: this.sessionId,
+          context: this.getPageContext(),
+        }),
+        signal: this.abortController.signal,
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const sid = res.headers.get("X-Session-ID");
+      if (sid && !this.sessionId) {
+        this.sessionId = sid;
+        this.saveSessionId(sid);
+      }
+      thinking.remove();
+      clear();
+      const div = this.el("div", "ult-message assistant");
+      group.appendChild(div);
+      const reader = res.body?.getReader();
+      if (!reader) throw new Error("No response stream");
+      const decoder = new TextDecoder();
+      let content = "";
+      let renderTimer = null;
+      const renderDelay = 30;
+      const schedule = () => {
+        if (renderTimer) return;
+        renderTimer = setTimeout(() => {
+          div.innerHTML = this.renderMarkdown(content);
+          this.scrollToBottom();
+          renderTimer = null;
+        }, renderDelay);
+      };
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        const chunk = decoder.decode(value, { stream: true });
+        for (const line of chunk.split("\n")) {
+          if (!line.startsWith("data: ")) continue;
+          const data = line.slice(6);
+          if (data === "[DONE]") continue;
+          try {
+            const parsed = JSON.parse(data);
+            if (parsed.content) {
+              content += parsed.content;
+              schedule();
+            } else if (parsed.error) {
+              throw new Error(parsed.error);
+            }
+          } catch (e) {
+            if (e.message !== "Unexpected end of JSON input")
+              console.error("Parse error:", e);
+          }
+        }
+      }
+      if (renderTimer) {
+        clearTimeout(renderTimer);
+        renderTimer = null;
+      }
+      div.innerHTML = this.renderMarkdown(content);
+      this.scrollToBottom();
+      this.messages.push({ role: "assistant", content });
+    } catch (e) {
+      thinking.remove();
+      clear();
+      const msg = this.el(
+        "div",
+        "ult-message assistant",
+        e.name === "AbortError"
+          ? "Generation stopped."
+          : "Sorry, I encountered an error. Please try again.",
+      );
+      group.appendChild(msg);
       console.error("Chat error:", e);
-    }finally{
-      this.isStreaming=false; this.abortController=null; this.updateComposerState(); this.refs.input?.focus();
+    } finally {
+      this.isStreaming = false;
+      this.abortController = null;
+      this.updateComposerState();
+      this.refs.input?.focus();
     }
   }
 
-  createMessageGroup(role){
-    if(!this.refs.messages) return null;
+  createMessageGroup(role) {
+    if (!this.refs.messages) return null;
     const { name, logomark } = this.config.branding;
-    const group=this.el("div","ult-message-group");
-    const label=this.el("div","ult-message-label",
-      role==="assistant" ? `<img src="${this.escapeHtml(logomark)}" alt="${this.escapeHtml(name)}" /><span>${this.escapeHtml(name)}</span>`
-                         : `<span class="ult-user-icon"><svg width="29" height="29" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 0 3 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg></span><span>You</span>`
+    const group = this.el("div", "ult-message-group");
+    const label = this.el(
+      "div",
+      "ult-message-label",
+      role === "assistant"
+        ? `<img src="${this.escapeHtml(logomark)}" alt="${this.escapeHtml(name)}" /><span>${this.escapeHtml(name)}</span>`
+        : `<span class="ult-user-icon"><svg width="29" height="29" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 0 3 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg></span><span>You</span>`,
     );
-    group.appendChild(label); this.refs.messages.appendChild(group); this.scrollToBottom(); return group;
+    group.appendChild(label);
+    this.refs.messages.appendChild(group);
+    this.scrollToBottom();
+    return group;
   }
 
-  addMessageToUI(role, content){
-    const group=this.createMessageGroup(role); if(!group) return null;
-    const div=this.el("div",`ult-message ${role==="assistant"?"assistant":""}`, this.renderMarkdown(content));
-    group.appendChild(div); return div;
+  addMessageToUI(role, content) {
+    const group = this.createMessageGroup(role);
+    if (!group) return null;
+    const div = this.el(
+      "div",
+      `ult-message ${role === "assistant" ? "assistant" : ""}`,
+      this.renderMarkdown(content),
+    );
+    group.appendChild(div);
+    return div;
   }
 
-  escapeHtml(text){ const d=this.el("div"); d.textContent=text; return d.innerHTML; }
+  escapeHtml(text) {
+    const d = this.el("div");
+    d.textContent = text;
+    return d.innerHTML;
+  }
 
-  renderMarkdown(src){
-    const esc=s=>s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");
-    const lines=(src||"").replace(/\r\n?/g,"\n").split("\n");
-    let html="",inCode=false,codeLang="",listType=null,listOpen=false,inQuote=false,paraOpen=false;
-    const closePara=()=>{ if(paraOpen){ html+="</p>"; paraOpen=false; } };
-    const openPara=()=>{ if(!paraOpen){ html+="<p>"; paraOpen=true; } };
-    const closeList=()=>{ if(listOpen){ html+=listType==="ol"?"</ol>":"</ul>"; listOpen=false; listType=null; } };
-    const closeQuote=()=>{ if(inQuote){ html+="</blockquote>"; inQuote=false; } };
-    for(let raw of lines){
-      const fence=raw.match(/^\s*```(\w+)?\s*$/);
-      if(fence){ if(inCode){ html+=`</code></pre>`; inCode=false; codeLang=""; } else { closePara(); closeList(); closeQuote(); inCode=true; codeLang=fence[1]||""; html+=`<pre><code class="lang-${esc(codeLang)}">`; } continue; }
-      if(inCode){ html+=esc(raw)+"\n"; continue; }
-      const q=/^>\s?(.*)$/.exec(raw); if(q){ if(!inQuote){ closePara(); closeList(); html+="<blockquote>"; inQuote=true; } raw=q[1]; } else closeQuote();
+  renderMarkdown(src) {
+    const esc = (s) =>
+      s
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    const lines = (src || "").replace(/\r\n?/g, "\n").split("\n");
+    let html = "",
+      inCode = false,
+      codeLang = "",
+      listType = null,
+      listOpen = false,
+      inQuote = false,
+      paraOpen = false;
+    const closePara = () => {
+      if (paraOpen) {
+        html += "</p>";
+        paraOpen = false;
+      }
+    };
+    const openPara = () => {
+      if (!paraOpen) {
+        html += "<p>";
+        paraOpen = true;
+      }
+    };
+    const closeList = () => {
+      if (listOpen) {
+        html += listType === "ol" ? "</ol>" : "</ul>";
+        listOpen = false;
+        listType = null;
+      }
+    };
+    const closeQuote = () => {
+      if (inQuote) {
+        html += "</blockquote>";
+        inQuote = false;
+      }
+    };
+    for (let raw of lines) {
+      const fence = raw.match(/^\s*```(\w+)?\s*$/);
+      if (fence) {
+        if (inCode) {
+          html += `</code></pre>`;
+          inCode = false;
+          codeLang = "";
+        } else {
+          closePara();
+          closeList();
+          closeQuote();
+          inCode = true;
+          codeLang = fence[1] || "";
+          html += `<pre><code class="lang-${esc(codeLang)}">`;
+        }
+        continue;
+      }
+      if (inCode) {
+        html += esc(raw) + "\n";
+        continue;
+      }
+      const q = /^>\s?(.*)$/.exec(raw);
+      if (q) {
+        if (!inQuote) {
+          closePara();
+          closeList();
+          html += "<blockquote>";
+          inQuote = true;
+        }
+        raw = q[1];
+      } else closeQuote();
       let m;
-      if((m=raw.match(/^\s*([-*+])\s+(.+)$/))){ if(!listOpen||listType!=="ul"){ closePara(); closeList(); html+="<ul>"; listOpen=true; listType="ul"; } html+=`<li>${this.renderInline(m[2])}</li>`; continue; }
-      if((m=raw.match(/^\s*(\d+)\.\s+(.+)$/))){ if(!listOpen||listType!=="ol"){ closePara(); closeList(); html+="<ol>"; listOpen=true; listType="ol"; } html+=`<li>${this.renderInline(m[2])}</li>`; continue; }
-      if(/^\s*$/.test(raw)){ closePara(); closeList(); closeQuote(); continue; }
-      if((m=raw.match(/^###\s+(.+)$/))){ closePara(); closeList(); closeQuote(); html+=`<h3>${this.renderInline(m[1])}</h3>`; continue; }
-      if((m=raw.match(/^##\s+(.+)$/))){ closePara(); closeList(); closeQuote(); html+=`<h2>${this.renderInline(m[1])}</h2>`; continue; }
-      if((m=raw.match(/^#\s+(.+)$/))){ closePara(); closeList(); closeQuote(); html+=`<h1>${this.renderInline(m[1])}</h1>`; continue; }
-      openPara(); html+=this.renderInline(raw);
+      if ((m = raw.match(/^\s*([-*+])\s+(.+)$/))) {
+        if (!listOpen || listType !== "ul") {
+          closePara();
+          closeList();
+          html += "<ul>";
+          listOpen = true;
+          listType = "ul";
+        }
+        html += `<li>${this.renderInline(m[2])}</li>`;
+        continue;
+      }
+      if ((m = raw.match(/^\s*(\d+)\.\s+(.+)$/))) {
+        if (!listOpen || listType !== "ol") {
+          closePara();
+          closeList();
+          html += "<ol>";
+          listOpen = true;
+          listType = "ol";
+        }
+        html += `<li>${this.renderInline(m[2])}</li>`;
+        continue;
+      }
+      if (/^\s*$/.test(raw)) {
+        closePara();
+        closeList();
+        closeQuote();
+        continue;
+      }
+      if ((m = raw.match(/^###\s+(.+)$/))) {
+        closePara();
+        closeList();
+        closeQuote();
+        html += `<h3>${this.renderInline(m[1])}</h3>`;
+        continue;
+      }
+      if ((m = raw.match(/^##\s+(.+)$/))) {
+        closePara();
+        closeList();
+        closeQuote();
+        html += `<h2>${this.renderInline(m[1])}</h2>`;
+        continue;
+      }
+      if ((m = raw.match(/^#\s+(.+)$/))) {
+        closePara();
+        closeList();
+        closeQuote();
+        html += `<h1>${this.renderInline(m[1])}</h1>`;
+        continue;
+      }
+      openPara();
+      html += this.renderInline(raw);
     }
-    closePara(); closeList(); closeQuote(); return html;
+    closePara();
+    closeList();
+    closeQuote();
+    return html;
   }
 
-  renderInline(text){
-    if(!text) return "";
-    text=this.escapeHtml(text);
-    const code=[]; text=text.replace(/`([^`]+)`/g,(m,c)=>{ code.push(c); return `@@ULTCODE${code.length-1}@@`; });
-    text=text.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,'<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
-    text=text.replace(/(?<!href=")(?<!src=")(?<!>)\b(https?:\/\/[^\s<>'")\]]+?)(?=[.,;:!?]*(?:\s|<|'|"|\)|\]|$))/g,'<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>');
-    text=text.replace(/\*\*([^"]+?)\*\*/g,"<strong>$1</strong>").replace(/__([^"]+?)__/g,"<strong>$1</strong>");
-    text=text.replace(/(?<!\*)\*(?!\*)([^"]+?)\*(?!\*)/g,"<em>$1</em>").replace(/(?<!_)_(?!_)([^"]+?)_(?!_)/g,"<em>$1</em>");
-    text=text.replace(/@@ULTCODE(\d+)@@/g,(_,i)=>`<code>${code[i]}</code>`);
-    return text.replace(/ {2}\n/g,"<br>");
+  renderInline(text) {
+    if (!text) return "";
+    text = this.escapeHtml(text);
+    const code = [];
+    text = text.replace(/`([^`]+)`/g, (m, c) => {
+      code.push(c);
+      return `@@ULTCODE${code.length - 1}@@`;
+    });
+    text = text.replace(
+      /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,
+      '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>',
+    );
+    text = text.replace(
+      /(?<!href=")(?<!src=")(?<!>)\b(https?:\/\/[^\s<>'")\]]+?)(?=[.,;:!?]*(?:\s|<|'|"|\)|\]|$))/g,
+      '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>',
+    );
+    text = text
+      .replace(/\*\*([^"]+?)\*\*/g, "<strong>$1</strong>")
+      .replace(/__([^"]+?)__/g, "<strong>$1</strong>");
+    text = text
+      .replace(/(?<!\*)\*(?!\*)([^"]+?)\*(?!\*)/g, "<em>$1</em>")
+      .replace(/(?<!_)_(?!_)([^"]+?)_(?!_)/g, "<em>$1</em>");
+    text = text.replace(
+      /@@ULTCODE(\d+)@@/g,
+      (_, i) => `<code>${code[i]}</code>`,
+    );
+    return text.replace(/ {2}\n/g, "<br>");
   }
 }
