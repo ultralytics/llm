@@ -156,7 +156,9 @@ class UltralyticsChat {
     if (this.inputDebounceTimer) clearTimeout(this.inputDebounceTimer);
     this.domObserver?.disconnect();
     this.listeners.forEach((eventList, el) =>
-      eventList.forEach(({ ev, fn, opts }) => el.removeEventListener(ev, fn, opts)),
+      eventList.forEach(({ ev, fn, opts }) =>
+        el.removeEventListener(ev, fn, opts),
+      ),
     );
     this.listeners.clear();
     this.styleElement?.remove();
@@ -492,7 +494,11 @@ class UltralyticsChat {
     // block touchmove outside modal (needs non-passive)
     this.on(window, "touchmove", this.touchBlocker, { passive: false });
     // keep viewport vars fresh for iOS keyboard
-    this.on(window.visualViewport || window, "resize", this.visualViewportHandler);
+    this.on(
+      window.visualViewport || window,
+      "resize",
+      this.visualViewportHandler,
+    );
     this.updateViewportVars();
   }
 
@@ -501,8 +507,13 @@ class UltralyticsChat {
     document.body.classList.remove("ult-locked");
     document.body.style.top = "";
     window.scrollTo(0, this.scrollY || 0);
-    window.removeEventListener("touchmove", this.touchBlocker, { passive: false });
-    (window.visualViewport || window).removeEventListener?.("resize", this.visualViewportHandler);
+    window.removeEventListener("touchmove", this.touchBlocker, {
+      passive: false,
+    });
+    (window.visualViewport || window).removeEventListener?.(
+      "resize",
+      this.visualViewportHandler,
+    );
   }
 
   updateViewportVars() {
@@ -920,37 +931,118 @@ class UltralyticsChat {
       listOpen = false,
       inQuote = false,
       paraOpen = false;
-    const closePara = () => { if (paraOpen) { html += "</p>"; paraOpen = false; } };
-    const openPara = () => { if (!paraOpen) { html += "<p>"; paraOpen = true; } };
-    const closeList = () => { if (listOpen) { html += listType === "ol" ? "</ol>" : "</ul>"; listOpen = false; listType = null; } };
-    const closeQuote = () => { if (inQuote) { html += "</blockquote>"; inQuote = false; } };
+    const closePara = () => {
+      if (paraOpen) {
+        html += "</p>";
+        paraOpen = false;
+      }
+    };
+    const openPara = () => {
+      if (!paraOpen) {
+        html += "<p>";
+        paraOpen = true;
+      }
+    };
+    const closeList = () => {
+      if (listOpen) {
+        html += listType === "ol" ? "</ol>" : "</ul>";
+        listOpen = false;
+        listType = null;
+      }
+    };
+    const closeQuote = () => {
+      if (inQuote) {
+        html += "</blockquote>";
+        inQuote = false;
+      }
+    };
     for (let raw of lines) {
       const fence = raw.match(/^\s*```(\w+)?\s*$/);
       if (fence) {
-        if (inCode) { html += `</code></pre>`; inCode = false; codeLang = ""; }
-        else { closePara(); closeList(); closeQuote(); inCode = true; codeLang = fence[1] || ""; html += `<pre><code class="lang-${esc(codeLang)}">`; }
+        if (inCode) {
+          html += `</code></pre>`;
+          inCode = false;
+          codeLang = "";
+        } else {
+          closePara();
+          closeList();
+          closeQuote();
+          inCode = true;
+          codeLang = fence[1] || "";
+          html += `<pre><code class="lang-${esc(codeLang)}">`;
+        }
         continue;
       }
-      if (inCode) { html += esc(raw) + "\n"; continue; }
+      if (inCode) {
+        html += esc(raw) + "\n";
+        continue;
+      }
       const q = /^>\s?(.*)$/.exec(raw);
-      if (q) { if (!inQuote) { closePara(); closeList(); html += "<blockquote>"; inQuote = true; } raw = q[1]; }
-      else closeQuote();
+      if (q) {
+        if (!inQuote) {
+          closePara();
+          closeList();
+          html += "<blockquote>";
+          inQuote = true;
+        }
+        raw = q[1];
+      } else closeQuote();
       let m;
       if ((m = raw.match(/^\s*([-*+])\s+(.+)$/))) {
-        if (!listOpen || listType !== "ul") { closePara(); closeList(); html += "<ul>"; listOpen = true; listType = "ul"; }
-        html += `<li>${this.renderInline(m[2])}</li>`; continue;
+        if (!listOpen || listType !== "ul") {
+          closePara();
+          closeList();
+          html += "<ul>";
+          listOpen = true;
+          listType = "ul";
+        }
+        html += `<li>${this.renderInline(m[2])}</li>`;
+        continue;
       }
       if ((m = raw.match(/^\s*(\d+)\.\s+(.+)$/))) {
-        if (!listOpen || listType !== "ol") { closePara(); closeList(); html += "<ol>"; listOpen = true; listType = "ol"; }
-        html += `<li>${this.renderInline(m[2])}</li>`; continue;
+        if (!listOpen || listType !== "ol") {
+          closePara();
+          closeList();
+          html += "<ol>";
+          listOpen = true;
+          listType = "ol";
+        }
+        html += `<li>${this.renderInline(m[2])}</li>`;
+        continue;
       }
-      if (/^\s*$/.test(raw)) { closePara(); closeList(); closeQuote(); continue; }
-      if ((m = raw.match(/^###\s+(.+)$/))) { closePara(); closeList(); closeQuote(); html += `<h3>${this.renderInline(m[1])}</h3>`; continue; }
-      if ((m = raw.match(/^##\s+(.+)$/))) { closePara(); closeList(); closeQuote(); html += `<h2>${this.renderInline(m[1])}</h2>`; continue; }
-      if ((m = raw.match(/^#\s+(.+)$/))) { closePara(); closeList(); closeQuote(); html += `<h1>${this.renderInline(m[1])}</h1>`; continue; }
-      openPara(); html += this.renderInline(raw);
+      if (/^\s*$/.test(raw)) {
+        closePara();
+        closeList();
+        closeQuote();
+        continue;
+      }
+      if ((m = raw.match(/^###\s+(.+)$/))) {
+        closePara();
+        closeList();
+        closeQuote();
+        html += `<h3>${this.renderInline(m[1])}</h3>`;
+        continue;
+      }
+      if ((m = raw.match(/^##\s+(.+)$/))) {
+        closePara();
+        closeList();
+        closeQuote();
+        html += `<h2>${this.renderInline(m[1])}</h2>`;
+        continue;
+      }
+      if ((m = raw.match(/^#\s+(.+)$/))) {
+        closePara();
+        closeList();
+        closeQuote();
+        html += `<h1>${this.renderInline(m[1])}</h1>`;
+        continue;
+      }
+      openPara();
+      html += this.renderInline(raw);
     }
-    closePara(); closeList(); closeQuote();
+    closePara();
+    closeList();
+    closeQuote();
     return html;
   }
 
@@ -958,7 +1050,10 @@ class UltralyticsChat {
     if (!text) return "";
     text = this.escapeHtml(text);
     const codeBlocks = [];
-    text = text.replace(/`([^`]+)`/g, (match, code) => { codeBlocks.push(code); return `@@ULTCODE${codeBlocks.length - 1}@@`; });
+    text = text.replace(/`([^`]+)`/g, (match, code) => {
+      codeBlocks.push(code);
+      return `@@ULTCODE${codeBlocks.length - 1}@@`;
+    });
     text = text.replace(
       /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,
       '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>',
@@ -971,7 +1066,10 @@ class UltralyticsChat {
     text = text.replace(/__([^"]+?)__/g, "<strong>$1</strong>");
     text = text.replace(/(?<!\*)\*(?!\*)([^"]+?)\*(?!\*)/g, "<em>$1</em>");
     text = text.replace(/(?<!_)_(?!_)([^"]+?)_(?!_)/g, "<em>$1</em>");
-    text = text.replace(/@@ULTCODE(\d+)@@/g, (match, idx) => `<code>${codeBlocks[idx]}</code>`);
+    text = text.replace(
+      /@@ULTCODE(\d+)@@/g,
+      (match, idx) => `<code>${codeBlocks[idx]}</code>`,
+    );
     return text.replace(/ {2}\n/g, "<br>");
   }
 }
