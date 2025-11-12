@@ -333,7 +333,8 @@ class UltralyticsChat {
         '<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.59 13.51l6.83 3.98"/><path d="M15.41 6.51L8.59 10.49"/>',
       arrowUp:
         '<line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/>',
-      square: '<rect x="4.8" y="4.8" width="14.4" height="14.4" rx="2" ry="2"/>',
+      square:
+        '<rect x="4.8" y="4.8" width="14.4" height="14.4" rx="2" ry="2"/>',
     };
     return `<svg width="18" height="18" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" fill="none">${paths[name] || ""}</svg>`;
   }
