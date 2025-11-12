@@ -301,7 +301,7 @@ class UltralyticsChat {
         .ult-icon-btn{width:38px;height:38px;border-radius:8px}
         .ult-icon-btn svg{width:17px;height:17px}
         .ult-chat-messages{flex:1 1 0;min-height:0;padding:0 0 8px 0;overflow-y:auto;overflow-x:hidden;overscroll-behavior-y:contain;-webkit-overflow-scrolling:touch}
-        .ult-chat-modal.welcome-mode .ult-chat-messages{flex:0 1 auto;min-height:0;overflow:visible}
+        .ult-chat-modal.welcome-mode .ult-chat-messages{flex:0 0 0;height:0;padding:0;overflow:hidden}
         .ult-welcome{padding:10px 14px 0}
         .ult-welcome h1{font-size:15px;margin:0 0 4px}
         .ult-welcome p{font-size:13px;margin:0;line-height:1.35}
