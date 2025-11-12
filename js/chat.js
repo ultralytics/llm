@@ -3,21 +3,13 @@
 class UltralyticsChat {
   constructor(config = {}) {
     this.config = {
-      apiUrl:
-        config.apiUrl ||
-        "https://chat-885297101091.europe-west1.run.app/api/chat",
+      apiUrl: config.apiUrl || "https://chat-885297101091.europe-west1.run.app/api/chat",
       maxMessageLength: config.maxMessageLength || 10000,
       branding: {
         name: config.branding?.name || "AI",
-        tagline:
-          config.branding?.tagline ||
-          "Ask anything about Ultralytics, YOLO, and more",
-        logo:
-          config.branding?.logo ||
-          "https://cdn.prod.website-files.com/680a070c3b99253410dd3dcf/680a070c3b99253410dd3e13_logo.svg",
-        logomark:
-          config.branding?.logomark ||
-          "https://storage.googleapis.com/organization-image-assets/ultralytics-botAvatarSrcUrl-1729379860806.svg",
+        tagline: config.branding?.tagline || "Ask anything about Ultralytics, YOLO, and more",
+        logo: config.branding?.logo || "https://cdn.prod.website-files.com/680a070c3b99253410dd3dcf/680a070c3b99253410dd3e13_logo.svg",
+        logomark: config.branding?.logomark || "https://storage.googleapis.com/organization-image-assets/ultralytics-botAvatarSrcUrl-1729379860806.svg",
         pillText: config.branding?.pillText || "Ask AI",
       },
       theme: {
@@ -28,14 +20,8 @@ class UltralyticsChat {
       },
       welcome: {
         title: config.welcome?.title || "Hi!",
-        message:
-          config.welcome?.message ||
-          "I'm an AI assistant trained on documentation, help articles, and other content.<br>Ask me anything about Ultralytics.",
-        examples: config.welcome?.examples || [
-          "What's new in YOLO11?",
-          "How do I get started with YOLO?",
-          "Tell me about Enterprise Licensing",
-        ],
+        message: config.welcome?.message || "I'm an AI assistant trained on documentation, help articles, and other content.<br>Ask me anything about Ultralytics.",
+        examples: config.welcome?.examples || ["What's new in YOLO11?", "How do I get started with YOLO?", "Tell me about Enterprise Licensing"],
       },
       ui: {
         placeholder: config.ui?.placeholder || "Ask anything…",
@@ -78,14 +64,8 @@ class UltralyticsChat {
   }
 
   getPageContext() {
-    const meta = (name) =>
-      document.querySelector(`meta[name="${name}"]`)?.content || "";
-    return {
-      url: window.location.href,
-      title: document.title,
-      description: meta("description"),
-      path: window.location.pathname,
-    };
+    const meta = (name) => document.querySelector(`meta[name="${name}"]`)?.content || "";
+    return { url: window.location.href, title: document.title, description: meta("description"), path: window.location.pathname };
   }
 
   loadSessionId() {
@@ -99,8 +79,8 @@ class UltralyticsChat {
   saveSessionId(id) {
     try {
       localStorage.setItem("ult-chat-session", id);
-    } catch (e) {
-      console.warn("Failed to save session ID:", e);
+    } catch {
+      console.warn("Failed to save session ID");
     }
   }
 
@@ -123,47 +103,33 @@ class UltralyticsChat {
       document.head.appendChild(viewport);
     }
     if (!viewport.content.includes("maximum-scale")) {
-      viewport.content =
-        "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no";
+      viewport.content = "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no";
     }
   }
 
   watchForRemoval() {
+    const elements = [
+      { element: () => this.styleElement, parent: document.head },
+      { element: () => this.refs.pill, parent: document.body },
+      { element: () => this.refs.modal, parent: document.body },
+      { element: () => this.refs.backdrop, parent: document.body },
+    ];
     const observer = new MutationObserver(() => {
-      if (this.styleElement?.parentNode !== document.head) {
-        document.head.appendChild(this.styleElement);
-      }
-      if (this.refs.pill?.parentNode !== document.body) {
-        document.body.appendChild(this.refs.pill);
-      }
-      if (this.refs.modal?.parentNode !== document.body) {
-        document.body.appendChild(this.refs.modal);
-      }
-      if (this.refs.backdrop?.parentNode !== document.body) {
-        document.body.appendChild(this.refs.backdrop);
-      }
+      elements.forEach(({ element, parent }) => {
+        const el = element();
+        if (el?.parentNode !== parent) parent.appendChild(el);
+      });
     });
     observer.observe(document.head, { childList: true });
     observer.observe(document.body, { childList: true });
     this.domObserver = observer;
   }
 
-  ensureUI() {
-    if (this.refs.pill && !document.body.contains(this.refs.pill))
-      document.body.appendChild(this.refs.pill);
-    if (this.refs.modal && !document.body.contains(this.refs.modal))
-      document.body.appendChild(this.refs.modal);
-    if (this.refs.backdrop && !document.body.contains(this.refs.backdrop))
-      document.body.appendChild(this.refs.backdrop);
-  }
-
   destroy() {
     this.toggle(false);
     if (this.inputDebounceTimer) clearTimeout(this.inputDebounceTimer);
     this.domObserver?.disconnect();
-    this.listeners.forEach((eventList, el) =>
-      eventList.forEach(({ ev, fn }) => el.removeEventListener(ev, fn)),
-    );
+    this.listeners.forEach((eventList, el) => eventList.forEach(({ ev, fn }) => el.removeEventListener(ev, fn)));
     this.listeners.clear();
     this.styleElement?.remove();
     this.refs.modal?.remove();
@@ -181,12 +147,7 @@ class UltralyticsChat {
       }
     };
     applyTheme();
-    const handler = () => applyTheme();
-    if (mql.addEventListener) {
-      mql.addEventListener("change", handler);
-    } else if (mql.addListener) {
-      mql.addListener(handler);
-    }
+    mql.addEventListener("change", applyTheme);
   }
 
   createStyles() {
@@ -333,26 +294,18 @@ class UltralyticsChat {
   }
 
   icon(name) {
-    const base =
-      'width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"';
     const paths = {
       copy: '<rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>',
-      download:
-        '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>',
-      refresh:
-        '<path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>',
-      close:
-        '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>',
+      download: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>',
+      refresh: '<path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>',
+      close: '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>',
       like: '<path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/>',
-      dislike:
-        '<path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"/>',
-      share:
-        '<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.59 13.51l6.83 3.98"/><path d="M15.41 6.51L8.59 10.49"/>',
-      arrowUp:
-        '<line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/>',
+      dislike: '<path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"/>',
+      share: '<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.59 13.51l6.83 3.98"/><path d="M15.41 6.51L8.59 10.49"/>',
+      arrowUp: '<line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/>',
       square: '<rect x="6" y="6" width="12" height="12" rx="2" ry="2"/>',
     };
-    return `<svg ${base} aria-hidden="true">${paths[name] || ""}</svg>`;
+    return `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name] || ""}</svg>`;
   }
 
   createUI() {
@@ -363,11 +316,7 @@ class UltralyticsChat {
     this.refs.backdrop = this.el("div", "ult-backdrop");
     document.body.appendChild(this.refs.backdrop);
 
-    this.refs.pill = this.el(
-      "button",
-      "ultralytics-chat-pill",
-      `<span>${this.escapeHtml(pillText)}</span><img src="${this.escapeHtml(logomark)}" alt="${this.escapeHtml(name)}" />`,
-    );
+    this.refs.pill = this.el("button", "ultralytics-chat-pill", `<span>${this.escapeHtml(pillText)}</span><img src="${this.escapeHtml(logomark)}" alt="${this.escapeHtml(name)}" />`);
     this.refs.pill.setAttribute("aria-label", pillText);
     this.refs.pill.title = pillText;
     document.body.appendChild(this.refs.pill);
@@ -423,15 +372,8 @@ class UltralyticsChat {
 
   setExamples(list) {
     if (!this.refs.examples) return;
-    this.refs.examples.innerHTML = list
-      .map(
-        (q) =>
-          `<button class="ult-example" data-q="${this.escapeHtml(q)}">${this.escapeHtml(q)}</button>`,
-      )
-      .join("");
-    this.qsa(".ult-example", this.refs.examples).forEach((b) =>
-      this.on(b, "click", () => this.sendMessage(b.dataset.q)),
-    );
+    this.refs.examples.innerHTML = list.map((q) => `<button class="ult-example" data-q="${this.escapeHtml(q)}">${this.escapeHtml(q)}</button>`).join("");
+    this.qsa(".ult-example", this.refs.examples).forEach((b) => this.on(b, "click", () => void this.sendMessage(b.dataset.q)));
   }
 
   attachEvents() {
@@ -441,9 +383,7 @@ class UltralyticsChat {
     this.on(this.qs(".ult-chat-close", m), "click", () => this.toggle());
     this.on(this.qs(".ult-chat-clear", m), "click", () => this.clearSession());
     this.on(this.qs(".ult-chat-copy", m), "click", () => this.copyThread());
-    this.on(this.qs(".ult-chat-download", m), "click", () =>
-      this.downloadThread(),
-    );
+    this.on(this.qs(".ult-chat-download", m), "click", () => this.downloadThread());
     this.on(this.refs.messages, "scroll", () => {
       const d = this.refs.messages;
       this.autoScroll = d.scrollHeight - d.scrollTop - d.clientHeight < 100;
@@ -453,19 +393,16 @@ class UltralyticsChat {
       t.style.height = "auto";
       t.style.height = Math.min(t.scrollHeight, 140) + "px";
       if (this.inputDebounceTimer) clearTimeout(this.inputDebounceTimer);
-      this.inputDebounceTimer = setTimeout(
-        () => this.updateComposerState(),
-        50,
-      );
+      this.inputDebounceTimer = setTimeout(() => this.updateComposerState(), 50);
     });
     this.on(this.refs.send, "click", () => {
       if (this.isStreaming) this.stopStreaming();
-      else this.sendMessage(this.refs.input.value.trim());
+      else void this.sendMessage(this.refs.input.value.trim());
     });
     this.on(this.refs.input, "keydown", (e) => {
       if (e.key === "Enter" && !e.shiftKey) {
         e.preventDefault();
-        this.sendMessage(this.refs.input.value.trim());
+        void this.sendMessage(this.refs.input.value.trim());
       }
       if (e.key === "Escape") {
         e.preventDefault();
@@ -474,18 +411,13 @@ class UltralyticsChat {
     });
     this.on(document, "keydown", (e) => {
       if (this.isOpen && e.key === "Escape") this.toggle(false);
-      if (!this.isOpen && e.metaKey && e.key.toLowerCase() === "k")
-        this.toggle(true);
+      if (!this.isOpen && e.metaKey && e.key.toLowerCase() === "k") this.toggle(true);
     });
-    this.on(this.qs(".ult-act-copy", m), "click", () =>
-      this.copyLastAssistant(),
-    );
+    this.on(this.qs(".ult-act-copy", m), "click", () => this.copyLastAssistant());
     this.on(this.qs(".ult-act-like", m), "click", () => this.feedback("up"));
-    this.on(this.qs(".ult-act-dislike", m), "click", () =>
-      this.feedback("down"),
-    );
+    this.on(this.qs(".ult-act-dislike", m), "click", () => this.feedback("down"));
     this.on(this.qs(".ult-act-share", m), "click", () => this.copyThread());
-    this.on(this.qs(".ult-act-retry", m), "click", () => this.retryLast());
+    this.on(this.qs(".ult-act-retry", m), "click", () => void this.retryLast());
   }
 
   toggle(forceOpen = null, mode = null) {
@@ -499,60 +431,45 @@ class UltralyticsChat {
       this.scrollY = window.scrollY;
       document.body.classList.add("ult-modal-open");
       document.body.style.top = `-${this.scrollY}px`;
-    } else {
-      document.body.classList.remove("ult-modal-open");
-      document.body.style.top = "";
-      window.scrollTo(0, this.scrollY);
-    }
-    if (next) {
       this.updateUIForMode();
       if (!this.messages.length) this.showWelcome(true);
       this.refs.input?.focus();
       this.updateComposerState();
-    } else if (this.isStreaming) {
-      this.stopStreaming();
+    } else {
+      document.body.classList.remove("ult-modal-open");
+      document.body.style.top = "";
+      window.scrollTo(0, this.scrollY);
+      if (this.isStreaming) this.stopStreaming();
     }
   }
 
   updateUIForMode() {
     if (!this.refs.modal) return;
     const tagline = this.qs(".ult-subtle", this.refs.modal);
+    const actions = this.qs(".ult-actions", this.refs.modal);
     this.refs.modal.dataset.mode = this.mode;
     if (this.mode === "search") {
       if (this.refs.input) this.refs.input.placeholder = "Search for...";
-      if (tagline)
-        tagline.innerHTML = `<strong style="color: ${this.config.theme.primary}; font-weight: 700;">SEARCH</strong> · Find answers in our docs and guides`;
-      const actions = this.qs(".ult-actions", this.refs.modal);
+      if (tagline) tagline.innerHTML = `<strong style="color: ${this.config.theme.primary}; font-weight: 700;">SEARCH</strong> · Find answers in our docs and guides`;
       if (actions) actions.style.display = "none";
       if (this.refs.messages) this.refs.messages.innerHTML = "";
-      if (this.refs.welcome)
-        this.refs.welcome.innerHTML = `<p>Enter keywords to find relevant documentation, guides, and resources</p>`;
-      this.setExamples([
-        "YOLO quickstart",
-        "model training parameters",
-        "export formats",
-        "dataset configuration",
-      ]);
+      if (this.refs.welcome) this.refs.welcome.innerHTML = `<p>Enter keywords to find relevant documentation, guides, and resources</p>`;
+      this.setExamples(["YOLO quickstart", "model training parameters", "export formats", "dataset configuration"]);
       this.showWelcome(true);
     } else {
-      if (this.refs.input)
-        this.refs.input.placeholder = this.config.ui.placeholder;
+      if (this.refs.input) this.refs.input.placeholder = this.config.ui.placeholder;
       if (tagline) tagline.textContent = this.config.branding.tagline;
-      const actions = this.qs(".ult-actions", this.refs.modal);
       if (actions) actions.style.display = "";
       const { title, message, examples } = this.config.welcome;
-      if (this.refs.welcome)
-        this.refs.welcome.innerHTML = `<h1>${this.escapeHtml(title)}</h1><p>${message}</p>`;
+      if (this.refs.welcome) this.refs.welcome.innerHTML = `<h1>${this.escapeHtml(title)}</h1><p>${message}</p>`;
       this.setExamples(examples);
       this.renderChatHistory();
     }
   }
 
   showWelcome(show) {
-    if (this.refs.welcome)
-      this.refs.welcome.style.display = show ? "block" : "none";
-    if (this.refs.examples)
-      this.refs.examples.style.display = show ? "flex" : "none";
+    if (this.refs.welcome) this.refs.welcome.style.display = show ? "block" : "none";
+    if (this.refs.examples) this.refs.examples.style.display = show ? "flex" : "none";
     if (this.refs.modal) this.refs.modal.classList.toggle("welcome-mode", show);
   }
 
@@ -576,52 +493,33 @@ class UltralyticsChat {
     if (!holder || holder.dataset.icon === name) return;
     holder.innerHTML = this.icon(name);
     holder.dataset.icon = name;
-    this.refs.send.title =
-      name === "square" && this.isStreaming
-        ? "Stop"
-        : name === "arrowUp"
-          ? "Send"
-          : "Ready";
+    this.refs.send.title = name === "square" && this.isStreaming ? "Stop" : name === "arrowUp" ? "Send" : "Ready";
     this.refs.send.setAttribute("aria-label", this.refs.send.title);
   }
 
   updateComposerState() {
     const hasText = !!this.refs.input?.value.trim().length;
-    if (this.isStreaming) {
-      this.swapSendIcon("square");
-      return;
-    }
-    this.swapSendIcon(hasText ? "arrowUp" : "square");
+    this.swapSendIcon(this.isStreaming ? "square" : hasText ? "arrowUp" : "square");
   }
 
   scrollToBottom() {
     if (!this.autoScroll || !this.refs.messages) return;
     requestAnimationFrame(() => {
-      if (this.refs.messages)
-        this.refs.messages.scrollTop = this.refs.messages.scrollHeight;
+      if (this.refs.messages) this.refs.messages.scrollTop = this.refs.messages.scrollHeight;
     });
   }
 
   formatThread() {
-    return this.messages
-      .map(
-        (m) =>
-          `${m.role === "user" ? "You" : this.config.branding.name}: ${m.content}`,
-      )
-      .join("\n\n---\n\n");
+    return this.messages.map((m) => `${m.role === "user" ? "You" : this.config.branding.name}: ${m.content}`).join("\n\n---\n\n");
   }
 
   copyThread() {
-    if (navigator.clipboard?.writeText)
-      navigator.clipboard.writeText(this.formatThread()).catch(console.error);
+    navigator.clipboard?.writeText(this.formatThread())?.catch(console.error);
   }
 
   copyLastAssistant() {
-    const last = [...this.messages]
-      .reverse()
-      .find((m) => m.role === "assistant");
-    if (last && navigator.clipboard?.writeText)
-      navigator.clipboard.writeText(last.content).catch(console.error);
+    const last = [...this.messages].reverse().find((m) => m.role === "assistant");
+    if (last) navigator.clipboard?.writeText(last.content)?.catch(console.error);
   }
 
   feedback(type) {
@@ -629,10 +527,8 @@ class UltralyticsChat {
   }
 
   retryLast() {
-    const lastUser = [...this.messages]
-      .reverse()
-      .find((m) => m.role === "user");
-    if (lastUser) this.sendMessage(lastUser.content);
+    const lastUser = [...this.messages].reverse().find((m) => m.role === "user");
+    if (lastUser) void this.sendMessage(lastUser.content);
   }
 
   downloadThread() {
@@ -651,8 +547,8 @@ class UltralyticsChat {
     this.sessionId = null;
     try {
       localStorage.removeItem("ult-chat-session");
-    } catch (e) {
-      console.warn("Failed to clear session:", e);
+    } catch {
+      console.warn("Failed to clear session");
     }
     if (this.refs.messages) this.refs.messages.innerHTML = "";
     this.showWelcome(true);
@@ -660,7 +556,7 @@ class UltralyticsChat {
   }
 
   stopStreaming() {
-    if (this.abortController) this.abortController.abort();
+    this.abortController?.abort();
     this.isStreaming = false;
     this.abortController = null;
     this.updateComposerState();
@@ -668,16 +564,11 @@ class UltralyticsChat {
   }
 
   createThinking(label = "Thinking") {
-    const thinking = this.el(
-      "div",
-      "ult-thinking",
-      `<span class="ult-thinking-word">${label}</span><span class="ult-typing"><span></span><span></span><span></span></span><span class="ult-thinking-time">(0.0s)</span>`,
-    );
+    const thinking = this.el("div", "ult-thinking", `<span class="ult-thinking-word">${label}</span><span class="ult-typing"><span></span><span></span><span></span></span><span class="ult-thinking-time">(0.0s)</span>`);
     const timeEl = this.qs(".ult-thinking-time", thinking);
     const t0 = performance.now();
     const tick = setInterval(() => {
-      if (timeEl)
-        timeEl.textContent = `(${((performance.now() - t0) / 1000).toFixed(1)}s)`;
+      if (timeEl) timeEl.textContent = `(${((performance.now() - t0) / 1000).toFixed(1)}s)`;
     }, 100);
     return { el: thinking, clear: () => clearInterval(tick) };
   }
@@ -689,36 +580,27 @@ class UltralyticsChat {
     this.refs.messages.appendChild(thinking);
     try {
       const url = this.apiUrl.replace(/\/chat$/, "/search");
-      const res = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query }),
-      });
+      const res = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ query }) });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       clear();
       thinking.remove();
       if (!data.results?.length) {
-        this.refs.messages.innerHTML =
-          '<div class="ult-message">No results found. Try different keywords.</div>';
+        this.refs.messages.innerHTML = '<div class="ult-message">No results found. Try different keywords.</div>';
         return;
       }
       this.refs.messages.innerHTML = data.results
         .map((r) => {
-          const snippet =
-            r.text?.length > 150 ? r.text.slice(0, 150) + "..." : r.text || "";
-          let host = "";
-          try {
-            host = new URL(r.url).hostname;
-          } catch {
-            host = "";
-          }
-          const faviconUrl = host
-            ? `https://www.google.com/s2/favicons?sz=32&domain=${encodeURIComponent(host)}`
-            : "";
-          const favicon = faviconUrl
-            ? `<img class="ult-search-result-favicon" src="${faviconUrl}" alt="" loading="lazy" />`
-            : "";
+          const snippet = r.text?.length > 150 ? r.text.slice(0, 150) + "..." : r.text || "";
+          const host = (() => {
+            try {
+              return new URL(r.url).hostname;
+            } catch {
+              return "";
+            }
+          })();
+          const faviconUrl = host ? `https://www.google.com/s2/favicons?sz=32&domain=${encodeURIComponent(host)}` : "";
+          const favicon = faviconUrl ? `<img class="ult-search-result-favicon" src="${faviconUrl}" alt="" loading="lazy" />` : "";
           const metaHost = host ? `<span>${this.escapeHtml(host)}</span>` : "";
           return `
           <div class="ult-search-result">
@@ -731,22 +613,19 @@ class UltralyticsChat {
     } catch (e) {
       clear();
       thinking.remove();
-      if (this.refs.messages)
-        this.refs.messages.innerHTML = `<div class="ult-message">Search error: ${this.escapeHtml(e.message)}</div>`;
+      if (this.refs.messages) this.refs.messages.innerHTML = `<div class="ult-message">Search error: ${this.escapeHtml(e.message)}</div>`;
       console.error("Search error:", e);
     }
   }
 
   async sendMessage(text) {
-    if (!text || this.isStreaming || !this.refs.input || !this.refs.messages)
-      return;
+    if (!text || this.isStreaming || !this.refs.input || !this.refs.messages) return;
     this.showWelcome(false);
     this.autoScroll = true;
     if (this.mode === "search") {
       this.refs.input.value = text;
       this.refs.input.style.height = "auto";
-      this.refs.input.style.height =
-        Math.min(this.refs.input.scrollHeight, 140) + "px";
+      this.refs.input.style.height = Math.min(this.refs.input.scrollHeight, 140) + "px";
       await this.performSearch(text);
       this.refs.input.focus();
       return;
@@ -766,11 +645,7 @@ class UltralyticsChat {
       const res = await fetch(this.apiUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          messages: [{ role: "user", content: text }],
-          session_id: this.sessionId,
-          context: this.getPageContext(),
-        }),
+        body: JSON.stringify({ messages: [{ role: "user", content: text }], session_id: this.sessionId, context: this.getPageContext() }),
         signal: this.abortController.signal,
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -788,14 +663,13 @@ class UltralyticsChat {
       const decoder = new TextDecoder();
       let content = "";
       let renderTimer = null;
-      const renderDelay = 30;
       const scheduleRender = () => {
         if (renderTimer) return;
         renderTimer = setTimeout(() => {
           div.innerHTML = this.renderMarkdown(content);
           this.scrollToBottom();
           renderTimer = null;
-        }, renderDelay);
+        }, 30);
       };
       while (true) {
         const { done, value } = await reader.read();
@@ -814,8 +688,7 @@ class UltralyticsChat {
               throw new Error(parsed.error);
             }
           } catch (e) {
-            if (e.message !== "Unexpected end of JSON input")
-              console.error("Parse error:", e);
+            if (e.message !== "Unexpected end of JSON input") console.error("Parse error:", e);
           }
         }
       }
@@ -829,13 +702,7 @@ class UltralyticsChat {
     } catch (e) {
       thinking.remove();
       clear();
-      const msg = this.el(
-        "div",
-        "ult-message assistant",
-        e.name === "AbortError"
-          ? "Generation stopped."
-          : "Sorry, I encountered an error. Please try again.",
-      );
+      const msg = this.el("div", "ult-message assistant", e.name === "AbortError" ? "Generation stopped." : "Sorry, I encountered an error. Please try again.");
       group.appendChild(msg);
       console.error("Chat error:", e);
     } finally {
@@ -866,11 +733,7 @@ class UltralyticsChat {
   addMessageToUI(role, content) {
     const group = this.createMessageGroup(role);
     if (!group) return null;
-    const div = this.el(
-      "div",
-      `ult-message ${role === "assistant" ? "assistant" : ""}`,
-      this.renderMarkdown(content),
-    );
+    const div = this.el("div", `ult-message ${role === "assistant" ? "assistant" : ""}`, this.renderMarkdown(content));
     group.appendChild(div);
     return div;
   }
@@ -882,13 +745,7 @@ class UltralyticsChat {
   }
 
   renderMarkdown(src) {
-    const esc = (s) =>
-      s
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
+    const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
     const lines = (src || "").replace(/\r\n?/g, "\n").split("\n");
     let html = "",
       inCode = false,
@@ -897,38 +754,16 @@ class UltralyticsChat {
       listOpen = false,
       inQuote = false,
       paraOpen = false;
-    const closePara = () => {
-      if (paraOpen) {
-        html += "</p>";
-        paraOpen = false;
-      }
-    };
-    const openPara = () => {
-      if (!paraOpen) {
-        html += "<p>";
-        paraOpen = true;
-      }
-    };
-    const closeList = () => {
-      if (listOpen) {
-        html += listType === "ol" ? "</ol>" : "</ul>";
-        listOpen = false;
-        listType = null;
-      }
-    };
-    const closeQuote = () => {
-      if (inQuote) {
-        html += "</blockquote>";
-        inQuote = false;
-      }
-    };
+    const closePara = () => paraOpen && ((html += "</p>"), (paraOpen = false));
+    const openPara = () => !paraOpen && ((html += "<p>"), (paraOpen = true));
+    const closeList = () => listOpen && ((html += listType === "ol" ? "</ol>" : "</ul>"), (listOpen = false), (listType = null));
+    const closeQuote = () => inQuote && ((html += "</blockquote>"), (inQuote = false));
     for (let raw of lines) {
       const fence = raw.match(/^\s*```(\w+)?\s*$/);
       if (fence) {
         if (inCode) {
           html += `</code></pre>`;
           inCode = false;
-          codeLang = "";
         } else {
           closePara();
           closeList();
@@ -1020,21 +855,13 @@ class UltralyticsChat {
       codeBlocks.push(code);
       return `@@ULTCODE${codeBlocks.length - 1}@@`;
     });
-    text = text.replace(
-      /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,
-      '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>',
-    );
-    text = text.replace(
-      /(?<!href=")(?<!src=")(?<!>)\b(https?:\/\/[^\s<>'")\]]+?)(?=[.,;:!?]*(?:\s|<|'|"|\)|\]|$))/g,
-      '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>',
-    );
+    text = text.replace(/\[([^\]]+)]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+    text = text.replace(/(?<!href=")(?<!src=")(?<!>)\b(https?:\/\/[^\s<>'")\]]+?)(?=[.,;:!?]*(?:\s|<|'|"|\)|]|$))/g, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>');
     text = text.replace(/\*\*([^"]+?)\*\*/g, "<strong>$1</strong>");
     text = text.replace(/__([^"]+?)__/g, "<strong>$1</strong>");
     text = text.replace(/(?<!\*)\*(?!\*)([^"]+?)\*(?!\*)/g, "<em>$1</em>");
     text = text.replace(/(?<!_)_(?!_)([^"]+?)_(?!_)/g, "<em>$1</em>");
-    text = text.replace(/@@ULTCODE(\d+)@@/g, (match, idx) => {
-      return `<code>${codeBlocks[idx]}</code>`;
-    });
+    text = text.replace(/@@ULTCODE(\d+)@@/g, (match, idx) => `<code>${codeBlocks[idx]}</code>`);
     return text.replace(/ {2}\n/g, "<br>");
   }
 }
