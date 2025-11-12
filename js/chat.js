@@ -53,7 +53,7 @@ class UltralyticsChat {
 
   qs = (s, r=document) => r.querySelector(s);
   qsa = (s, r=document) => [...r.querySelectorAll(s)];
-  on(el, ev, fn, opts) { if (!el) return; el.addEventListener(ev, fn, opts); (this.listeners.get(el) ?? this.listeners.set(el, []).get(el)).push?.({ev,fn,opts}); }
+  on(el, ev, fn, opts) { if (!el) return; el.addEventListener(ev, fn, opts); if (!this.listeners.has(el)) this.listeners.set(el, []); this.listeners.get(el).push({ev,fn,opts}); }
   el(tag, cls="", html=""){ const e=document.createElement(tag); if(cls) e.className=cls; if(html) e.innerHTML=html; return e; }
 
   getPageContext(){ const meta=n=>document.querySelector(`meta[name="${n}"]`)?.content||""; return {url:location.href,title:document.title,description:meta("description"),path:location.pathname}; }
@@ -178,7 +178,6 @@ class UltralyticsChat {
 
       @media (max-width:768px){
         .ult-backdrop{pointer-events:none}
-        /* Full-bleed, no 100vw; lock to viewport using inset */
         .ult-chat-modal{position:fixed;inset:0;width:100%;height:calc(var(--ult-vh) * 100);max-width:100%;max-height:calc(var(--ult-vh) * 100);border-radius:0;transform:none!important;overflow:hidden}
         .ult-chat-modal.open{transform:none!important}
         .ult-chat-header{padding:10px 12px;min-height:52px}
@@ -195,7 +194,6 @@ class UltralyticsChat {
         .ult-example{padding:8px 10px;font-size:11px}
         .ult-chat-messages{padding:0 12px 10px;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;overflow-x:hidden}
         .ult-chat-input-container{padding:8px 10px calc(10px + env(safe-area-inset-bottom))}
-        /* Prevent iOS auto-zoom */
         .ult-chat-input{padding:10px 12px;font-size:16px;max-height:120px}
         .ult-chat-send{width:36px;height:36px}
         .ult-chat-send svg{width:16px;height:16px}
@@ -305,7 +303,7 @@ class UltralyticsChat {
     this.on(window,"touchmove",this.touchBlocker,{passive:false});
     this.on(window.visualViewport||window,"resize",this.visualViewportHandler);
     this.updateViewportVars();
-    this.forceViewportMeta(true); // optional zoom reset
+    this.forceViewportMeta(true);
   }
 
   unlockPageScroll(){
@@ -320,7 +318,7 @@ class UltralyticsChat {
 
   updateViewportVars(){
     const vv=window.visualViewport;
-    const vhUnit=(vv?vv.height:window.innerHeight)*0.01; // 1% of viewport height
+    const vhUnit=(vv?vv.height:window.innerHeight)*0.01;
     document.documentElement.style.setProperty("--ult-vh", `${vhUnit}px`);
     const kb=vv?Math.max(0, window.innerHeight - vv.height):0;
     document.documentElement.style.setProperty("--ult-kb", `${kb}px`);
@@ -332,9 +330,8 @@ class UltralyticsChat {
     if(!tag){ tag=document.createElement("meta"); tag.name="viewport"; document.head.appendChild(tag); }
     if(lock){
       if(this.originalViewportMetaContent===null) this.originalViewportMetaContent=tag.getAttribute("content")||"";
-      // Reset zoom and prevent pinch while modal is open
       tag.setAttribute("content","width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover, user-scalable=no");
-      window.scrollTo(0,0); // nudge Safari to reflow at 100%
+      window.scrollTo(0,0);
     }else{
       if(this.originalViewportMetaContent!==null) tag.setAttribute("content", this.originalViewportMetaContent || "width=device-width, initial-scale=1, viewport-fit=cover");
       this.originalViewportMetaContent=null;
@@ -397,7 +394,16 @@ class UltralyticsChat {
   clearSession(){ this.messages=[]; this.sessionId=null; try{localStorage.removeItem("ult-chat-session");}catch(e){console.warn("Failed to clear session:",e);} if(this.refs.messages) this.refs.messages.innerHTML=""; this.showWelcome(true); this.updateComposerState(); }
   stopStreaming(){ if(this.abortController) this.abortController.abort(); this.isStreaming=false; this.abortController=null; this.updateComposerState(); this.refs.input?.focus(); }
 
-  createThinking(label="Thinking"){ const thinking=this.el("div","ult-thinking",`<span class="ult-thinking-word">${label}</span><span class="ult-typing"><span></span><span></span><span></span></span><span class="ult-thinking-time">(0.0s)</span>`); const timeEl=this.qs(".ult-thinking-time",thinking); const t0=performance.now(); const tick=setInterval(()=>{ if(timeEl) timeEl.textContent=\`(\${((performance.now()-t0)/1000).toFixed(1)}s)\`; },100); return { el:thinking, clear:()=>clearInterval(tick) }; }
+  createThinking(label="Thinking"){
+    const thinking=this.el("div","ult-thinking",`<span class="ult-thinking-word">${label}</span><span class="ult-typing"><span></span><span></span><span></span></span><span class="ult-thinking-time">(0.0s)</span>`);
+    const timeEl=this.qs(".ult-thinking-time",thinking);
+    const t0=performance.now();
+    const tick=setInterval(()=>{ if(timeEl){
+      const secs=((performance.now()-t0)/1000).toFixed(1);
+      timeEl.textContent='(' + secs + 's)';
+    }},100);
+    return { el:thinking, clear:()=>clearInterval(tick) };
+  }
 
   async performSearch(query){
     if(!this.refs.messages) return;
