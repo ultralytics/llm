@@ -307,7 +307,7 @@ class UltralyticsChat {
         .ult-welcome p{font-size:13px;margin:0;line-height:1.35}
         .ult-examples{padding:6px 14px;gap:6px;flex-wrap:wrap}
         .ult-example{padding:8px 11px;font-size:12px}
-        .ult-chat-input-container{padding:8px 14px 10px;flex-shrink:0;gap:8px;border-top:1px solid #eceff5;background:#fff}
+        .ult-chat-input-container{padding:8px 14px 10px;flex:0 0 auto;gap:8px;border-top:1px solid #eceff5;background:#fff}
         .ult-chat-modal.welcome-mode .ult-chat-input-container{margin-top:auto}
         html[data-theme=dark] .ult-chat-input-container{border-top-color:#1c1c22;background:#0a0a0b}
         .ult-chat-input{padding:9px 11px;font-size:16px;max-height:100px;border-radius:10px}
