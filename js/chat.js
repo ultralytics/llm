@@ -8,7 +8,7 @@ class UltralyticsChat {
         "https://chat-885297101091.europe-west1.run.app/api/chat",
       maxMessageLength: config.maxMessageLength || 10000,
       branding: {
-        name: config.branding?.name || "AI",
+        name: config.branding?.name || "Ultralytics AI",
         tagline:
           config.branding?.tagline ||
           "Ask anything about Ultralytics, YOLO, and more",
