@@ -27,10 +27,10 @@ class UltralyticsChat {
         text: config.theme?.text || "#0b0b0f",
       },
       welcome: {
-        title: config.welcome?.title || "Hi 👋",
+        title: config.welcome?.title || "Hello 👋",
         message:
           config.welcome?.message ||
-          "I'm an AI assistant trained on documentation, help articles, and other content.<br>Ask me anything about Ultralytics.",
+          "I'm an AI assistant trained on Ultralytics documentation - ask me anything!",
         examples: config.welcome?.examples || [
           "What's new in YOLO11?",
           "How do I get started with YOLO?",
