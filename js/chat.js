@@ -5,7 +5,7 @@ class UltralyticsChat {
     this.config = {
       apiUrl:
         config.apiUrl ||
-        "https://chat-885297101091.us-central1.run.app",
+        "https://chat-885297101091.us-central1.run.app/api/chat",
       maxMessageLength: config.maxMessageLength || 10000,
       branding: {
         name: config.branding?.name || "Ultralytics AI",
