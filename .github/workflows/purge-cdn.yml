@@ -13,7 +13,6 @@ on:
   workflow_run:
     workflows: ["Tag and Release"]
     types: [completed]
-    branches: [main]
 
 permissions:
   contents: read
