@@ -855,8 +855,8 @@ class UltralyticsChat {
       codeBlocks.push(code);
       return `@@ULTCODE${codeBlocks.length - 1}@@`;
     });
-    text = text.replace(/\[([^\]]+)]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
-    text = text.replace(/(?<!href=")(?<!src=")(?<!>)\b(https?:\/\/[^\s<>'")\]]+?)(?=[.,;:!?]*(?:\s|<|'|"|\)|]|$))/g, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>');
+    text = text.replace(/\[([^\]]+)]\((https?:\/\/[^\s)]+)\)/g, (_, label, url) => `<a href="${url}" target="_blank" rel="noopener noreferrer">${label}</a>`);
+    text = text.replace(/(?<!href=")(?<!src=")(?<!>)\b(https?:\/\/[^\s<>'")\]]+?)(?=[.,;:!?]*(?:\s|<|'|"|\)|]|$))/g, (url) => `<a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>`);
     text = text.replace(/\*\*([^"]+?)\*\*/g, "<strong>$1</strong>");
     text = text.replace(/__([^"]+?)__/g, "<strong>$1</strong>");
     text = text.replace(/(?<!\*)\*(?!\*)([^"]+?)\*(?!\*)/g, "<em>$1</em>");
