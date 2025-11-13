@@ -1,7 +1,5 @@
 // Ultralytics 🚀 AGPL-3.0 License - https://ultralytics.com/license
 
-// UltralyticsChat v0.0.4
-
 class UltralyticsChat {
   constructor(config = {}) {
     this.config = {
