@@ -32,7 +32,7 @@ class UltralyticsChat {
         message:
           config.welcome?.message ||
           "I'm an AI assistant trained on Ultralytics documentation - ask me anything!",
-        chatExamples: config.welcome?.chatExamples || [
+        chatExamples: config.welcome?.chatExamples ?? config.welcome?.examples ?? [
           "What's new in YOLO11?",
           "How do I get started with YOLO?",
           "Tell me about Enterprise Licensing",
