@@ -409,7 +409,7 @@ class UltralyticsChat {
     this.refs.input = this.qs(".ult-chat-input", this.refs.modal);
     this.refs.send = this.qs(".ult-chat-send", this.refs.modal);
 
-    this.setExamples(chatExamples);
+    this.setExamples(chatExamples || []);
   }
 
   setExamples(list) {
@@ -515,7 +515,7 @@ class UltralyticsChat {
       if (this.refs.messages) this.refs.messages.innerHTML = "";
       if (this.refs.welcome)
         this.refs.welcome.innerHTML = `<p>Enter keywords to find relevant documentation, guides, and resources</p>`;
-      this.setExamples(this.config.welcome.searchExamples);
+      this.setExamples(this.config.welcome.searchExamples || []);
       this.showWelcome(true);
     } else {
       if (this.refs.input)
@@ -525,7 +525,7 @@ class UltralyticsChat {
       const { title, message, chatExamples } = this.config.welcome;
       if (this.refs.welcome)
         this.refs.welcome.innerHTML = `<h1>${this.escapeHtml(title)}</h1><p>${message}</p>`;
-      this.setExamples(chatExamples);
+      this.setExamples(chatExamples || []);
       this.renderChatHistory();
     }
   }
