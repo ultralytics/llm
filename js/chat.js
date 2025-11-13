@@ -1,4 +1,5 @@
 // Ultralytics 🚀 AGPL-3.0 License - https://ultralytics.com/license
+// UltralyticsChat v0.0.4
 
 class UltralyticsChat {
   constructor(config = {}) {
@@ -31,10 +32,16 @@ class UltralyticsChat {
         message:
           config.welcome?.message ||
           "I'm an AI assistant trained on Ultralytics documentation - ask me anything!",
-        examples: config.welcome?.examples || [
+        chatExamples: config.welcome?.chatExamples || [
           "What's new in YOLO11?",
           "How do I get started with YOLO?",
           "Tell me about Enterprise Licensing",
+        ],
+        searchExamples: config.welcome?.searchExamples || [
+          "YOLO quickstart",
+          "model training parameters",
+          "export formats",
+          "dataset configuration",
         ],
       },
       ui: {
@@ -341,7 +348,7 @@ class UltralyticsChat {
 
   createUI() {
     const { logomark, pillText, logo, name, tagline } = this.config.branding;
-    const { title, message, examples } = this.config.welcome;
+    const { title, message, chatExamples } = this.config.welcome;
     const { placeholder, copyText, downloadText, clearText } = this.config.ui;
 
     this.refs.backdrop = this.el("div", "ult-backdrop");
@@ -402,7 +409,7 @@ class UltralyticsChat {
     this.refs.input = this.qs(".ult-chat-input", this.refs.modal);
     this.refs.send = this.qs(".ult-chat-send", this.refs.modal);
 
-    this.setExamples(examples);
+    this.setExamples(chatExamples);
   }
 
   setExamples(list) {
@@ -508,22 +515,17 @@ class UltralyticsChat {
       if (this.refs.messages) this.refs.messages.innerHTML = "";
       if (this.refs.welcome)
         this.refs.welcome.innerHTML = `<p>Enter keywords to find relevant documentation, guides, and resources</p>`;
-      this.setExamples([
-        "YOLO quickstart",
-        "model training parameters",
-        "export formats",
-        "dataset configuration",
-      ]);
+      this.setExamples(this.config.welcome.searchExamples);
       this.showWelcome(true);
     } else {
       if (this.refs.input)
         this.refs.input.placeholder = this.config.ui.placeholder;
       if (tagline) tagline.textContent = this.config.branding.tagline;
       if (actions) actions.style.display = "";
-      const { title, message, examples } = this.config.welcome;
+      const { title, message, chatExamples } = this.config.welcome;
       if (this.refs.welcome)
         this.refs.welcome.innerHTML = `<h1>${this.escapeHtml(title)}</h1><p>${message}</p>`;
-      this.setExamples(examples);
+      this.setExamples(chatExamples);
       this.renderChatHistory();
     }
   }
