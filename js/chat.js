@@ -114,6 +114,7 @@ class UltralyticsChat {
 
   init() {
     this.ensureViewport();
+    this.loadHighlightJS();
     this.createStyles();
     this.createUI();
     this.attachEvents();
@@ -121,6 +122,29 @@ class UltralyticsChat {
     this.showWelcome(true);
     this.updateComposerState();
     this.watchForRemoval();
+  }
+
+  loadHighlightJS() {
+    if (window.hljs || document.getElementById("hljs-theme")) return;
+    const link = this.el("link");
+    link.rel = "stylesheet";
+    link.id = "hljs-theme";
+    document.head.appendChild(link);
+    const script = this.el("script");
+    script.src = "https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js";
+    script.onload = () => window.hljs?.configure({ ignoreUnescapedHTML: true });
+    document.head.appendChild(script);
+  }
+
+  highlight(el) {
+    if (!window.hljs) return;
+    el?.querySelectorAll("pre code").forEach((b) => {
+      if (!b.dataset.highlighted) {
+        const lang = [...b.classList].find((c) => c.startsWith("lang-"))?.replace("lang-", "");
+        if (lang) b.classList.add(`language-${lang}`);
+        window.hljs.highlightElement(b);
+      }
+    });
   }
 
   ensureViewport() {
@@ -171,6 +195,11 @@ class UltralyticsChat {
     const mql = window.matchMedia("(prefers-color-scheme: dark)");
     const applyTheme = () => {
       if (!root.hasAttribute("data-theme")) root.setAttribute("data-theme", mql.matches ? "dark" : "light");
+      const link = document.getElementById("hljs-theme");
+      if (link) {
+        const dark = root.getAttribute("data-theme") === "dark";
+        link.href = `https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github${dark ? "-dark" : ""}.min.css`;
+      }
     };
     applyTheme();
     mql.addEventListener("change", applyTheme);
@@ -242,9 +271,10 @@ class UltralyticsChat {
       .ult-code-block:hover .ult-code-copy{opacity:1}
       .ult-code-copy:hover{background:rgba(255,255,255,.2)}
       .ult-code-copy.copied{background:#10b981;border-color:#10b981;color:#fff}
-      .ult-message pre{background:#0f172a;color:#e5e7eb;padding:10px 12px;border-radius:10px;overflow:auto;border:0}
+      .ult-message pre{padding:10px 12px;border-radius:10px;overflow:auto;border:1px solid #e5e7eb;background:#f6f8fa}
       .ult-message code{background:#f4f4f5;padding:2px 6px;border-radius:6px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;border:0}
-      .ult-message pre code{background:transparent;padding:0;border:0;display:block;color:inherit;font-size:13px}
+      .ult-message pre code{background:transparent;padding:0;border:0;display:block;font-size:13px}
+      html[data-theme=dark] .ult-message pre{background:#0d1117;border-color:#30363d}
       html[data-theme=dark] .ult-message code{background:#1e1e22}
       html[data-theme=dark] .ult-message pre code{background:transparent}
 
@@ -742,6 +772,7 @@ class UltralyticsChat {
         if (renderTimer) return;
         renderTimer = setTimeout(() => {
           div.innerHTML = this.renderMarkdown(content, true);
+          this.highlight(div);
           this.scrollToBottom();
           renderTimer = null;
         }, 30);
@@ -767,6 +798,7 @@ class UltralyticsChat {
       }
       if (renderTimer) clearTimeout(renderTimer);
       div.innerHTML = this.renderMarkdown(content);
+      this.highlight(div);
       this.scrollToBottom();
       this.messages.push({ role: "assistant", content });
     } catch (e) {
@@ -809,6 +841,7 @@ class UltralyticsChat {
     if (!group) return null;
     const div = this.el("div", `ult-message ${role === "assistant" ? "assistant" : ""}`, this.renderMarkdown(content));
     group.appendChild(div);
+    if (role === "assistant") this.highlight(div);
     return div;
   }
 
@@ -862,7 +895,9 @@ class UltralyticsChat {
       const fence = raw.match(/^\s*```(\w+)?\s*$/);
       if (fence) {
         if (inCode) {
-          html += skipCopyButtons ? `</code></pre></div>` : `</code></pre><button class="ult-code-copy">${this.icon("copy")}Copy</button></div>`;
+          html += skipCopyButtons
+            ? `</code></pre></div>`
+            : `</code></pre><button class="ult-code-copy">${this.icon("copy")}Copy</button></div>`;
           inCode = false;
         } else {
           closePara();
