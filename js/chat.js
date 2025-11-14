@@ -584,8 +584,16 @@ class UltralyticsChat {
   }
 
   retryLast() {
-    const lastUser = [...this.messages].reverse().find((m) => m.role === "user");
-    if (lastUser) void this.sendMessage(lastUser.content);
+    const lastAssistantIdx = [...this.messages].reverse().findIndex((m) => m.role === "assistant");
+    if (lastAssistantIdx === -1) return;
+    const actualIdx = this.messages.length - 1 - lastAssistantIdx;
+    const lastUserMsg = this.messages[actualIdx - 1];
+    if (!lastUserMsg || lastUserMsg.role !== "user") return;
+    this.messages.splice(actualIdx, 1);
+    const groups = this.qsa(".ult-message-group", this.refs.messages);
+    const lastAssistantGroup = [...groups].reverse().find((g) => g.querySelector(".ult-message.assistant"));
+    if (lastAssistantGroup) lastAssistantGroup.remove();
+    void this.sendMessage(lastUserMsg.content, true);
   }
 
   downloadThread() {
@@ -681,7 +689,7 @@ class UltralyticsChat {
     }
   }
 
-  async sendMessage(text) {
+  async sendMessage(text, isRetry = false) {
     if (!text || this.isStreaming || !this.refs.input || !this.refs.messages) return;
     this.showWelcome(false);
     this.autoScroll = true;
@@ -694,7 +702,7 @@ class UltralyticsChat {
       return;
     }
     this.messages.push({ role: "user", content: text });
-    this.addMessageToUI("user", text);
+    if (!isRetry) this.addMessageToUI("user", text);
     this.refs.input.value = "";
     this.refs.input.style.height = "auto";
     this.isStreaming = true;
