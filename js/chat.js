@@ -162,6 +162,7 @@ class UltralyticsChat {
     this.refs.modal?.remove();
     this.refs.backdrop?.remove();
     this.refs.pill?.remove();
+    this.refs.tooltip?.remove();
     this.refs = {};
   }
 
@@ -208,7 +209,7 @@ class UltralyticsChat {
       .ult-chat-title img{max-height:32px;max-width:180px}
       .ult-subtle{font-size:12px;color:#6b7280} html[data-theme=dark] .ult-subtle{color:#a1a1aa}
       .ult-header-actions{display:flex;gap:6px;align-items:center}
-      .ult-icon-btn{background:transparent;border:0;width:44px;height:44px;border-radius:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#6b7280;transition:.15s;touch-action:manipulation}
+      .ult-icon-btn{background:transparent;border:0;width:44px;height:44px;border-radius:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#6b7280;transition:.15s;touch-action:manipulation;position:relative}
       .ult-icon-btn:hover{transform:translateY(-1px);color:var(--ult-text);background:#f7f7f9}
       html[data-theme=dark] .ult-icon-btn{color:#a1a1aa}
       html[data-theme=dark] .ult-icon-btn:hover{color:#fafafa;background:#17181d}
@@ -232,6 +233,11 @@ class UltralyticsChat {
       .ult-message strong{font-weight:700;color:var(--ult-text)}
       html[data-theme=dark] .ult-message strong{color:#fafafa}
       .ult-code-block{position:relative;margin:6px 0}
+      .ult-global-tooltip{position:fixed;background:#1f2937;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:500;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .1s;z-index:10003;transform:translate(-50%,-100%)}
+      .ult-global-tooltip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:4px solid transparent;border-top-color:#1f2937}
+      .ult-global-tooltip.show{opacity:1}
+      html[data-theme=dark] .ult-global-tooltip{background:#374151}
+      html[data-theme=dark] .ult-global-tooltip::after{border-top-color:#374151}
       .ult-code-copy{position:absolute;top:8px;right:8px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);color:#e5e7eb;padding:5px 10px;border-radius:6px;cursor:pointer;font-size:12px;opacity:0;transition:.15s;font-weight:500;display:flex;align-items:center;gap:5px}
       .ult-code-block:hover .ult-code-copy{opacity:1}
       .ult-code-copy:hover{background:rgba(255,255,255,.2)}
@@ -262,7 +268,7 @@ class UltralyticsChat {
 
       .ult-chat-input-container{padding:12px 12px 16px;display:flex;gap:8px;align-items:flex-end}
       .ult-actions{display:flex;gap:6px;align-items:center}
-      .ult-action-btn,.ult-chat-send{background:#f1f2f6;border:0;border-radius:12px;width:44px;height:44px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.12s;flex-shrink:0;touch-action:manipulation;color:#6b7280}
+      .ult-action-btn,.ult-chat-send{background:#f1f2f6;border:0;border-radius:12px;width:44px;height:44px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.12s;flex-shrink:0;touch-action:manipulation;color:#6b7280;position:relative}
       .ult-action-btn:hover,.ult-chat-send:hover{transform:translateY(-1px);filter:brightness(.98);color:var(--ult-text)}
       html[data-theme=dark] .ult-action-btn,html[data-theme=dark] .ult-chat-send{background:#17181d;color:#a1a1aa}
       html[data-theme=dark] .ult-action-btn:hover,html[data-theme=dark] .ult-chat-send:hover{color:#fafafa}
@@ -362,11 +368,14 @@ class UltralyticsChat {
     this.refs.modal = this.el(
       "div",
       "ult-chat-modal",
-      `<div class="ult-chat-header"><div class="ult-chat-title"><img src="${this.esc(logo)}" alt="${this.esc(name)}" /><div class="ult-subtle">${this.esc(tagline)}</div></div><div class="ult-header-actions"><button class="ult-icon-btn ult-chat-copy" title="${this.esc(copyText)}" aria-label="${this.esc(copyText)}">${this.icon("copy")}</button><button class="ult-icon-btn ult-chat-download" title="${this.esc(downloadText)}" aria-label="${this.esc(downloadText)}">${this.icon("download")}</button><button class="ult-icon-btn ult-chat-clear" title="${this.esc(clearText)}" aria-label="${this.esc(clearText)}">${this.icon("refresh")}</button><button class="ult-icon-btn ult-chat-close" title="Close" aria-label="Close">${this.icon("close")}</button></div></div><div id="ult-welcome" class="ult-welcome" style="display:none"><h1>${this.esc(title)}</h1><p>${message}</p></div><div id="ult-examples" class="ult-examples" style="display:none"></div><div class="ult-chat-messages" id="ult-messages" aria-live="polite"></div><div class="ult-chat-input-container"><div class="ult-actions"><button class="ult-action-btn ult-act-copy" title="Copy last response" aria-label="Copy last response">${this.icon("copy")}</button><button class="ult-action-btn ult-act-like" title="Thumbs up" aria-label="Thumbs up">${this.icon("like")}</button><button class="ult-action-btn ult-act-dislike" title="Thumbs down" aria-label="Thumbs down">${this.icon("dislike")}</button><button class="ult-action-btn ult-act-share" title="Share" aria-label="Share">${this.icon("share")}</button><button class="ult-action-btn ult-act-retry" title="Try again" aria-label="Try again">${this.icon("refresh")}</button></div><textarea name="message" class="ult-chat-input" placeholder="${this.esc(placeholder)}" rows="1" maxlength="${this.config.maxMessageLength}" autocomplete="off"></textarea><button class="ult-chat-send" title="Ready" aria-label="Ready"><span class="ult-icon-swap" data-icon="square">${this.icon("square")}</span></button></div>`,
+      `<div class="ult-chat-header"><div class="ult-chat-title"><img src="${this.esc(logo)}" alt="${this.esc(name)}" /><div class="ult-subtle">${this.esc(tagline)}</div></div><div class="ult-header-actions"><button class="ult-icon-btn ult-chat-copy" aria-label="${this.esc(copyText)}" data-tooltip="${this.esc(copyText)}">${this.icon("copy")}</button><button class="ult-icon-btn ult-chat-download" aria-label="${this.esc(downloadText)}" data-tooltip="${this.esc(downloadText)}">${this.icon("download")}</button><button class="ult-icon-btn ult-chat-clear" aria-label="${this.esc(clearText)}" data-tooltip="${this.esc(clearText)}">${this.icon("refresh")}</button><button class="ult-icon-btn ult-chat-close" aria-label="Close" data-tooltip="Close">${this.icon("close")}</button></div></div><div id="ult-welcome" class="ult-welcome" style="display:none"><h1>${this.esc(title)}</h1><p>${message}</p></div><div id="ult-examples" class="ult-examples" style="display:none"></div><div class="ult-chat-messages" id="ult-messages" aria-live="polite"></div><div class="ult-chat-input-container"><div class="ult-actions"><button class="ult-action-btn ult-act-copy" aria-label="Copy last response" data-tooltip="Copy last response">${this.icon("copy")}</button><button class="ult-action-btn ult-act-like" aria-label="Thumbs up" data-tooltip="Thumbs up">${this.icon("like")}</button><button class="ult-action-btn ult-act-dislike" aria-label="Thumbs down" data-tooltip="Thumbs down">${this.icon("dislike")}</button><button class="ult-action-btn ult-act-share" aria-label="Share" data-tooltip="Share">${this.icon("share")}</button><button class="ult-action-btn ult-act-retry" aria-label="Try again" data-tooltip="Try again">${this.icon("refresh")}</button></div><textarea name="message" class="ult-chat-input" placeholder="${this.esc(placeholder)}" rows="1" maxlength="${this.config.maxMessageLength}" autocomplete="off"></textarea><button class="ult-chat-send" aria-label="Ready" data-tooltip="Ready"><span class="ult-icon-swap" data-icon="square">${this.icon("square")}</span></button></div>`,
     );
     this.refs.modal.setAttribute("role", "dialog");
     this.refs.modal.setAttribute("aria-modal", "true");
     document.body.appendChild(this.refs.modal);
+
+    this.refs.tooltip = this.el("div", "ult-global-tooltip");
+    document.body.appendChild(this.refs.tooltip);
 
     this.refs.messages = this.qs("#ult-messages", this.refs.modal);
     this.refs.welcome = this.qs("#ult-welcome", this.refs.modal);
@@ -388,6 +397,7 @@ class UltralyticsChat {
 
   attachEvents() {
     const m = this.refs.modal;
+    this.setupTooltips();
     this.on(this.refs.pill, "click", () => this.toggle(true, "chat"));
     this.on(this.refs.backdrop, "click", () => this.toggle());
     this.on(this.qs(".ult-chat-close", m), "click", () => this.toggle());
@@ -517,13 +527,29 @@ class UltralyticsChat {
     this.refs.messages.scrollTop = this.refs.messages.scrollHeight;
   }
 
+  setupTooltips() {
+    this.qsa("[data-tooltip]", this.refs.modal).forEach((btn) => {
+      this.on(btn, "mouseenter", (e) => {
+        const t = this.refs.tooltip;
+        if (!t) return;
+        const r = e.currentTarget.getBoundingClientRect();
+        t.textContent = e.currentTarget.dataset.tooltip;
+        t.style.left = r.left + r.width / 2 + "px";
+        t.style.top = r.top - 8 + "px";
+        t.classList.add("show");
+      });
+      this.on(btn, "mouseleave", () => this.refs.tooltip?.classList.remove("show"));
+    });
+  }
+
   swapSendIcon(name) {
     const holder = this.qs(".ult-icon-swap", this.refs.send);
     if (!holder || holder.dataset.icon === name) return;
     holder.innerHTML = this.icon(name);
     holder.dataset.icon = name;
-    this.refs.send.title = name === "square" && this.isStreaming ? "Stop" : name === "arrowUp" ? "Send" : "Ready";
-    this.refs.send.setAttribute("aria-label", this.refs.send.title);
+    const label = name === "square" && this.isStreaming ? "Stop" : name === "arrowUp" ? "Send" : "Ready";
+    this.refs.send.setAttribute("aria-label", label);
+    this.refs.send.dataset.tooltip = label;
   }
 
   updateComposerState() {
