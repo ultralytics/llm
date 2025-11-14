@@ -191,7 +191,12 @@ class UltralyticsChat {
       .ult-message a{color:var(--ult-primary);text-underline-offset:2px}.ult-message a:hover{text-decoration:underline}
       .ult-message strong{font-weight:700;color:var(--ult-text)}
       html[data-theme=dark] .ult-message strong{color:#fafafa}
-      .ult-message pre{background:#0f172a;color:#e5e7eb;padding:10px 12px;border-radius:10px;overflow:auto;margin:6px 0;border:0}
+      .ult-code-block{position:relative;margin:6px 0}
+      .ult-code-copy{position:absolute;top:8px;right:8px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);color:#e5e7eb;padding:4px 8px;border-radius:6px;cursor:pointer;font-size:11px;opacity:0;transition:.15s;font-weight:500}
+      .ult-code-block:hover .ult-code-copy{opacity:1}
+      .ult-code-copy:hover{background:rgba(255,255,255,.2)}
+      .ult-code-copy.copied{background:#10b981;border-color:#10b981;color:#fff}
+      .ult-message pre{background:#0f172a;color:#e5e7eb;padding:10px 12px;border-radius:10px;overflow:auto;border:0}
       .ult-message code{background:#f4f4f5;padding:2px 6px;border-radius:6px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;border:0}
       .ult-message pre code{background:transparent;padding:0;border:0;display:block;color:inherit;font-size:13px}
       html[data-theme=dark] .ult-message code{background:#1e1e22}
@@ -368,6 +373,20 @@ class UltralyticsChat {
     this.on(this.qs(".ult-act-dislike", m), "click", () => this.feedback("down"));
     this.on(this.qs(".ult-act-share", m), "click", () => this.copyThread());
     this.on(this.qs(".ult-act-retry", m), "click", () => void this.retryLast());
+    this.on(this.refs.messages, "click", (e) => {
+      if (e.target.closest(".ult-code-copy")) {
+        const btn = e.target.closest(".ult-code-copy");
+        const code = btn.previousElementSibling?.querySelector("code")?.textContent || "";
+        navigator.clipboard?.writeText(code).then(() => {
+          btn.textContent = "Copied!";
+          btn.classList.add("copied");
+          setTimeout(() => {
+            btn.textContent = "Copy";
+            btn.classList.remove("copied");
+          }, 1500);
+        }).catch(console.error);
+      }
+    });
   }
 
   toggle(forceOpen = null, mode = null) {
@@ -712,14 +731,14 @@ class UltralyticsChat {
       const fence = raw.match(/^\s*```(\w+)?\s*$/);
       if (fence) {
         if (inCode) {
-          html += `</code></pre>`;
+          html += `</code></pre><button class="ult-code-copy">Copy</button></div>`;
           inCode = false;
         } else {
           closePara();
           closeList();
           closeQuote();
           inCode = true;
-          html += `<pre><code class="lang-${esc(fence[1] || "")}">`;
+          html += `<div class="ult-code-block"><pre><code class="lang-${esc(fence[1] || "")}">`;
         }
         continue;
       }
