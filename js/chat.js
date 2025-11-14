@@ -125,7 +125,7 @@ class UltralyticsChat {
   }
 
   loadHighlightJS() {
-    if (window.hljs) return;
+    if (window.hljs || document.getElementById("hljs-theme")) return;
     const link = this.el("link");
     link.rel = "stylesheet";
     link.id = "hljs-theme";
@@ -137,11 +137,12 @@ class UltralyticsChat {
   }
 
   highlight(el) {
+    if (!window.hljs) return;
     el?.querySelectorAll("pre code").forEach((b) => {
       if (!b.dataset.highlighted) {
         const lang = [...b.classList].find((c) => c.startsWith("lang-"))?.replace("lang-", "");
         if (lang) b.classList.add(`language-${lang}`);
-        window.hljs?.highlightElement(b);
+        window.hljs.highlightElement(b);
       }
     });
   }
