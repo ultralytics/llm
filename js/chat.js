@@ -128,7 +128,7 @@ class UltralyticsChat {
     if (window.hljs) return;
     const link = document.createElement("link");
     link.rel = "stylesheet";
-    link.href = "https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/default.min.css";
+    link.id = "hljs-theme";
     document.head.appendChild(link);
     const script = document.createElement("script");
     script.src = "https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js";
@@ -136,6 +136,7 @@ class UltralyticsChat {
       if (window.hljs) window.hljs.configure({ ignoreUnescapedHTML: true });
     };
     document.head.appendChild(script);
+    this.updateHljsTheme();
   }
 
   highlightCode(element) {
@@ -200,9 +201,19 @@ class UltralyticsChat {
     const mql = window.matchMedia("(prefers-color-scheme: dark)");
     const applyTheme = () => {
       if (!root.hasAttribute("data-theme")) root.setAttribute("data-theme", mql.matches ? "dark" : "light");
+      this.updateHljsTheme();
     };
     applyTheme();
     mql.addEventListener("change", applyTheme);
+  }
+
+  updateHljsTheme() {
+    const link = document.getElementById("hljs-theme");
+    if (!link) return;
+    const isDark = document.documentElement.getAttribute("data-theme") === "dark";
+    link.href = isDark
+      ? "https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css"
+      : "https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github.min.css";
   }
 
   createStyles() {
@@ -771,6 +782,7 @@ class UltralyticsChat {
         if (renderTimer) return;
         renderTimer = setTimeout(() => {
           div.innerHTML = this.renderMarkdown(content, true);
+          this.highlightCode(div);
           this.scrollToBottom();
           renderTimer = null;
         }, 30);
