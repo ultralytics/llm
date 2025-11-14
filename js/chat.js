@@ -9,18 +9,50 @@ class UltralyticsChat {
       branding: {
         name: d(config.branding, "name", "Ultralytics AI"),
         tagline: d(config.branding, "tagline", "Ask anything about Ultralytics, YOLO, and more"),
-        logo: d(config.branding, "logo", "https://cdn.prod.website-files.com/680a070c3b99253410dd3dcf/68e4eb1e9893320b26cc02c3_Ultralytics%20Logo.png.svg"),
-        logomark: d(config.branding, "logomark", "https://storage.googleapis.com/organization-image-assets/ultralytics-botAvatarSrcUrl-1729379860806.svg"),
+        logo: d(
+          config.branding,
+          "logo",
+          "https://cdn.prod.website-files.com/680a070c3b99253410dd3dcf/68e4eb1e9893320b26cc02c3_Ultralytics%20Logo.png.svg",
+        ),
+        logomark: d(
+          config.branding,
+          "logomark",
+          "https://storage.googleapis.com/organization-image-assets/ultralytics-botAvatarSrcUrl-1729379860806.svg",
+        ),
         pillText: d(config.branding, "pillText", "Ask AI"),
       },
-      theme: { primary: d(config.theme, "primary", "#042AFF"), dark: d(config.theme, "dark", "#111F68"), yellow: d(config.theme, "yellow", "#E1FF25"), text: d(config.theme, "text", "#0b0b0f") },
+      theme: {
+        primary: d(config.theme, "primary", "#042AFF"),
+        dark: d(config.theme, "dark", "#111F68"),
+        yellow: d(config.theme, "yellow", "#E1FF25"),
+        text: d(config.theme, "text", "#0b0b0f"),
+      },
       welcome: {
         title: d(config.welcome, "title", "Hello 👋"),
-        message: d(config.welcome, "message", "I'm an AI assistant trained on Ultralytics documentation - ask me anything!"),
-        chatExamples: d(config.welcome, "chatExamples") ?? d(config.welcome, "examples") ?? ["What's new in YOLO11?", "How do I get started with YOLO?", "Tell me about Enterprise Licensing"],
-        searchExamples: d(config.welcome, "searchExamples", ["YOLO quickstart", "model training parameters", "export formats", "dataset configuration"]),
+        message: d(
+          config.welcome,
+          "message",
+          "I'm an AI assistant trained on Ultralytics documentation - ask me anything!",
+        ),
+        chatExamples: d(config.welcome, "chatExamples") ??
+          d(config.welcome, "examples") ?? [
+            "What's new in YOLO11?",
+            "How do I get started with YOLO?",
+            "Tell me about Enterprise Licensing",
+          ],
+        searchExamples: d(config.welcome, "searchExamples", [
+          "YOLO quickstart",
+          "model training parameters",
+          "export formats",
+          "dataset configuration",
+        ]),
       },
-      ui: { placeholder: d(config.ui, "placeholder", "Ask anything…"), copyText: d(config.ui, "copyText", "Copy thread"), downloadText: d(config.ui, "downloadText", "Download thread"), clearText: d(config.ui, "clearText", "New chat") },
+      ui: {
+        placeholder: d(config.ui, "placeholder", "Ask anything…"),
+        copyText: d(config.ui, "copyText", "Copy thread"),
+        downloadText: d(config.ui, "downloadText", "Download thread"),
+        clearText: d(config.ui, "clearText", "New chat"),
+      },
     };
     this.apiUrl = this.config.apiUrl;
     this.messages = [];
@@ -56,7 +88,12 @@ class UltralyticsChat {
 
   getPageContext() {
     const meta = (name) => document.querySelector(`meta[name="${name}"]`)?.content || "";
-    return { url: window.location.href, title: document.title, description: meta("description"), path: window.location.pathname };
+    return {
+      url: window.location.href,
+      title: document.title,
+      description: meta("description"),
+      path: window.location.pathname,
+    };
   }
 
   loadSessionId() {
@@ -93,7 +130,8 @@ class UltralyticsChat {
       viewport.name = "viewport";
       document.head.appendChild(viewport);
     }
-    if (!viewport.content.includes("maximum-scale")) viewport.content = "width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no";
+    if (!viewport.content.includes("maximum-scale"))
+      viewport.content = "width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no";
   }
 
   watchForRemoval() {
@@ -103,10 +141,12 @@ class UltralyticsChat {
       { element: () => this.refs.modal, parent: document.body },
       { element: () => this.refs.backdrop, parent: document.body },
     ];
-    const observer = new MutationObserver(() => elements.forEach(({ element, parent }) => {
-      const el = element();
-      if (el?.parentNode !== parent) parent.appendChild(el);
-    }));
+    const observer = new MutationObserver(() =>
+      elements.forEach(({ element, parent }) => {
+        const el = element();
+        if (el?.parentNode !== parent) parent.appendChild(el);
+      }),
+    );
     observer.observe(document.head, { childList: true });
     observer.observe(document.body, { childList: true });
     this.domObserver = observer;
@@ -287,12 +327,15 @@ class UltralyticsChat {
   icon(name) {
     const paths = {
       copy: '<rect x="5" y="5" width="13" height="13" rx="2"/><path d="M9 9h1a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2h1"/>',
-      download: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>',
+      download:
+        '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>',
       refresh: '<path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>',
       close: '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>',
       like: '<path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/>',
-      dislike: '<path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"/>',
-      share: '<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.59 13.51l6.83 3.98"/><path d="M15.41 6.51L8.59 10.49"/>',
+      dislike:
+        '<path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"/>',
+      share:
+        '<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.59 13.51l6.83 3.98"/><path d="M15.41 6.51L8.59 10.49"/>',
       arrowUp: '<line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/>',
       square: '<rect x="4.8" y="4.8" width="14.4" height="14.4" rx="2" ry="2"/>',
     };
@@ -307,12 +350,20 @@ class UltralyticsChat {
     this.refs.backdrop = this.el("div", "ult-backdrop");
     document.body.appendChild(this.refs.backdrop);
 
-    this.refs.pill = this.el("button", "ultralytics-chat-pill", `<span>${this.esc(pillText)}</span><img src="${this.esc(logomark)}" alt="${this.esc(name)}" />`);
+    this.refs.pill = this.el(
+      "button",
+      "ultralytics-chat-pill",
+      `<span>${this.esc(pillText)}</span><img src="${this.esc(logomark)}" alt="${this.esc(name)}" />`,
+    );
     this.refs.pill.setAttribute("aria-label", pillText);
     this.refs.pill.title = pillText;
     document.body.appendChild(this.refs.pill);
 
-    this.refs.modal = this.el("div", "ult-chat-modal", `<div class="ult-chat-header"><div class="ult-chat-title"><img src="${this.esc(logo)}" alt="${this.esc(name)}" /><div class="ult-subtle">${this.esc(tagline)}</div></div><div class="ult-header-actions"><button class="ult-icon-btn ult-chat-copy" title="${this.esc(copyText)}" aria-label="${this.esc(copyText)}">${this.icon("copy")}</button><button class="ult-icon-btn ult-chat-download" title="${this.esc(downloadText)}" aria-label="${this.esc(downloadText)}">${this.icon("download")}</button><button class="ult-icon-btn ult-chat-clear" title="${this.esc(clearText)}" aria-label="${this.esc(clearText)}">${this.icon("refresh")}</button><button class="ult-icon-btn ult-chat-close" title="Close" aria-label="Close">${this.icon("close")}</button></div></div><div id="ult-welcome" class="ult-welcome" style="display:none"><h1>${this.esc(title)}</h1><p>${message}</p></div><div id="ult-examples" class="ult-examples" style="display:none"></div><div class="ult-chat-messages" id="ult-messages" aria-live="polite"></div><div class="ult-chat-input-container"><div class="ult-actions"><button class="ult-action-btn ult-act-copy" title="Copy last response" aria-label="Copy last response">${this.icon("copy")}</button><button class="ult-action-btn ult-act-like" title="Thumbs up" aria-label="Thumbs up">${this.icon("like")}</button><button class="ult-action-btn ult-act-dislike" title="Thumbs down" aria-label="Thumbs down">${this.icon("dislike")}</button><button class="ult-action-btn ult-act-share" title="Share" aria-label="Share">${this.icon("share")}</button><button class="ult-action-btn ult-act-retry" title="Try again" aria-label="Try again">${this.icon("refresh")}</button></div><textarea name="message" class="ult-chat-input" placeholder="${this.esc(placeholder)}" rows="1" maxlength="${this.config.maxMessageLength}" autocomplete="off"></textarea><button class="ult-chat-send" title="Ready" aria-label="Ready"><span class="ult-icon-swap" data-icon="square">${this.icon("square")}</span></button></div>`);
+    this.refs.modal = this.el(
+      "div",
+      "ult-chat-modal",
+      `<div class="ult-chat-header"><div class="ult-chat-title"><img src="${this.esc(logo)}" alt="${this.esc(name)}" /><div class="ult-subtle">${this.esc(tagline)}</div></div><div class="ult-header-actions"><button class="ult-icon-btn ult-chat-copy" title="${this.esc(copyText)}" aria-label="${this.esc(copyText)}">${this.icon("copy")}</button><button class="ult-icon-btn ult-chat-download" title="${this.esc(downloadText)}" aria-label="${this.esc(downloadText)}">${this.icon("download")}</button><button class="ult-icon-btn ult-chat-clear" title="${this.esc(clearText)}" aria-label="${this.esc(clearText)}">${this.icon("refresh")}</button><button class="ult-icon-btn ult-chat-close" title="Close" aria-label="Close">${this.icon("close")}</button></div></div><div id="ult-welcome" class="ult-welcome" style="display:none"><h1>${this.esc(title)}</h1><p>${message}</p></div><div id="ult-examples" class="ult-examples" style="display:none"></div><div class="ult-chat-messages" id="ult-messages" aria-live="polite"></div><div class="ult-chat-input-container"><div class="ult-actions"><button class="ult-action-btn ult-act-copy" title="Copy last response" aria-label="Copy last response">${this.icon("copy")}</button><button class="ult-action-btn ult-act-like" title="Thumbs up" aria-label="Thumbs up">${this.icon("like")}</button><button class="ult-action-btn ult-act-dislike" title="Thumbs down" aria-label="Thumbs down">${this.icon("dislike")}</button><button class="ult-action-btn ult-act-share" title="Share" aria-label="Share">${this.icon("share")}</button><button class="ult-action-btn ult-act-retry" title="Try again" aria-label="Try again">${this.icon("refresh")}</button></div><textarea name="message" class="ult-chat-input" placeholder="${this.esc(placeholder)}" rows="1" maxlength="${this.config.maxMessageLength}" autocomplete="off"></textarea><button class="ult-chat-send" title="Ready" aria-label="Ready"><span class="ult-icon-swap" data-icon="square">${this.icon("square")}</span></button></div>`,
+    );
     this.refs.modal.setAttribute("role", "dialog");
     this.refs.modal.setAttribute("aria-modal", "true");
     document.body.appendChild(this.refs.modal);
@@ -327,8 +378,12 @@ class UltralyticsChat {
 
   setExamples(list) {
     if (!this.refs.examples) return;
-    this.refs.examples.innerHTML = list.map((q) => `<button class="ult-example" data-q="${this.esc(q)}">${this.esc(q)}</button>`).join("");
-    this.qsa(".ult-example", this.refs.examples).forEach((b) => this.on(b, "click", () => void this.sendMessage(b.dataset.q)));
+    this.refs.examples.innerHTML = list
+      .map((q) => `<button class="ult-example" data-q="${this.esc(q)}">${this.esc(q)}</button>`)
+      .join("");
+    this.qsa(".ult-example", this.refs.examples).forEach((b) =>
+      this.on(b, "click", () => void this.sendMessage(b.dataset.q)),
+    );
   }
 
   attachEvents() {
@@ -377,14 +432,17 @@ class UltralyticsChat {
       if (e.target.closest(".ult-code-copy")) {
         const btn = e.target.closest(".ult-code-copy");
         const code = btn.previousElementSibling?.querySelector("code")?.textContent || "";
-        navigator.clipboard?.writeText(code).then(() => {
-          btn.innerHTML = "Copied!";
-          btn.classList.add("copied");
-          setTimeout(() => {
-            btn.innerHTML = `${this.icon("copy")}Copy`;
-            btn.classList.remove("copied");
-          }, 1500);
-        }).catch(console.error);
+        navigator.clipboard
+          ?.writeText(code)
+          .then(() => {
+            btn.innerHTML = "Copied!";
+            btn.classList.add("copied");
+            setTimeout(() => {
+              btn.innerHTML = `${this.icon("copy")}Copy`;
+              btn.classList.remove("copied");
+            }, 1500);
+          })
+          .catch(console.error);
       }
     });
   }
@@ -419,10 +477,12 @@ class UltralyticsChat {
     this.refs.modal.dataset.mode = this.mode;
     if (this.mode === "search") {
       if (this.refs.input) this.refs.input.placeholder = "Search for...";
-      if (tagline) tagline.innerHTML = `<strong style="color: ${this.config.theme.primary}; font-weight: 700;">SEARCH</strong> · Find answers in our docs and guides`;
+      if (tagline)
+        tagline.innerHTML = `<strong style="color: ${this.config.theme.primary}; font-weight: 700;">SEARCH</strong> · Find answers in our docs and guides`;
       if (actions) actions.style.display = "none";
       if (this.refs.messages) this.refs.messages.innerHTML = "";
-      if (this.refs.welcome) this.refs.welcome.innerHTML = `<p>Enter keywords to find relevant documentation, guides, and resources</p>`;
+      if (this.refs.welcome)
+        this.refs.welcome.innerHTML = `<p>Enter keywords to find relevant documentation, guides, and resources</p>`;
       this.setExamples(this.config.welcome.searchExamples || []);
       this.showWelcome(true);
     } else {
@@ -479,7 +539,9 @@ class UltralyticsChat {
   }
 
   formatThread() {
-    return this.messages.map((m) => `${m.role === "user" ? "You" : this.config.branding.name}: ${m.content}`).join("\n\n---\n\n");
+    return this.messages
+      .map((m) => `${m.role === "user" ? "You" : this.config.branding.name}: ${m.content}`)
+      .join("\n\n---\n\n");
   }
 
   copyThread() {
@@ -533,7 +595,11 @@ class UltralyticsChat {
   }
 
   createThinking(label = "Thinking") {
-    const thinking = this.el("div", "ult-thinking", `<span class="ult-thinking-word">${label}</span><span class="ult-typing"><span></span><span></span><span></span></span><span class="ult-thinking-time">(0.0s)</span>`);
+    const thinking = this.el(
+      "div",
+      "ult-thinking",
+      `<span class="ult-thinking-word">${label}</span><span class="ult-typing"><span></span><span></span><span></span></span><span class="ult-thinking-time">(0.0s)</span>`,
+    );
     const timeEl = this.qs(".ult-thinking-time", thinking);
     const t0 = performance.now();
     const tick = setInterval(() => {
@@ -549,7 +615,11 @@ class UltralyticsChat {
     this.refs.messages.appendChild(thinking);
     try {
       const url = this.apiUrl.replace(/\/chat$/, "/search");
-      const res = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ query }) });
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query }),
+      });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       clear();
@@ -558,24 +628,29 @@ class UltralyticsChat {
         this.refs.messages.innerHTML = '<div class="ult-message">No results found. Try different keywords.</div>';
         return;
       }
-      this.refs.messages.innerHTML = data.results.map((r) => {
-        const snippet = r.text?.length > 150 ? r.text.slice(0, 150) + "..." : r.text || "";
-        const host = (() => {
-          try {
-            return new URL(r.url).hostname;
-          } catch {
-            return "";
-          }
-        })();
-        const faviconUrl = host ? `https://www.google.com/s2/favicons?sz=32&domain=${encodeURIComponent(host)}` : "";
-        const favicon = faviconUrl ? `<img class="ult-search-result-favicon" src="${faviconUrl}" alt="" loading="lazy" />` : "";
-        const metaHost = host ? `<span>${this.esc(host)}</span>` : "";
-        return `<div class="ult-search-result"><div class="ult-search-result-title">${favicon}<a href="${this.esc(r.url)}" target="_blank" rel="noopener">${this.esc(r.title || "")}</a></div><div class="ult-search-result-snippet">${this.esc(snippet)}</div><div class="ult-search-result-meta"><span class="ult-search-result-score">Match: ${((r.score || 0) * 100).toFixed(0)}%</span>${metaHost}</div></div>`;
-      }).join("");
+      this.refs.messages.innerHTML = data.results
+        .map((r) => {
+          const snippet = r.text?.length > 150 ? r.text.slice(0, 150) + "..." : r.text || "";
+          const host = (() => {
+            try {
+              return new URL(r.url).hostname;
+            } catch {
+              return "";
+            }
+          })();
+          const faviconUrl = host ? `https://www.google.com/s2/favicons?sz=32&domain=${encodeURIComponent(host)}` : "";
+          const favicon = faviconUrl
+            ? `<img class="ult-search-result-favicon" src="${faviconUrl}" alt="" loading="lazy" />`
+            : "";
+          const metaHost = host ? `<span>${this.esc(host)}</span>` : "";
+          return `<div class="ult-search-result"><div class="ult-search-result-title">${favicon}<a href="${this.esc(r.url)}" target="_blank" rel="noopener">${this.esc(r.title || "")}</a></div><div class="ult-search-result-snippet">${this.esc(snippet)}</div><div class="ult-search-result-meta"><span class="ult-search-result-score">Match: ${((r.score || 0) * 100).toFixed(0)}%</span>${metaHost}</div></div>`;
+        })
+        .join("");
     } catch (e) {
       clear();
       thinking.remove();
-      if (this.refs.messages) this.refs.messages.innerHTML = `<div class="ult-message">Search error: ${this.esc(e.message)}</div>`;
+      if (this.refs.messages)
+        this.refs.messages.innerHTML = `<div class="ult-message">Search error: ${this.esc(e.message)}</div>`;
       console.error("Search error:", e);
     }
   }
@@ -607,7 +682,11 @@ class UltralyticsChat {
       const res = await fetch(this.apiUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: [{ role: "user", content: text }], session_id: this.sessionId, context: this.getPageContext() }),
+        body: JSON.stringify({
+          messages: [{ role: "user", content: text }],
+          session_id: this.sessionId,
+          context: this.getPageContext(),
+        }),
         signal: this.abortController.signal,
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -662,7 +741,11 @@ class UltralyticsChat {
     } catch (e) {
       thinking.remove();
       clear();
-      const msg = this.el("div", "ult-message assistant", e.name === "AbortError" ? "Generation stopped." : "Sorry, I encountered an error. Please try again.");
+      const msg = this.el(
+        "div",
+        "ult-message assistant",
+        e.name === "AbortError" ? "Generation stopped." : "Sorry, I encountered an error. Please try again.",
+      );
       group.appendChild(msg);
       console.error("Chat error:", e);
     } finally {
@@ -677,7 +760,13 @@ class UltralyticsChat {
     if (!this.refs.messages) return null;
     const { name, logomark } = this.config.branding;
     const group = this.el("div", "ult-message-group");
-    const label = this.el("div", "ult-message-label", role === "assistant" ? `<img src="${this.esc(logomark)}" alt="${this.esc(name)}" /><span>${this.esc(name)}</span>` : `<span class="ult-user-icon"><svg width="29" height="29" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg></span><span>You</span>`);
+    const label = this.el(
+      "div",
+      "ult-message-label",
+      role === "assistant"
+        ? `<img src="${this.esc(logomark)}" alt="${this.esc(name)}" /><span>${this.esc(name)}</span>`
+        : `<span class="ult-user-icon"><svg width="29" height="29" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg></span><span>You</span>`,
+    );
     group.appendChild(label);
     this.refs.messages.appendChild(group);
     this.scrollToBottom();
@@ -699,9 +788,20 @@ class UltralyticsChat {
   }
 
   renderMarkdown(src) {
-    const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+    const esc = (s) =>
+      s
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
     const lines = (src || "").replace(/\r\n?/g, "\n").split("\n");
-    let html = "", inCode = false, listType = null, listOpen = false, inQuote = false, paraOpen = false;
+    let html = "",
+      inCode = false,
+      listType = null,
+      listOpen = false,
+      inQuote = false,
+      paraOpen = false;
     const closePara = () => {
       if (paraOpen) {
         html += "</p>";
@@ -823,8 +923,14 @@ class UltralyticsChat {
       codeBlocks.push(code);
       return `@@ULTCODE${codeBlocks.length - 1}@@`;
     });
-    text = text.replace(/\[([^\]]+)]\((https?:\/\/[^\s)]+)\)/g, (_, label, url) => `<a href="${url}" target="_blank" rel="noopener noreferrer">${label}</a>`);
-    text = text.replace(/(?<!href=")(?<!src=")(?<!>)\b(https?:\/\/[^\s<>'")\]]+?)(?=[.,;:!?]*(?:\s|<|'|"|\)|]|$))/g, (url) => `<a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>`);
+    text = text.replace(
+      /\[([^\]]+)]\((https?:\/\/[^\s)]+)\)/g,
+      (_, label, url) => `<a href="${url}" target="_blank" rel="noopener noreferrer">${label}</a>`,
+    );
+    text = text.replace(
+      /(?<!href=")(?<!src=")(?<!>)\b(https?:\/\/[^\s<>'")\]]+?)(?=[.,;:!?]*(?:\s|<|'|"|\)|]|$))/g,
+      (url) => `<a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>`,
+    );
     text = text.replace(/\*\*([^"]+?)\*\*/g, "<strong>$1</strong>");
     text = text.replace(/__([^"]+?)__/g, "<strong>$1</strong>");
     text = text.replace(/(?<!\*)\*(?!\*)([^"]+?)\*(?!\*)/g, "<em>$1</em>");
