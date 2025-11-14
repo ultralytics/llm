@@ -733,7 +733,7 @@ class UltralyticsChat {
       const scheduleRender = () => {
         if (renderTimer) return;
         renderTimer = setTimeout(() => {
-          div.innerHTML = this.renderMarkdown(content);
+          div.innerHTML = this.renderMarkdown(content, true);
           this.scrollToBottom();
           renderTimer = null;
         }, 30);
@@ -757,10 +757,7 @@ class UltralyticsChat {
           }
         }
       }
-      if (renderTimer) {
-        clearTimeout(renderTimer);
-        renderTimer = null;
-      }
+      if (renderTimer) clearTimeout(renderTimer);
       div.innerHTML = this.renderMarkdown(content);
       this.scrollToBottom();
       this.messages.push({ role: "assistant", content });
@@ -813,7 +810,7 @@ class UltralyticsChat {
     return d.innerHTML;
   }
 
-  renderMarkdown(src) {
+  renderMarkdown(src, skipCopyButtons = false) {
     const esc = (s) =>
       s
         .replace(/&/g, "&amp;")
@@ -857,7 +854,7 @@ class UltralyticsChat {
       const fence = raw.match(/^\s*```(\w+)?\s*$/);
       if (fence) {
         if (inCode) {
-          html += `</code></pre><button class="ult-code-copy">${this.icon("copy")}Copy</button></div>`;
+          html += skipCopyButtons ? `</code></pre></div>` : `</code></pre><button class="ult-code-copy">${this.icon("copy")}Copy</button></div>`;
           inCode = false;
         } else {
           closePara();
