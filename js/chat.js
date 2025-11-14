@@ -126,29 +126,22 @@ class UltralyticsChat {
 
   loadHighlightJS() {
     if (window.hljs) return;
-    const link = document.createElement("link");
+    const link = this.el("link");
     link.rel = "stylesheet";
     link.id = "hljs-theme";
     document.head.appendChild(link);
-    const script = document.createElement("script");
+    const script = this.el("script");
     script.src = "https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js";
-    script.onload = () => {
-      if (window.hljs) window.hljs.configure({ ignoreUnescapedHTML: true });
-    };
+    script.onload = () => window.hljs?.configure({ ignoreUnescapedHTML: true });
     document.head.appendChild(script);
-    this.updateHljsTheme();
   }
 
-  highlightCode(element) {
-    if (!window.hljs || !element) return;
-    element.querySelectorAll("pre code").forEach((block) => {
-      if (!block.dataset.highlighted) {
-        const langClass = Array.from(block.classList).find((c) => c.startsWith("lang-"));
-        if (langClass) {
-          const lang = langClass.replace("lang-", "");
-          block.classList.add(`language-${lang}`);
-        }
-        window.hljs.highlightElement(block);
+  highlight(el) {
+    el?.querySelectorAll("pre code").forEach((b) => {
+      if (!b.dataset.highlighted) {
+        const lang = [...b.classList].find((c) => c.startsWith("lang-"))?.replace("lang-", "");
+        if (lang) b.classList.add(`language-${lang}`);
+        window.hljs?.highlightElement(b);
       }
     });
   }
@@ -201,19 +194,14 @@ class UltralyticsChat {
     const mql = window.matchMedia("(prefers-color-scheme: dark)");
     const applyTheme = () => {
       if (!root.hasAttribute("data-theme")) root.setAttribute("data-theme", mql.matches ? "dark" : "light");
-      this.updateHljsTheme();
+      const link = document.getElementById("hljs-theme");
+      if (link) {
+        const dark = root.getAttribute("data-theme") === "dark";
+        link.href = `https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github${dark ? "-dark" : ""}.min.css`;
+      }
     };
     applyTheme();
     mql.addEventListener("change", applyTheme);
-  }
-
-  updateHljsTheme() {
-    const link = document.getElementById("hljs-theme");
-    if (!link) return;
-    const isDark = document.documentElement.getAttribute("data-theme") === "dark";
-    link.href = isDark
-      ? "https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css"
-      : "https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github.min.css";
   }
 
   createStyles() {
@@ -783,7 +771,7 @@ class UltralyticsChat {
         if (renderTimer) return;
         renderTimer = setTimeout(() => {
           div.innerHTML = this.renderMarkdown(content, true);
-          this.highlightCode(div);
+          this.highlight(div);
           this.scrollToBottom();
           renderTimer = null;
         }, 30);
@@ -809,7 +797,7 @@ class UltralyticsChat {
       }
       if (renderTimer) clearTimeout(renderTimer);
       div.innerHTML = this.renderMarkdown(content);
-      this.highlightCode(div);
+      this.highlight(div);
       this.scrollToBottom();
       this.messages.push({ role: "assistant", content });
     } catch (e) {
@@ -852,7 +840,7 @@ class UltralyticsChat {
     if (!group) return null;
     const div = this.el("div", `ult-message ${role === "assistant" ? "assistant" : ""}`, this.renderMarkdown(content));
     group.appendChild(div);
-    if (role === "assistant") this.highlightCode(div);
+    if (role === "assistant") this.highlight(div);
     return div;
   }
 
