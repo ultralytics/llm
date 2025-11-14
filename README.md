@@ -2,8 +2,6 @@
 
 # 🚀 Ultralytics LLM
 
-
-
 **Ultralytics LLM** provides a lightweight, production-ready JavaScript chat client for integrating AI-powered conversations into web applications. Built for [jsDelivr CDN](https://www.jsdelivr.com/package/gh/ultralytics/llm) delivery with zero dependencies.
 
 [![CI](https://github.com/ultralytics/llm/actions/workflows/ci.yml/badge.svg)](https://github.com/ultralytics/llm/actions/workflows/ci.yml)
@@ -67,10 +65,7 @@ Load the chat widget via [jsDelivr CDN](https://www.jsdelivr.com/package/gh/ultr
 <html>
   <head>
     <title>Ultralytics Chat</title>
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
-    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   </head>
   <body>
     <script src="https://cdn.jsdelivr.net/gh/ultralytics/llm@latest/js/chat.min.js"></script>

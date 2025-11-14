@@ -10,25 +10,14 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="mobile-web-app-capable" content="yes" />
-    <meta
-      name="format-detection"
-      content="telephone=no, address=no, email=no"
-    />
+    <meta name="format-detection" content="telephone=no, address=no, email=no" />
     <meta
       name="description"
       content="Ultralytics Chat Widget Demo - A lightweight, professional chat client for docs and apps"
     />
     <meta name="color-scheme" content="light dark" />
-    <meta
-      name="theme-color"
-      content="#ffffff"
-      media="(prefers-color-scheme: light)"
-    />
-    <meta
-      name="theme-color"
-      content="#0a0a0b"
-      media="(prefers-color-scheme: dark)"
-    />
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0a0a0b" media="(prefers-color-scheme: dark)" />
     <title>Ultralytics Chat — Demo</title>
 
     <style>
@@ -42,8 +31,7 @@
         --link: #042aff;
         --callout: #eef2ff;
         --code-bg: #0f172a;
-        --shadow-1:
-          0 10px 24px rgba(2, 6, 23, 0.1), 0 2px 8px rgba(2, 6, 23, 0.06);
+        --shadow-1: 0 10px 24px rgba(2, 6, 23, 0.1), 0 2px 8px rgba(2, 6, 23, 0.06);
         --radius: 12px;
         --container: 1200px;
         --safe-top: env(safe-area-inset-top, 0px);
@@ -58,8 +46,7 @@
         --link: #7aa2ff;
         --callout: #121826;
         --code-bg: #0f172a;
-        --shadow-1:
-          0 10px 28px rgba(0, 0, 0, 0.45), 0 2px 10px rgba(0, 0, 0, 0.25);
+        --shadow-1: 0 10px 28px rgba(0, 0, 0, 0.45), 0 2px 10px rgba(0, 0, 0, 0.25);
       }
 
       /* ---------- Base ---------- */
@@ -373,9 +360,7 @@
         -webkit-overflow-scrolling: touch;
       }
       code {
-        font-family:
-          ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono",
-          monospace;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
         font-size: 13px;
         word-break: break-all;
       }
@@ -496,16 +481,12 @@
         <div class="hero" id="intro">
           <h1>Ultralytics Chat Widget</h1>
           <p class="lead">
-            A lightweight, professional chat client for docs and apps. Streams
-            tokens, supports markdown, and uses Ultralytics brand UI.
+            A lightweight, professional chat client for docs and apps. Streams tokens, supports markdown, and uses
+            Ultralytics brand UI.
           </p>
           <div class="toolbar">
-            <button class="btn" onclick="openChat()" aria-label="Open chat">
-              Open Chat
-            </button>
-            <span class="btn" style="pointer-events: none; opacity: 0.72"
-              >Press ⌘ + K to open</span
-            >
+            <button class="btn" onclick="openChat()" aria-label="Open chat">Open Chat</button>
+            <span class="btn" style="pointer-events: none; opacity: 0.72">Press ⌘ + K to open</span>
           </div>
         </div>
 
@@ -515,9 +496,7 @@
             <ul>
               <li>Centered modal with blurred/lightened backdrop for focus</li>
               <li>Brand-aligned pill launcher with hover zoom only</li>
-              <li>
-                Copy, like/dislike, share, retry actions (dark-mode friendly)
-              </li>
+              <li>Copy, like/dislike, share, retry actions (dark-mode friendly)</li>
               <li>Animated Send/Stop icon swap — arrow up ↔ square</li>
               <li>Minimal custom code, easy to embed in any page</li>
             </ul>
@@ -607,10 +586,7 @@ chat.toggle(false); // close</code></pre>
               </tr>
             </tbody>
           </table>
-          <p class="lead">
-            Numbers depend on dataset and hardware. Replace with your own
-            metrics.
-          </p>
+          <p class="lead">Numbers depend on dataset and hardware. Replace with your own metrics.</p>
         </div>
 
         <div id="examples" class="card">
@@ -630,17 +606,13 @@ results[0].show()</code></pre>
           <h3>YOLO Inference</h3>
           <p>
             Run single-image, directory, or video streams. Use
-            <code>conf</code> and <code>iou</code> to tune precision/recall
-            tradeoffs.
+            <code>conf</code> and <code>iou</code> to tune precision/recall tradeoffs.
           </p>
         </div>
 
         <div id="training" class="card">
           <h3>Training</h3>
-          <p>
-            Fine-tune on your datasets. Track runs, compare metrics, and export
-            best checkpoints.
-          </p>
+          <p>Fine-tune on your datasets. Track runs, compare metrics, and export best checkpoints.</p>
         </div>
 
         <div id="export" class="card">
@@ -652,13 +624,12 @@ results[0].show()</code></pre>
         <div id="faq" class="card">
           <h3>FAQ</h3>
           <p>
-            <strong>How does the chat integrate with docs?</strong><br />It's a
-            self-contained client that calls your API. Pass in RAG context or
-            knowledge base sources on the server side.
+            <strong>How does the chat integrate with docs?</strong><br />It's a self-contained client that calls your
+            API. Pass in RAG context or knowledge base sources on the server side.
           </p>
           <p>
-            <strong>Does it support dark mode?</strong><br />Yes. It follows the
-            page's <code>data-theme</code> attribute and inherits CSS variables.
+            <strong>Does it support dark mode?</strong><br />Yes. It follows the page's
+            <code>data-theme</code> attribute and inherits CSS variables.
           </p>
         </div>
       </section>
@@ -726,19 +697,13 @@ results[0].show()</code></pre>
           },
           welcome: {
             title: "Hello 👋",
-            message:
-              "I'm an AI assistant trained on Ultralytics documentation - ask me anything!",
+            message: "I'm an AI assistant trained on Ultralytics documentation - ask me anything!",
             chatExamples: [
               "What's new in SAM 3?",
               "How do I get started with YOLO?",
               "Tell me about Enterprise Licensing",
             ],
-            searchExamples: [
-              "YOLO quickstart",
-              "model training parameters",
-              "export formats",
-              "dataset configuration",
-            ],
+            searchExamples: ["YOLO quickstart", "model training parameters", "export formats", "dataset configuration"],
           },
           ui: {
             placeholder: "Ask anything…",
