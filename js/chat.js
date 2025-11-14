@@ -114,6 +114,7 @@ class UltralyticsChat {
 
   init() {
     this.ensureViewport();
+    this.loadHighlightJS();
     this.createStyles();
     this.createUI();
     this.attachEvents();
@@ -121,6 +122,34 @@ class UltralyticsChat {
     this.showWelcome(true);
     this.updateComposerState();
     this.watchForRemoval();
+  }
+
+  loadHighlightJS() {
+    if (window.hljs) return;
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = "https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/default.min.css";
+    document.head.appendChild(link);
+    const script = document.createElement("script");
+    script.src = "https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js";
+    script.onload = () => {
+      if (window.hljs) window.hljs.configure({ ignoreUnescapedHTML: true });
+    };
+    document.head.appendChild(script);
+  }
+
+  highlightCode(element) {
+    if (!window.hljs || !element) return;
+    element.querySelectorAll("pre code").forEach((block) => {
+      if (!block.dataset.highlighted) {
+        const langClass = Array.from(block.classList).find(c => c.startsWith('lang-'));
+        if (langClass) {
+          const lang = langClass.replace('lang-', '');
+          block.classList.add(`language-${lang}`);
+        }
+        window.hljs.highlightElement(block);
+      }
+    });
   }
 
   ensureViewport() {
@@ -767,6 +796,7 @@ class UltralyticsChat {
       }
       if (renderTimer) clearTimeout(renderTimer);
       div.innerHTML = this.renderMarkdown(content);
+      this.highlightCode(div);
       this.scrollToBottom();
       this.messages.push({ role: "assistant", content });
     } catch (e) {
@@ -809,6 +839,7 @@ class UltralyticsChat {
     if (!group) return null;
     const div = this.el("div", `ult-message ${role === "assistant" ? "assistant" : ""}`, this.renderMarkdown(content));
     group.appendChild(div);
+    if (role === "assistant") this.highlightCode(div);
     return div;
   }
 
