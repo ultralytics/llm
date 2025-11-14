@@ -25,11 +25,11 @@ jobs:
         run: |
           FILES=("js/chat.js" "js/chat.min.js")
           VERSIONS=("main" "master" "latest")
-          
+
           echo "Purging jsdelivr CDN cache for ${{ github.repository }}..."
           SUCCESS=0
           FAILED=0
-          
+
           for file in "${FILES[@]}"; do
             for version in "${VERSIONS[@]}"; do
               URL="https://purge.jsdelivr.net/gh/${{ github.repository }}@$version/$file"
@@ -58,9 +58,9 @@ jobs:
               sleep 1
             done
           done
-          
+
           echo "CDN purge summary: $SUCCESS successful, $FAILED failed"
-          
+
           # Exit with error if all purges failed
           if [ $SUCCESS -eq 0 ]; then
             echo "Error: All CDN purges failed"
