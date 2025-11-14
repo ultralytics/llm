@@ -190,7 +190,7 @@ class UltralyticsChat {
       :root{--ult-dark:${dark};--ult-primary:${primary};--ult-yellow:${yellow};--ult-text:${text}}
 
       .ult-backdrop{display:none;position:fixed;inset:0;background:rgba(255,255,255,.07);
-        backdrop-filter:blur(3px) saturate(120%) brightness(1.025);-webkit-backdrop-filter:blur(3px) saturate(120%) brightness(1.025);
+        backdrop-filter:blur(5px) saturate(120%) brightness(1.025);-webkit-backdrop-filter:blur(5px) saturate(120%) brightness(1.025);
         z-index:9999;opacity:0;transition:opacity .18s}
       .ult-backdrop.open{display:block;opacity:1}
 
