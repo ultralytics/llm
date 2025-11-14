@@ -282,9 +282,10 @@ class UltralyticsChat {
       .ult-code-block:hover .ult-code-copy{opacity:1}
       .ult-code-copy:hover{background:rgba(255,255,255,.2)}
       .ult-code-copy.copied{background:#10b981;border-color:#10b981;color:#fff}
-      .ult-message pre{background:#0f172a;color:#e5e7eb;padding:10px 12px;border-radius:10px;overflow:auto;border:0}
+      .ult-message pre{padding:10px 12px;border-radius:10px;overflow:auto;border:1px solid #e5e7eb;background:#f6f8fa}
       .ult-message code{background:#f4f4f5;padding:2px 6px;border-radius:6px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;border:0}
-      .ult-message pre code{background:transparent;padding:0;border:0;display:block;color:inherit;font-size:13px}
+      .ult-message pre code{background:transparent;padding:0;border:0;display:block;font-size:13px}
+      html[data-theme=dark] .ult-message pre{background:#0d1117;border-color:#30363d}
       html[data-theme=dark] .ult-message code{background:#1e1e22}
       html[data-theme=dark] .ult-message pre code{background:transparent}
 
