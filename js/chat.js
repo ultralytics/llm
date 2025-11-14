@@ -143,9 +143,9 @@ class UltralyticsChat {
     if (!window.hljs || !element) return;
     element.querySelectorAll("pre code").forEach((block) => {
       if (!block.dataset.highlighted) {
-        const langClass = Array.from(block.classList).find(c => c.startsWith('lang-'));
+        const langClass = Array.from(block.classList).find((c) => c.startsWith("lang-"));
         if (langClass) {
-          const lang = langClass.replace('lang-', '');
+          const lang = langClass.replace("lang-", "");
           block.classList.add(`language-${lang}`);
         }
         window.hljs.highlightElement(block);
@@ -905,7 +905,9 @@ class UltralyticsChat {
       const fence = raw.match(/^\s*```(\w+)?\s*$/);
       if (fence) {
         if (inCode) {
-          html += skipCopyButtons ? `</code></pre></div>` : `</code></pre><button class="ult-code-copy">${this.icon("copy")}Copy</button></div>`;
+          html += skipCopyButtons
+            ? `</code></pre></div>`
+            : `</code></pre><button class="ult-code-copy">${this.icon("copy")}Copy</button></div>`;
           inCode = false;
         } else {
           closePara();
