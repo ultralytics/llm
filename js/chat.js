@@ -24,7 +24,7 @@ class UltralyticsChat {
       theme: {
         primary: d(config.theme, "primary", "#042AFF"),
         dark: d(config.theme, "dark", "#111F68"),
-        accent: d(config.theme, "accent", "#E1FF25"),
+        accent: d(config.theme, "accent", d(config.theme, "yellow", "#E1FF25")),
         text: d(config.theme, "text", "#0b0b0f"),
       },
       welcome: {
@@ -267,7 +267,6 @@ class UltralyticsChat {
 
       .ult-chat-messages{flex:1;overflow-y:auto;padding:0 18px 18px;display:flex;flex-direction:column;gap:14px;-webkit-overflow-scrolling:touch}
       .ult-message-group:hover .ult-message-actions,.ult-message-group:focus-within .ult-message-actions{opacity:1}
-      .ult-message-group:hover .ult-message-actions{opacity:1}
       .ult-message-label{display:flex;align-items:center;gap:8px;font-size:11px;font-weight:800;color:#6b7280;text-transform:uppercase;letter-spacing:.03em;padding:0 2px}
       html[data-theme=dark] .ult-message-label{color:#a1a1aa}
       .ult-message-label img{max-height:24px;max-width:24px;border-radius:4px}
@@ -287,9 +286,10 @@ class UltralyticsChat {
       .ult-code-copy{position:absolute;top:8px;right:8px;background:#f1f2f6;border:0;border-radius:8px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:0;transition:.12s;color:#6b7280}
       .ult-code-block:hover .ult-code-copy{opacity:1}
       .ult-code-copy:hover{transform:translateY(-1px);filter:brightness(.98);color:var(--ult-text)}
-      .ult-code-copy.copied{color:#10b981}
+      .ult-code-copy.success,.ult-icon-btn.success{color:#26C000}
       html[data-theme=dark] .ult-code-copy{background:#17181d;color:#a1a1aa}
       html[data-theme=dark] .ult-code-copy:hover{color:#fafafa}
+      html[data-theme=dark] .ult-code-copy.success,html[data-theme=dark] .ult-icon-btn.success{color:#26C000}
       .ult-message pre{padding:10px 12px;border-radius:10px;overflow:auto;border:1px solid #e5e7eb;background:#f6f8fa}
       .ult-message code{background:#f4f4f5;padding:2px 6px;border-radius:6px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;border:0}
       .ult-message pre code{background:transparent;padding:0;border:0;display:block;font-size:13px}
@@ -318,8 +318,6 @@ class UltralyticsChat {
       .ult-chat-input-container{padding:12px 12px 16px;display:flex;gap:8px;align-items:flex-end}
       .ult-chat-send{background:transparent;border:0;border-radius:8px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.15s;flex-shrink:0;touch-action:manipulation;color:#6b7280;position:relative}
       .ult-chat-send:hover{transform:translateY(-1px);color:var(--ult-text);background:#f7f7f9}
-      .ult-code-copy.success,.ult-icon-btn.success{color:#26C000}
-      html[data-theme=dark] .ult-code-copy.success,html[data-theme=dark] .ult-icon-btn.success{color:#26C000}
       html[data-theme=dark] .ult-chat-send{color:#a1a1aa}
       html[data-theme=dark] .ult-chat-send:hover{color:#fafafa;background:#17181d}
       .ult-chat-input{flex:1;padding:10px 12px;border:0;border-radius:12px;font-size:14px;resize:none;max-height:140px;background:#f7f7f9;color:#0b0b0f;outline:0}
@@ -490,32 +488,24 @@ class UltralyticsChat {
       if (!this.isOpen && e.metaKey && e.key.toLowerCase() === "k") this.toggle(true);
     });
 
-    this.on(
-      this.refs.messages,
-      "mouseover",
-      (e) => {
-        const btn = e.target.closest("[data-tooltip]");
-        if (btn && this.refs.tooltip && !btn.dataset.tooltipActive) {
-          btn.dataset.tooltipActive = "true";
-          const r = btn.getBoundingClientRect();
-          this.refs.tooltip.textContent = btn.dataset.tooltip;
-          this.refs.tooltip.style.left = r.left + r.width / 2 + "px";
-          this.refs.tooltip.style.top = r.top - 8 + "px";
-          this.refs.tooltip.classList.add("show");
-        }
+    this.on(this.refs.messages, "mouseover", (e) => {
+      const btn = e.target.closest("[data-tooltip]");
+      if (btn && this.refs.tooltip && !btn.dataset.tooltipActive) {
+        btn.dataset.tooltipActive = "true";
+        const r = btn.getBoundingClientRect();
+        this.refs.tooltip.textContent = btn.dataset.tooltip;
+        this.refs.tooltip.style.left = r.left + r.width / 2 + "px";
+        this.refs.tooltip.style.top = r.top - 8 + "px";
+        this.refs.tooltip.classList.add("show");
       }
-    );
-    this.on(
-      this.refs.messages,
-      "mouseout",
-      (e) => {
-        const btn = e.target.closest("[data-tooltip]");
-        if (btn) {
-          delete btn.dataset.tooltipActive;
-          this.refs.tooltip?.classList.remove("show");
-        }
+    });
+    this.on(this.refs.messages, "mouseout", (e) => {
+      const btn = e.target.closest("[data-tooltip]");
+      if (btn && (!e.relatedTarget || !btn.contains(e.relatedTarget))) {
+        delete btn.dataset.tooltipActive;
+        this.refs.tooltip?.classList.remove("show");
       }
-    );
+    });
 
     this.on(this.refs.messages, "click", (e) => {
       if (e.target.closest(".ult-code-copy")) {
