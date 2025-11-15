@@ -231,10 +231,10 @@ class UltralyticsChat {
 
       .ult-chat-modal{position:fixed;left:50%;top:50%;width:min(760px,calc(100vw - 40px));height:min(80vh,820px);background:#fff;border:0;border-radius:16px;
         box-shadow:0 24px 60px rgba(2,6,23,.25),0 8px 24px rgba(2,6,23,.18);z-index:10001;
-        transform:translate(-50%,-50%);opacity:0;
-        transition:opacity .2s ease-out;
-        flex-direction:column;overflow:hidden;text-align:left;display:none}
-      .ult-chat-modal.open{display:flex;opacity:1}
+        transform:translate(-50%,-50%);opacity:0;visibility:hidden;
+        transition:opacity .2s ease-out,visibility .2s;
+        flex-direction:column;overflow:hidden;text-align:left;display:flex;pointer-events:none}
+      .ult-chat-modal.open{opacity:1;visibility:visible;pointer-events:auto}
       html[data-theme=dark] .ult-chat-modal{background:#0a0a0b}
 
       .ult-chat-header{padding:16px 18px;display:flex;justify-content:space-between;align-items:center}
