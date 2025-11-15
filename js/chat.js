@@ -216,15 +216,15 @@ class UltralyticsChat {
 
       .ult-backdrop{display:none;position:fixed;inset:0;background:rgba(255,255,255,.07);
         backdrop-filter:blur(5px) saturate(120%) brightness(1.025);-webkit-backdrop-filter:blur(5px) saturate(120%) brightness(1.025);
-        z-index:9999;opacity:0;transition:opacity .25s ease-out}
+        z-index:9999;opacity:0;transition:opacity .2s ease-out}
       .ult-backdrop.open{display:block;opacity:1}
 
       .ultralytics-chat-pill{position:fixed;right:16px;bottom:36px;padding:14px 22px;border-radius:9999px;background:var(--ult-yellow);
         color:var(--ult-dark);border:0;cursor:pointer;font-size:18px;font-weight:500;box-shadow:0 20px 38px rgba(2,6,23,.22),0 8px 18px rgba(2,6,23,.14);
-        z-index:10000;transition:opacity .3s ease-out,transform .18s;
+        z-index:10000;transition:opacity .2s ease-out,transform .15s ease-out;
         display:inline-flex;align-items:center;gap:10px;transform:scale(1);opacity:1;
         -webkit-user-select:none;user-select:none;touch-action:manipulation}
-      .ultralytics-chat-pill:hover{transform:scale(1.08)}
+      .ultralytics-chat-pill:hover{transform:scale(1.05)}
       .ultralytics-chat-pill.hidden{opacity:0;pointer-events:none}
       .ultralytics-chat-pill img{width:30px;height:30px;border-radius:3px}
       html[data-theme=dark] .ultralytics-chat-pill{background:#40434f;color:#fff;box-shadow:0 20px 38px rgba(0,0,0,.5),0 8px 18px rgba(0,0,0,.32)}
@@ -232,7 +232,7 @@ class UltralyticsChat {
       .ult-chat-modal{position:fixed;left:50%;top:50%;width:min(760px,calc(100vw - 40px));height:min(80vh,820px);background:#fff;border:0;border-radius:16px;
         box-shadow:0 24px 60px rgba(2,6,23,.25),0 8px 24px rgba(2,6,23,.18);z-index:10001;
         transform:translate(-50%,-50%);opacity:0;
-        transition:opacity .3s ease-out;
+        transition:opacity .2s ease-out;
         flex-direction:column;overflow:hidden;text-align:left;display:none}
       .ult-chat-modal.open{display:flex;opacity:1}
       html[data-theme=dark] .ult-chat-modal{background:#0a0a0b}
