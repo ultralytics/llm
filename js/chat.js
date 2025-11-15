@@ -492,26 +492,29 @@ class UltralyticsChat {
 
     this.on(
       this.refs.messages,
-      "mouseenter",
+      "mouseover",
       (e) => {
         const btn = e.target.closest("[data-tooltip]");
-        if (btn && this.refs.tooltip) {
+        if (btn && this.refs.tooltip && !btn.dataset.tooltipActive) {
+          btn.dataset.tooltipActive = "true";
           const r = btn.getBoundingClientRect();
           this.refs.tooltip.textContent = btn.dataset.tooltip;
           this.refs.tooltip.style.left = r.left + r.width / 2 + "px";
           this.refs.tooltip.style.top = r.top - 8 + "px";
           this.refs.tooltip.classList.add("show");
         }
-      },
-      true,
+      }
     );
     this.on(
       this.refs.messages,
-      "mouseleave",
+      "mouseout",
       (e) => {
-        if (e.target.closest("[data-tooltip]")) this.refs.tooltip?.classList.remove("show");
-      },
-      true,
+        const btn = e.target.closest("[data-tooltip]");
+        if (btn) {
+          delete btn.dataset.tooltipActive;
+          this.refs.tooltip?.classList.remove("show");
+        }
+      }
     );
 
     this.on(this.refs.messages, "click", (e) => {
