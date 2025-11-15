@@ -502,7 +502,10 @@ class UltralyticsChat {
           const assistantMessages = this.messages.filter((m) => m.role === "assistant");
           const messageContent = assistantMessages[groupIndex]?.content;
           if (messageContent) {
-            navigator.clipboard?.writeText(messageContent)?.then(() => this.showCopySuccess(actionBtn)).catch(console.error);
+            navigator.clipboard
+              ?.writeText(messageContent)
+              ?.then(() => this.showCopySuccess(actionBtn))
+              .catch(console.error);
           }
         } else if (action === "like" || action === "dislike") {
           this.feedback(action === "like" ? "up" : "down");
