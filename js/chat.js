@@ -24,7 +24,7 @@ class UltralyticsChat {
       theme: {
         primary: d(config.theme, "primary", "#042AFF"),
         dark: d(config.theme, "dark", "#111F68"),
-        yellow: d(config.theme, "yellow", "#E1FF25"),
+        accent: d(config.theme, "accent", "#E1FF25"),
         text: d(config.theme, "text", "#0b0b0f"),
       },
       welcome: {
@@ -217,20 +217,20 @@ class UltralyticsChat {
   }
 
   createStyles() {
-    const { primary, dark, yellow, text } = this.config.theme;
+    const { primary, dark, accent, text } = this.config.theme;
     this.styleElement = this.el(
       "style",
       "",
       `
       *{box-sizing:border-box}
-      :root{--ult-dark:${dark};--ult-primary:${primary};--ult-yellow:${yellow};--ult-text:${text}}
+      :root{--ult-dark:${dark};--ult-primary:${primary};--ult-accent:${accent};--ult-text:${text}}
 
       .ult-backdrop{display:none;position:fixed;inset:0;background:rgba(255,255,255,.07);
         backdrop-filter:blur(5px) saturate(120%) brightness(1.025);-webkit-backdrop-filter:blur(5px) saturate(120%) brightness(1.025);
         z-index:9999;opacity:0;visibility:hidden;transition:opacity .2s ease-out,visibility .2s;pointer-events:none}
       .ult-backdrop.open{display:block;opacity:1;visibility:visible;pointer-events:auto}
 
-      .ultralytics-chat-pill{position:fixed;right:16px;bottom:36px;padding:14px 22px;border-radius:9999px;background:var(--ult-yellow);
+      .ultralytics-chat-pill{position:fixed;right:16px;bottom:36px;padding:14px 22px;border-radius:9999px;background:var(--ult-accent);
         color:var(--ult-dark);border:0;cursor:pointer;font-size:18px;font-weight:500;box-shadow:0 20px 38px rgba(2,6,23,.22),0 8px 18px rgba(2,6,23,.14);
         z-index:10000;transition:opacity .2s ease-out,transform .15s ease-out;
         display:inline-flex;align-items:center;gap:10px;transform:scale(1) translateZ(0);opacity:1;
@@ -271,7 +271,7 @@ class UltralyticsChat {
       .ult-message-label{display:flex;align-items:center;gap:8px;font-size:11px;font-weight:800;color:#6b7280;text-transform:uppercase;letter-spacing:.03em;padding:0 2px}
       html[data-theme=dark] .ult-message-label{color:#a1a1aa}
       .ult-message-label img{max-height:24px;max-width:24px;border-radius:4px}
-      .ult-user-icon{color:var(--ult-yellow)}
+      .ult-user-icon{color:var(--ult-accent)}
       .ult-message{font-size:14px;line-height:1.6;color:var(--ult-text);padding:0 2px;word-break:break-word;text-align:left}
       html[data-theme=dark] .ult-message{color:#f5f5f5}
       .ult-message-actions{display:flex;gap:4px;opacity:0;transition:opacity .15s;margin-top:6px;padding-left:2px}
@@ -318,7 +318,8 @@ class UltralyticsChat {
       .ult-chat-input-container{padding:12px 12px 16px;display:flex;gap:8px;align-items:flex-end}
       .ult-chat-send{background:transparent;border:0;border-radius:8px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.15s;flex-shrink:0;touch-action:manipulation;color:#6b7280;position:relative}
       .ult-chat-send:hover{transform:translateY(-1px);color:var(--ult-text);background:#f7f7f9}
-      .ult-code-copy.success,.ult-icon-btn.success{color:#10b981}
+      .ult-code-copy.success,.ult-icon-btn.success{color:#26C000}
+      html[data-theme=dark] .ult-code-copy.success,html[data-theme=dark] .ult-icon-btn.success{color:#26C000}
       html[data-theme=dark] .ult-chat-send{color:#a1a1aa}
       html[data-theme=dark] .ult-chat-send:hover{color:#fafafa;background:#17181d}
       .ult-chat-input{flex:1;padding:10px 12px;border:0;border-radius:12px;font-size:14px;resize:none;max-height:140px;background:#f7f7f9;color:#0b0b0f;outline:0}
