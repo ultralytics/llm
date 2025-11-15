@@ -326,8 +326,8 @@ class UltralyticsChat {
 
       .ult-chat-footer{padding:8px 18px;text-align:left;font-size:11px;color:#9ca3af}
       html[data-theme=dark] .ult-chat-footer{color:#71717a}
-      .ult-chat-footer a{color:inherit;text-decoration:none;transition:.15s}
-      .ult-chat-footer a:hover{color:var(--ult-primary)}
+      .ult-chat-footer a{color:var(--ult-primary)}
+      .ult-chat-footer a:hover{text-decoration:underline}
 
       .ult-chat-modal[data-mode="search"] .ult-chat-header{order:0}
       .ult-chat-modal[data-mode="search"] .ult-chat-input-container{order:1;padding:16px 18px;border-top:1px solid #eceff5;border-bottom:1px solid #eceff5;background:#fdfdff;align-items:center}
@@ -841,7 +841,7 @@ class UltralyticsChat {
         "ult-message assistant",
         e.name === "AbortError"
           ? "Generation stopped."
-          : "Sorry, I encountered an error. Please try again. If the problem persists, please <a href='https://github.com/ultralytics/llm/issues/new' target='_blank' rel='noopener noreferrer'>submit a bug report</a>.",
+          : "Sorry, I encountered an error. Please try again. If the problem persists, please <a href='https://github.com/ultralytics/llm/issues/new?template=bug-report.yml' target='_blank' rel='noopener noreferrer'>submit a bug report</a>.",
       );
       group.appendChild(msg);
       console.error("Chat error:", e);
@@ -961,8 +961,8 @@ class UltralyticsChat {
       if (fence) {
         if (inCode) {
           html += skipCopyButtons
-            ? `</code></pre></div>`
-            : `</code></pre><button class="ult-code-copy">${this.icon("copy")}</button></div>`;
+          ? `</code></pre></div>`
+          : `</code></pre><button class="ult-code-copy" aria-label="Copy code" data-tooltip="Copy code">${this.icon("copy")}</button></div>`;
           inCode = false;
           codeIndent = 0;
         } else {
