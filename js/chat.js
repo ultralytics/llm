@@ -909,7 +909,7 @@ class UltralyticsChat {
     const actions = this.el(
       "div",
       "ult-message-actions",
-      `<button class="ult-icon-btn" data-action="copy" aria-label="Copy response" data-tooltip="Copy response">${this.icon("copy")}</button><button class="ult-icon-btn" data-action="like" aria-label="Thumbs up" data-tooltip="Thumbs up">${this.icon("like")}</button><button class="ult-icon-btn" data-action="dislike" aria-label="Thumbs down" data-tooltip="Thumbs down">${this.icon("dislike")}</button><button class="ult-icon-btn" data-action="retry" aria-label="Regenerate" data-tooltip="Regenerate">${this.icon("refresh")}</button>`,
+      `<button class="ult-icon-btn" data-action="copy" aria-label="Copy response" data-tooltip="Copy response">${this.icon("copy")}</button><button class="ult-icon-btn" data-action="like" aria-label="Good response" data-tooltip="Good response">${this.icon("like")}</button><button class="ult-icon-btn" data-action="dislike" aria-label="Bad response" data-tooltip="Bad response">${this.icon("dislike")}</button><button class="ult-icon-btn" data-action="retry" aria-label="Try again" data-tooltip="Try again">${this.icon("refresh")}</button>`,
     );
     group.appendChild(actions);
   }
