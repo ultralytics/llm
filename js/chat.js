@@ -316,11 +316,11 @@ class UltralyticsChat {
       html[data-theme=dark] .ult-thinking{color:#a1a1aa}
 
       .ult-chat-input-container{padding:12px 12px 16px;display:flex;gap:8px;align-items:flex-end}
-      .ult-chat-send{background:#f1f2f6;border:0;border-radius:12px;width:44px;height:44px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.12s;flex-shrink:0;touch-action:manipulation;color:#6b7280;position:relative}
-      .ult-chat-send:hover{transform:translateY(-1px);filter:brightness(.98);color:var(--ult-text)}
+      .ult-chat-send{background:transparent;border:0;border-radius:8px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.15s;flex-shrink:0;touch-action:manipulation;color:#6b7280;position:relative}
+      .ult-chat-send:hover{transform:translateY(-1px);color:var(--ult-text);background:#f7f7f9}
       .ult-code-copy.success,.ult-icon-btn.success{color:#10b981}
-      html[data-theme=dark] .ult-chat-send{background:#17181d;color:#a1a1aa}
-      html[data-theme=dark] .ult-chat-send:hover{color:#fafafa}
+      html[data-theme=dark] .ult-chat-send{color:#a1a1aa}
+      html[data-theme=dark] .ult-chat-send:hover{color:#fafafa;background:#17181d}
       .ult-chat-input{flex:1;padding:10px 12px;border:0;border-radius:12px;font-size:14px;resize:none;max-height:140px;background:#f7f7f9;color:#0b0b0f;outline:0}
       .ult-chat-input::placeholder{color:#9ca3af} html[data-theme=dark] .ult-chat-input{background:#131318;color:#fafafa}
 
@@ -359,8 +359,6 @@ class UltralyticsChat {
         .ult-chat-modal.welcome-mode .ult-chat-input-container{margin-top:auto}
         html[data-theme=dark] .ult-chat-input-container{border-top-color:#1c1c22;background:#0a0a0b}
         .ult-chat-input{padding:9px 11px;font-size:16px;max-height:100px;border-radius:10px}
-        .ult-chat-send{width:38px;height:38px;border-radius:10px;flex-shrink:0}
-        .ult-chat-send svg{width:17px;height:17px}
         .ult-message-group{gap:3px;padding:0 14px;margin-bottom:8px}
         .ult-message-label{font-size:11px;gap:5px;padding:0;margin-bottom:2px}
         .ult-message-label img{max-height:20px;max-width:20px}
