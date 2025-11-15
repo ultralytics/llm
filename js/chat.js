@@ -86,6 +86,17 @@ class UltralyticsChat {
     return e;
   }
 
+  showCopySuccess(btn) {
+    if (!btn) return;
+    const orig = btn.innerHTML;
+    btn.innerHTML = this.icon("check");
+    btn.classList.add("success");
+    setTimeout(() => {
+      btn.innerHTML = orig;
+      btn.classList.remove("success");
+    }, 1500);
+  }
+
   getPageContext() {
     const meta = (name) => document.querySelector(`meta[name="${name}"]`)?.content || "";
     return {
@@ -306,6 +317,7 @@ class UltralyticsChat {
       .ult-actions{display:flex;gap:6px;align-items:center}
       .ult-action-btn,.ult-chat-send{background:#f1f2f6;border:0;border-radius:12px;width:44px;height:44px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.12s;flex-shrink:0;touch-action:manipulation;color:#6b7280;position:relative}
       .ult-action-btn:hover,.ult-chat-send:hover{transform:translateY(-1px);filter:brightness(.98);color:var(--ult-text)}
+      .ult-code-copy.copied,.ult-action-btn.success,.ult-icon-btn.success{color:#10b981}
       html[data-theme=dark] .ult-action-btn,html[data-theme=dark] .ult-chat-send{background:#17181d;color:#a1a1aa}
       html[data-theme=dark] .ult-action-btn:hover,html[data-theme=dark] .ult-chat-send:hover{color:#fafafa}
       .ult-chat-input{flex:1;padding:10px 12px;border:0;border-radius:12px;font-size:14px;resize:none;max-height:140px;background:#f7f7f9;color:#0b0b0f;outline:0}
@@ -482,17 +494,7 @@ class UltralyticsChat {
       if (e.target.closest(".ult-code-copy")) {
         const btn = e.target.closest(".ult-code-copy");
         const code = btn.previousElementSibling?.querySelector("code")?.textContent || "";
-        navigator.clipboard
-          ?.writeText(code)
-          .then(() => {
-            btn.innerHTML = this.icon("check");
-            btn.classList.add("copied");
-            setTimeout(() => {
-              btn.innerHTML = this.icon("copy");
-              btn.classList.remove("copied");
-            }, 1500);
-          })
-          .catch(console.error);
+        navigator.clipboard?.writeText(code).then(() => this.showCopySuccess(btn)).catch(console.error);
       }
     });
   }
@@ -612,11 +614,15 @@ class UltralyticsChat {
 
   copyThread() {
     navigator.clipboard?.writeText(this.formatThread())?.catch(console.error);
+    this.showCopySuccess(this.qs(".ult-chat-copy", this.refs.modal));
   }
 
   copyLastAssistant() {
     const last = [...this.messages].reverse().find((m) => m.role === "assistant");
-    if (last) navigator.clipboard?.writeText(last.content)?.catch(console.error);
+    if (last) {
+      navigator.clipboard?.writeText(last.content)?.catch(console.error);
+      this.showCopySuccess(this.qs(".ult-act-copy", this.refs.modal));
+    }
   }
 
   feedback(type) {
