@@ -86,6 +86,17 @@ class UltralyticsChat {
     return e;
   }
 
+  showCopySuccess(btn) {
+    if (!btn) return;
+    const orig = btn.innerHTML;
+    btn.innerHTML = this.icon("check");
+    btn.classList.add("success");
+    setTimeout(() => {
+      btn.innerHTML = orig;
+      btn.classList.remove("success");
+    }, 1500);
+  }
+
   getPageContext() {
     const meta = (name) => document.querySelector(`meta[name="${name}"]`)?.content || "";
     return {
@@ -216,21 +227,25 @@ class UltralyticsChat {
 
       .ult-backdrop{display:none;position:fixed;inset:0;background:rgba(255,255,255,.07);
         backdrop-filter:blur(5px) saturate(120%) brightness(1.025);-webkit-backdrop-filter:blur(5px) saturate(120%) brightness(1.025);
-        z-index:9999;opacity:0;transition:opacity .18s}
-      .ult-backdrop.open{display:block;opacity:1}
+        z-index:9999;opacity:0;visibility:hidden;transition:opacity .2s ease-out,visibility .2s;pointer-events:none}
+      .ult-backdrop.open{display:block;opacity:1;visibility:visible;pointer-events:auto}
 
       .ultralytics-chat-pill{position:fixed;right:16px;bottom:36px;padding:14px 22px;border-radius:9999px;background:var(--ult-yellow);
         color:var(--ult-dark);border:0;cursor:pointer;font-size:18px;font-weight:500;box-shadow:0 20px 38px rgba(2,6,23,.22),0 8px 18px rgba(2,6,23,.14);
-        z-index:10000;transition:transform .18s,box-shadow .18s,opacity .14s;display:inline-flex;align-items:center;gap:10px;transform:translateZ(0);
-        -webkit-user-select:none;user-select:none;touch-action:manipulation}
-      .ultralytics-chat-pill:hover{transform:scale(1.1)} .ultralytics-chat-pill.hidden{transform:scale(.95);opacity:0;pointer-events:none}
+        z-index:10000;transition:opacity .2s ease-out,transform .15s ease-out;
+        display:inline-flex;align-items:center;gap:10px;transform:scale(1) translateZ(0);opacity:1;
+        -webkit-user-select:none;user-select:none;touch-action:manipulation;will-change:opacity,transform}
+      .ultralytics-chat-pill:hover{transform:scale(1.05) translateZ(0)}
+      .ultralytics-chat-pill.hidden{opacity:0;pointer-events:none}
       .ultralytics-chat-pill img{width:30px;height:30px;border-radius:3px}
       html[data-theme=dark] .ultralytics-chat-pill{background:#40434f;color:#fff;box-shadow:0 20px 38px rgba(0,0,0,.5),0 8px 18px rgba(0,0,0,.32)}
 
       .ult-chat-modal{position:fixed;left:50%;top:50%;width:min(760px,calc(100vw - 40px));height:min(80vh,820px);background:#fff;border:0;border-radius:16px;
-        box-shadow:0 24px 60px rgba(2,6,23,.25),0 8px 24px rgba(2,6,23,.18);z-index:10001;transform:translate(-50%,-50%) scale(.98);opacity:0;transition:transform .18s,opacity .18s;
-        flex-direction:column;overflow:hidden;text-align:left;display:none}
-      .ult-chat-modal.open{display:flex;opacity:1;transform:translate(-50%,-50%) scale(1)}
+        box-shadow:0 24px 60px rgba(2,6,23,.25),0 8px 24px rgba(2,6,23,.18);z-index:10001;
+        transform:translate(-50%,-50%) translateZ(0);opacity:0;visibility:hidden;
+        transition:opacity .2s ease-out,visibility .2s;
+        flex-direction:column;overflow:hidden;text-align:left;display:flex;pointer-events:none;will-change:opacity}
+      .ult-chat-modal.open{opacity:1;visibility:visible;pointer-events:auto}
       html[data-theme=dark] .ult-chat-modal{background:#0a0a0b}
 
       .ult-chat-header{padding:16px 18px;display:flex;justify-content:space-between;align-items:center}
@@ -267,10 +282,12 @@ class UltralyticsChat {
       .ult-global-tooltip.show{opacity:1}
       html[data-theme=dark] .ult-global-tooltip{background:#374151}
       html[data-theme=dark] .ult-global-tooltip::after{border-top-color:#374151}
-      .ult-code-copy{position:absolute;top:8px;right:8px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);color:#e5e7eb;padding:5px 10px;border-radius:6px;cursor:pointer;font-size:12px;opacity:0;transition:.15s;font-weight:500;display:flex;align-items:center;gap:5px}
+      .ult-code-copy{position:absolute;top:8px;right:8px;background:#f1f2f6;border:0;border-radius:8px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:0;transition:.12s;color:#6b7280}
       .ult-code-block:hover .ult-code-copy{opacity:1}
-      .ult-code-copy:hover{background:rgba(255,255,255,.2)}
-      .ult-code-copy.copied{background:#10b981;border-color:#10b981;color:#fff}
+      .ult-code-copy:hover{transform:translateY(-1px);filter:brightness(.98);color:var(--ult-text)}
+      .ult-code-copy.copied{color:#10b981}
+      html[data-theme=dark] .ult-code-copy{background:#17181d;color:#a1a1aa}
+      html[data-theme=dark] .ult-code-copy:hover{color:#fafafa}
       .ult-message pre{padding:10px 12px;border-radius:10px;overflow:auto;border:1px solid #e5e7eb;background:#f6f8fa}
       .ult-message code{background:#f4f4f5;padding:2px 6px;border-radius:6px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;border:0}
       .ult-message pre code{background:transparent;padding:0;border:0;display:block;font-size:13px}
@@ -300,6 +317,7 @@ class UltralyticsChat {
       .ult-actions{display:flex;gap:6px;align-items:center}
       .ult-action-btn,.ult-chat-send{background:#f1f2f6;border:0;border-radius:12px;width:44px;height:44px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.12s;flex-shrink:0;touch-action:manipulation;color:#6b7280;position:relative}
       .ult-action-btn:hover,.ult-chat-send:hover{transform:translateY(-1px);filter:brightness(.98);color:var(--ult-text)}
+      .ult-code-copy.success,.ult-action-btn.success,.ult-icon-btn.success{color:#10b981}
       html[data-theme=dark] .ult-action-btn,html[data-theme=dark] .ult-chat-send{background:#17181d;color:#a1a1aa}
       html[data-theme=dark] .ult-action-btn:hover,html[data-theme=dark] .ult-chat-send:hover{color:#fafafa}
       .ult-chat-input{flex:1;padding:10px 12px;border:0;border-radius:12px;font-size:14px;resize:none;max-height:140px;background:#f7f7f9;color:#0b0b0f;outline:0}
@@ -314,6 +332,9 @@ class UltralyticsChat {
 
       .ult-icon-swap{display:flex;align-items:center;justify-content:center}
       @media (max-width:768px){
+        .ult-backdrop{transition:opacity .15s ease-out,visibility .15s}
+        .ultralytics-chat-pill{transition:opacity .15s ease-out,transform .12s ease-out}
+        .ult-chat-modal{transition:opacity .15s ease-out,visibility .15s}
         .ult-backdrop{pointer-events:none}
         .ult-chat-modal{position:fixed;left:0;top:0;width:100vw;height:100svh;max-width:100vw;max-height:100svh;border-radius:0;margin:0;padding:0;transform:none!important}
         .ult-chat-modal.open{transform:none!important;opacity:1}
@@ -374,6 +395,7 @@ class UltralyticsChat {
         '<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.59 13.51l6.83 3.98"/><path d="M15.41 6.51L8.59 10.49"/>',
       arrowUp: '<line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/>',
       square: '<rect x="4.8" y="4.8" width="14.4" height="14.4" rx="2" ry="2"/>',
+      check: '<polyline points="20 6 9 17 4 12"/>',
     };
     return `<svg width="18" height="18" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" fill="none">${paths[name] || ""}</svg>`;
   }
@@ -474,14 +496,7 @@ class UltralyticsChat {
         const code = btn.previousElementSibling?.querySelector("code")?.textContent || "";
         navigator.clipboard
           ?.writeText(code)
-          .then(() => {
-            btn.innerHTML = "Copied!";
-            btn.classList.add("copied");
-            setTimeout(() => {
-              btn.innerHTML = `${this.icon("copy")}Copy`;
-              btn.classList.remove("copied");
-            }, 1500);
-          })
+          .then(() => this.showCopySuccess(btn))
           .catch(console.error);
       }
     });
@@ -602,11 +617,15 @@ class UltralyticsChat {
 
   copyThread() {
     navigator.clipboard?.writeText(this.formatThread())?.catch(console.error);
+    this.showCopySuccess(this.qs(".ult-chat-copy", this.refs.modal));
   }
 
   copyLastAssistant() {
     const last = [...this.messages].reverse().find((m) => m.role === "assistant");
-    if (last) navigator.clipboard?.writeText(last.content)?.catch(console.error);
+    if (last) {
+      navigator.clipboard?.writeText(last.content)?.catch(console.error);
+      this.showCopySuccess(this.qs(".ult-act-copy", this.refs.modal));
+    }
   }
 
   feedback(type) {
@@ -797,7 +816,7 @@ class UltralyticsChat {
         }
       }
       if (renderTimer) clearTimeout(renderTimer);
-      div.innerHTML = this.renderMarkdown(content);
+      div.innerHTML = this.renderMarkdown(content, false);
       this.highlight(div);
       this.scrollToBottom();
       this.messages.push({ role: "assistant", content });
@@ -897,7 +916,7 @@ class UltralyticsChat {
         if (inCode) {
           html += skipCopyButtons
             ? `</code></pre></div>`
-            : `</code></pre><button class="ult-code-copy">${this.icon("copy")}Copy</button></div>`;
+            : `</code></pre><button class="ult-code-copy">${this.icon("copy")}</button></div>`;
           inCode = false;
         } else {
           closePara();
