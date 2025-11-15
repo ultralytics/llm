@@ -274,12 +274,7 @@ class UltralyticsChat {
       .ult-user-icon{color:var(--ult-yellow)}
       .ult-message{font-size:14px;line-height:1.6;color:var(--ult-text);padding:0 2px;word-break:break-word;text-align:left}
       html[data-theme=dark] .ult-message{color:#f5f5f5}
-      .ult-message-actions{display:flex;gap:4px;opacity:0;transition:opacity .15s;margin-top:6px;padding-left:2px}
-      .ult-message-action-btn{background:transparent;border:1px solid #e5e7eb;border-radius:8px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.12s;color:#6b7280}
-      .ult-message-action-btn:hover{background:#f7f7f9;color:var(--ult-text);transform:translateY(-1px)}
-      .ult-message-action-btn.success{color:#10b981}
-      html[data-theme=dark] .ult-message-action-btn{border-color:#232327;color:#a1a1aa}
-      html[data-theme=dark] .ult-message-action-btn:hover{background:#17181d;color:#fafafa}
+      .ult-message-actions{display:flex;gap:6px;opacity:0;transition:opacity .15s;margin-top:6px;padding-left:2px}
       .ult-message a{color:var(--ult-primary);text-underline-offset:2px}.ult-message a:hover{text-decoration:underline}
       .ult-message strong{font-weight:700;color:var(--ult-text)}
       html[data-theme=dark] .ult-message strong{color:#fafafa}
@@ -323,7 +318,7 @@ class UltralyticsChat {
       .ult-chat-input-container{padding:12px 12px 16px;display:flex;gap:8px;align-items:flex-end}
       .ult-chat-send{background:#f1f2f6;border:0;border-radius:12px;width:44px;height:44px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.12s;flex-shrink:0;touch-action:manipulation;color:#6b7280;position:relative}
       .ult-chat-send:hover{transform:translateY(-1px);filter:brightness(.98);color:var(--ult-text)}
-      .ult-code-copy.success,.ult-message-action-btn.success,.ult-icon-btn.success{color:#10b981}
+      .ult-code-copy.success,.ult-icon-btn.success{color:#10b981}
       html[data-theme=dark] .ult-chat-send{background:#17181d;color:#a1a1aa}
       html[data-theme=dark] .ult-chat-send:hover{color:#fafafa}
       .ult-chat-input{flex:1;padding:10px 12px;border:0;border-radius:12px;font-size:14px;resize:none;max-height:140px;background:#f7f7f9;color:#0b0b0f;outline:0}
@@ -501,7 +496,7 @@ class UltralyticsChat {
           .then(() => this.showCopySuccess(btn))
           .catch(console.error);
       }
-      const actionBtn = e.target.closest(".ult-message-action-btn");
+      const actionBtn = e.target.closest(".ult-icon-btn[data-action]");
       if (actionBtn) {
         const action = actionBtn.dataset.action;
         const group = actionBtn.closest(".ult-message-group");
@@ -511,6 +506,8 @@ class UltralyticsChat {
         } else if (action === "like" || action === "dislike") {
           this.feedback(action === "like" ? "up" : "down");
           this.showCopySuccess(actionBtn);
+        } else if (action === "retry") {
+          void this.retryLast();
         }
       }
     });
@@ -629,14 +626,6 @@ class UltralyticsChat {
   copyThread() {
     navigator.clipboard?.writeText(this.formatThread())?.catch(console.error);
     this.showCopySuccess(this.qs(".ult-chat-copy", this.refs.modal));
-  }
-
-  copyLastAssistant() {
-    const last = [...this.messages].reverse().find((m) => m.role === "assistant");
-    if (last) {
-      navigator.clipboard?.writeText(last.content)?.catch(console.error);
-      this.showCopySuccess(this.qs(".ult-act-copy", this.refs.modal));
-    }
   }
 
   feedback(type) {
@@ -881,9 +870,21 @@ class UltralyticsChat {
     const actions = this.el(
       "div",
       "ult-message-actions",
-      `<button class="ult-message-action-btn" data-action="copy" aria-label="Copy">${this.icon("copy")}</button><button class="ult-message-action-btn" data-action="like" aria-label="Thumbs up">${this.icon("like")}</button><button class="ult-message-action-btn" data-action="dislike" aria-label="Thumbs down">${this.icon("dislike")}</button>`,
+      `<button class="ult-icon-btn" data-action="copy" aria-label="Copy response" data-tooltip="Copy response">${this.icon("copy")}</button><button class="ult-icon-btn" data-action="like" aria-label="Thumbs up" data-tooltip="Thumbs up">${this.icon("like")}</button><button class="ult-icon-btn" data-action="dislike" aria-label="Thumbs down" data-tooltip="Thumbs down">${this.icon("dislike")}</button><button class="ult-icon-btn" data-action="retry" aria-label="Regenerate" data-tooltip="Regenerate">${this.icon("refresh")}</button>`,
     );
     group.appendChild(actions);
+    this.qsa("[data-tooltip]", actions).forEach((btn) => {
+      this.on(btn, "mouseenter", (e) => {
+        const t = this.refs.tooltip;
+        if (!t) return;
+        const r = e.currentTarget.getBoundingClientRect();
+        t.textContent = e.currentTarget.dataset.tooltip;
+        t.style.left = r.left + r.width / 2 + "px";
+        t.style.top = r.top - 8 + "px";
+        t.classList.add("show");
+      });
+      this.on(btn, "mouseleave", () => this.refs.tooltip?.classList.remove("show"));
+    });
   }
 
   finalizeAssistantMessage(group) {
