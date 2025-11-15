@@ -489,6 +489,20 @@ class UltralyticsChat {
       if (!this.isOpen && e.metaKey && e.key.toLowerCase() === "k") this.toggle(true);
     });
 
+    this.on(this.refs.messages, "mouseenter", (e) => {
+      const btn = e.target.closest("[data-tooltip]");
+      if (btn && this.refs.tooltip) {
+        const r = btn.getBoundingClientRect();
+        this.refs.tooltip.textContent = btn.dataset.tooltip;
+        this.refs.tooltip.style.left = r.left + r.width / 2 + "px";
+        this.refs.tooltip.style.top = r.top - 8 + "px";
+        this.refs.tooltip.classList.add("show");
+      }
+    }, true);
+    this.on(this.refs.messages, "mouseleave", (e) => {
+      if (e.target.closest("[data-tooltip]")) this.refs.tooltip?.classList.remove("show");
+    }, true);
+
     this.on(this.refs.messages, "click", (e) => {
       if (e.target.closest(".ult-code-copy")) {
         const btn = e.target.closest(".ult-code-copy");
@@ -888,18 +902,6 @@ class UltralyticsChat {
       `<button class="ult-icon-btn" data-action="copy" aria-label="Copy response" data-tooltip="Copy response">${this.icon("copy")}</button><button class="ult-icon-btn" data-action="like" aria-label="Thumbs up" data-tooltip="Thumbs up">${this.icon("like")}</button><button class="ult-icon-btn" data-action="dislike" aria-label="Thumbs down" data-tooltip="Thumbs down">${this.icon("dislike")}</button><button class="ult-icon-btn" data-action="retry" aria-label="Regenerate" data-tooltip="Regenerate">${this.icon("refresh")}</button>`,
     );
     group.appendChild(actions);
-    this.qsa("[data-tooltip]", actions).forEach((btn) => {
-      this.on(btn, "mouseenter", (e) => {
-        const t = this.refs.tooltip;
-        if (!t) return;
-        const r = e.currentTarget.getBoundingClientRect();
-        t.textContent = e.currentTarget.dataset.tooltip;
-        t.style.left = r.left + r.width / 2 + "px";
-        t.style.top = r.top - 8 + "px";
-        t.classList.add("show");
-      });
-      this.on(btn, "mouseleave", () => this.refs.tooltip?.classList.remove("show"));
-    });
   }
 
   finalizeAssistantMessage(group) {
