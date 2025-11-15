@@ -314,8 +314,7 @@ class UltralyticsChat {
       .ult-typing span{width:6px;height:6px;background:#a1a1aa;border-radius:50%;animation:ultTyping 1.2s infinite}
       .ult-typing span:nth-child(2){animation-delay:.18s}.ult-typing span:nth-child(3){animation-delay:.36s}
       @keyframes ultTyping{0%,60%,100%{transform:translateY(0);opacity:1}30%{transform:translateY(-6px);opacity:.75}}
-      .ult-thinking{display:inline-flex;align-items:center;gap:8px;padding:6px 0;color:#6b7280;font-size:13px}
-      html[data-theme=dark] .ult-thinking{color:#a1a1aa}
+      .ult-thinking{display:flex;align-items:center;gap:8px;padding:0;color:inherit;font-size:inherit}
 
       .ult-chat-input-container{padding:12px 12px 16px;display:flex;gap:8px;align-items:flex-end}
       .ult-chat-send{background:transparent;border:0;border-radius:8px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.15s;flex-shrink:0;touch-action:manipulation;color:#6b7280;position:relative}
@@ -713,17 +712,19 @@ class UltralyticsChat {
   }
 
   createThinking(label = "Thinking") {
+    const wrapper = this.el("div", "ult-message assistant ult-message-thinking");
     const thinking = this.el(
-      "div",
+      "p",
       "ult-thinking",
       `<span class="ult-thinking-word">${label}</span><span class="ult-typing"><span></span><span></span><span></span></span><span class="ult-thinking-time">(0.0s)</span>`,
     );
-    const timeEl = this.qs(".ult-thinking-time", thinking);
+    wrapper.appendChild(thinking);
+    const timeEl = this.qs(".ult-thinking-time", wrapper);
     const t0 = performance.now();
     const tick = setInterval(() => {
       if (timeEl) timeEl.textContent = `(${((performance.now() - t0) / 1000).toFixed(1)}s)`;
     }, 100);
-    return { el: thinking, clear: () => clearInterval(tick) };
+    return { el: wrapper, clear: () => clearInterval(tick) };
   }
 
   async performSearch(query) {
@@ -860,13 +861,11 @@ class UltralyticsChat {
     } catch (e) {
       thinking.remove();
       clear();
-      const msg = this.el(
-        "div",
-        "ult-message assistant",
+      const errorHtml =
         e.name === "AbortError"
-          ? "Generation stopped."
-          : "Sorry, I encountered an error. Please try again. If the problem persists, please <a href='https://github.com/ultralytics/llm/issues/new?template=bug-report.yml' target='_blank' rel='noopener noreferrer'>submit a bug report</a>.",
-      );
+          ? "<p>Generation stopped.</p>"
+          : "<p>Sorry, I encountered an error. Please try again. If the problem persists, please <a href='https://github.com/ultralytics/llm/issues/new?template=bug-report.yml' target='_blank' rel='noopener noreferrer'>submit a bug report</a>.</p>";
+      const msg = this.el("div", "ult-message assistant", errorHtml);
       group.appendChild(msg);
       console.error("Chat error:", e);
     } finally {
