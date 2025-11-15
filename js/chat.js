@@ -917,6 +917,7 @@ class UltralyticsChat {
     const lines = (src || "").replace(/\r\n?/g, "\n").split("\n");
     let html = "",
       inCode = false,
+      codeIndent = 0,
       listType = null,
       listOpen = false,
       inQuote = false,
@@ -954,17 +955,20 @@ class UltralyticsChat {
             ? `</code></pre></div>`
             : `</code></pre><button class="ult-code-copy">${this.icon("copy")}</button></div>`;
           inCode = false;
+          codeIndent = 0;
         } else {
           closePara();
           closeList();
           closeQuote();
           inCode = true;
+          codeIndent = raw.search(/\S/);
           html += `<div class="ult-code-block"><pre><code class="lang-${esc(fence[1] || "")}">`;
         }
         continue;
       }
       if (inCode) {
-        html += esc(raw) + "\n";
+        const stripped = raw.slice(codeIndent);
+        html += esc(stripped) + "\n";
         continue;
       }
       const q = /^>\s?(.*)$/.exec(raw);
