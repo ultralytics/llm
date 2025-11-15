@@ -266,13 +266,20 @@ class UltralyticsChat {
       html[data-theme=dark] .ult-example{background:#131318;color:#fafafa}
 
       .ult-chat-messages{flex:1;overflow-y:auto;padding:0 18px 18px;display:flex;flex-direction:column;gap:14px;-webkit-overflow-scrolling:touch}
-      .ult-message-group{display:flex;flex-direction:column;gap:6px}
+      .ult-message-group{display:flex;flex-direction:column;gap:6px;position:relative}
+      .ult-message-group:hover .ult-message-actions{opacity:1}
       .ult-message-label{display:flex;align-items:center;gap:8px;font-size:11px;font-weight:800;color:#6b7280;text-transform:uppercase;letter-spacing:.03em;padding:0 2px}
       html[data-theme=dark] .ult-message-label{color:#a1a1aa}
       .ult-message-label img{max-height:24px;max-width:24px;border-radius:4px}
       .ult-user-icon{color:var(--ult-yellow)}
       .ult-message{font-size:14px;line-height:1.6;color:var(--ult-text);padding:0 2px;word-break:break-word;text-align:left}
       html[data-theme=dark] .ult-message{color:#f5f5f5}
+      .ult-message-actions{display:flex;gap:4px;opacity:0;transition:opacity .15s;margin-top:6px;padding-left:2px}
+      .ult-message-action-btn{background:transparent;border:1px solid #e5e7eb;border-radius:8px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.12s;color:#6b7280}
+      .ult-message-action-btn:hover{background:#f7f7f9;color:var(--ult-text);transform:translateY(-1px)}
+      .ult-message-action-btn.success{color:#10b981}
+      html[data-theme=dark] .ult-message-action-btn{border-color:#232327;color:#a1a1aa}
+      html[data-theme=dark] .ult-message-action-btn:hover{background:#17181d;color:#fafafa}
       .ult-message a{color:var(--ult-primary);text-underline-offset:2px}.ult-message a:hover{text-decoration:underline}
       .ult-message strong{font-weight:700;color:var(--ult-text)}
       html[data-theme=dark] .ult-message strong{color:#fafafa}
@@ -314,12 +321,11 @@ class UltralyticsChat {
       html[data-theme=dark] .ult-thinking{color:#a1a1aa}
 
       .ult-chat-input-container{padding:12px 12px 16px;display:flex;gap:8px;align-items:flex-end}
-      .ult-actions{display:flex;gap:6px;align-items:center}
-      .ult-action-btn,.ult-chat-send{background:#f1f2f6;border:0;border-radius:12px;width:44px;height:44px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.12s;flex-shrink:0;touch-action:manipulation;color:#6b7280;position:relative}
-      .ult-action-btn:hover,.ult-chat-send:hover{transform:translateY(-1px);filter:brightness(.98);color:var(--ult-text)}
-      .ult-code-copy.success,.ult-action-btn.success,.ult-icon-btn.success{color:#10b981}
-      html[data-theme=dark] .ult-action-btn,html[data-theme=dark] .ult-chat-send{background:#17181d;color:#a1a1aa}
-      html[data-theme=dark] .ult-action-btn:hover,html[data-theme=dark] .ult-chat-send:hover{color:#fafafa}
+      .ult-chat-send{background:#f1f2f6;border:0;border-radius:12px;width:44px;height:44px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.12s;flex-shrink:0;touch-action:manipulation;color:#6b7280;position:relative}
+      .ult-chat-send:hover{transform:translateY(-1px);filter:brightness(.98);color:var(--ult-text)}
+      .ult-code-copy.success,.ult-message-action-btn.success,.ult-icon-btn.success{color:#10b981}
+      html[data-theme=dark] .ult-chat-send{background:#17181d;color:#a1a1aa}
+      html[data-theme=dark] .ult-chat-send:hover{color:#fafafa}
       .ult-chat-input{flex:1;padding:10px 12px;border:0;border-radius:12px;font-size:14px;resize:none;max-height:140px;background:#f7f7f9;color:#0b0b0f;outline:0}
       .ult-chat-input::placeholder{color:#9ca3af} html[data-theme=dark] .ult-chat-input{background:#131318;color:#fafafa}
 
@@ -340,8 +346,8 @@ class UltralyticsChat {
         .ult-chat-modal.open{transform:none!important;opacity:1}
         .ult-chat-modal.open{display:flex;flex-direction:column;overflow:hidden}
         body.ult-modal-open{position:fixed!important;width:100%!important;overflow:hidden!important;-webkit-overflow-scrolling:touch}
-        .ult-actions{display:none}
         .ult-subtle{display:none!important}
+        .ult-message-actions{margin-top:4px}
         .ult-chat-header{padding:8px 12px;min-height:48px;flex-shrink:0;border-bottom:1px solid #eceff5}
         html[data-theme=dark] .ult-chat-header{border-bottom-color:#1c1c22}
         .ult-chat-title{gap:6px;flex:1;min-width:0}
@@ -420,7 +426,7 @@ class UltralyticsChat {
     this.refs.modal = this.el(
       "div",
       "ult-chat-modal",
-      `<div class="ult-chat-header"><div class="ult-chat-title"><img src="${this.esc(logo)}" alt="${this.esc(name)}" /><div class="ult-subtle">${this.esc(tagline)}</div></div><div class="ult-header-actions"><button class="ult-icon-btn ult-chat-copy" aria-label="${this.esc(copyText)}" data-tooltip="${this.esc(copyText)}">${this.icon("copy")}</button><button class="ult-icon-btn ult-chat-download" aria-label="${this.esc(downloadText)}" data-tooltip="${this.esc(downloadText)}">${this.icon("download")}</button><button class="ult-icon-btn ult-chat-clear" aria-label="${this.esc(clearText)}" data-tooltip="${this.esc(clearText)}">${this.icon("refresh")}</button><button class="ult-icon-btn ult-chat-close" aria-label="Close" data-tooltip="Close">${this.icon("close")}</button></div></div><div id="ult-welcome" class="ult-welcome" style="display:none"><h1>${this.esc(title)}</h1><p>${message}</p></div><div id="ult-examples" class="ult-examples" style="display:none"></div><div class="ult-chat-messages" id="ult-messages" aria-live="polite"></div><div class="ult-chat-input-container"><div class="ult-actions"><button class="ult-action-btn ult-act-copy" aria-label="Copy last response" data-tooltip="Copy last response">${this.icon("copy")}</button><button class="ult-action-btn ult-act-like" aria-label="Thumbs up" data-tooltip="Thumbs up">${this.icon("like")}</button><button class="ult-action-btn ult-act-dislike" aria-label="Thumbs down" data-tooltip="Thumbs down">${this.icon("dislike")}</button><button class="ult-action-btn ult-act-share" aria-label="Share" data-tooltip="Share">${this.icon("share")}</button><button class="ult-action-btn ult-act-retry" aria-label="Try again" data-tooltip="Try again">${this.icon("refresh")}</button></div><textarea name="message" class="ult-chat-input" placeholder="${this.esc(placeholder)}" rows="1" maxlength="${this.config.maxMessageLength}" autocomplete="off"></textarea><button class="ult-chat-send" aria-label="Ready" data-tooltip="Ready"><span class="ult-icon-swap" data-icon="square">${this.icon("square")}</span></button></div>`,
+      `<div class="ult-chat-header"><div class="ult-chat-title"><img src="${this.esc(logo)}" alt="${this.esc(name)}" /><div class="ult-subtle">${this.esc(tagline)}</div></div><div class="ult-header-actions"><button class="ult-icon-btn ult-chat-copy" aria-label="${this.esc(copyText)}" data-tooltip="${this.esc(copyText)}">${this.icon("copy")}</button><button class="ult-icon-btn ult-chat-download" aria-label="${this.esc(downloadText)}" data-tooltip="${this.esc(downloadText)}">${this.icon("download")}</button><button class="ult-icon-btn ult-chat-clear" aria-label="${this.esc(clearText)}" data-tooltip="${this.esc(clearText)}">${this.icon("refresh")}</button><button class="ult-icon-btn ult-chat-close" aria-label="Close" data-tooltip="Close">${this.icon("close")}</button></div></div><div id="ult-welcome" class="ult-welcome" style="display:none"><h1>${this.esc(title)}</h1><p>${message}</p></div><div id="ult-examples" class="ult-examples" style="display:none"></div><div class="ult-chat-messages" id="ult-messages" aria-live="polite"></div><div class="ult-chat-input-container"><textarea name="message" class="ult-chat-input" placeholder="${this.esc(placeholder)}" rows="1" maxlength="${this.config.maxMessageLength}" autocomplete="off"></textarea><button class="ult-chat-send" aria-label="Ready" data-tooltip="Ready"><span class="ult-icon-swap" data-icon="square">${this.icon("square")}</span></button></div>`,
     );
     this.refs.modal.setAttribute("role", "dialog");
     this.refs.modal.setAttribute("aria-modal", "true");
@@ -485,11 +491,7 @@ class UltralyticsChat {
       if (this.isOpen && e.key === "Escape") this.toggle(false);
       if (!this.isOpen && e.metaKey && e.key.toLowerCase() === "k") this.toggle(true);
     });
-    this.on(this.qs(".ult-act-copy", m), "click", () => this.copyLastAssistant());
-    this.on(this.qs(".ult-act-like", m), "click", () => this.feedback("up"));
-    this.on(this.qs(".ult-act-dislike", m), "click", () => this.feedback("down"));
-    this.on(this.qs(".ult-act-share", m), "click", () => this.copyThread());
-    this.on(this.qs(".ult-act-retry", m), "click", () => void this.retryLast());
+
     this.on(this.refs.messages, "click", (e) => {
       if (e.target.closest(".ult-code-copy")) {
         const btn = e.target.closest(".ult-code-copy");
@@ -498,6 +500,18 @@ class UltralyticsChat {
           ?.writeText(code)
           .then(() => this.showCopySuccess(btn))
           .catch(console.error);
+      }
+      const actionBtn = e.target.closest(".ult-message-action-btn");
+      if (actionBtn) {
+        const action = actionBtn.dataset.action;
+        const group = actionBtn.closest(".ult-message-group");
+        const message = group?.querySelector(".ult-message.assistant")?.textContent;
+        if (action === "copy" && message) {
+          navigator.clipboard?.writeText(message)?.then(() => this.showCopySuccess(actionBtn)).catch(console.error);
+        } else if (action === "like" || action === "dislike") {
+          this.feedback(action === "like" ? "up" : "down");
+          this.showCopySuccess(actionBtn);
+        }
       }
     });
   }
@@ -528,13 +542,11 @@ class UltralyticsChat {
   updateUIForMode() {
     if (!this.refs.modal) return;
     const tagline = this.qs(".ult-subtle", this.refs.modal);
-    const actions = this.qs(".ult-actions", this.refs.modal);
     this.refs.modal.dataset.mode = this.mode;
     if (this.mode === "search") {
       if (this.refs.input) this.refs.input.placeholder = "Search for...";
       if (tagline)
         tagline.innerHTML = `<strong style="color: ${this.config.theme.primary}; font-weight: 700;">SEARCH</strong> · Find answers in our docs and guides`;
-      if (actions) actions.style.display = "none";
       if (this.refs.messages) this.refs.messages.innerHTML = "";
       if (this.refs.welcome)
         this.refs.welcome.innerHTML = `<p>Enter keywords to find relevant documentation, guides, and resources</p>`;
@@ -543,7 +555,6 @@ class UltralyticsChat {
     } else {
       if (this.refs.input) this.refs.input.placeholder = this.config.ui.placeholder;
       if (tagline) tagline.textContent = this.config.branding.tagline;
-      if (actions) actions.style.display = "";
       const { title, message, chatExamples } = this.config.welcome;
       if (this.refs.welcome) this.refs.welcome.innerHTML = `<h1>${this.esc(title)}</h1><p>${message}</p>`;
       this.setExamples(chatExamples || []);
@@ -817,7 +828,7 @@ class UltralyticsChat {
       }
       if (renderTimer) clearTimeout(renderTimer);
       div.innerHTML = this.renderMarkdown(content, false);
-      this.highlight(div);
+      this.finalizeAssistantMessage(group);
       this.scrollToBottom();
       this.messages.push({ role: "assistant", content });
     } catch (e) {
@@ -842,6 +853,7 @@ class UltralyticsChat {
     if (!this.refs.messages) return null;
     const { name, logomark } = this.config.branding;
     const group = this.el("div", "ult-message-group");
+    group.dataset.role = role;
     const label = this.el(
       "div",
       "ult-message-label",
@@ -860,8 +872,25 @@ class UltralyticsChat {
     if (!group) return null;
     const div = this.el("div", `ult-message ${role === "assistant" ? "assistant" : ""}`, this.renderMarkdown(content));
     group.appendChild(div);
-    if (role === "assistant") this.highlight(div);
+    if (role === "assistant") this.finalizeAssistantMessage(group);
     return div;
+  }
+
+  addMessageActions(group) {
+    if (group.querySelector(".ult-message-actions")) return;
+    const actions = this.el(
+      "div",
+      "ult-message-actions",
+      `<button class="ult-message-action-btn" data-action="copy" aria-label="Copy">${this.icon("copy")}</button><button class="ult-message-action-btn" data-action="like" aria-label="Thumbs up">${this.icon("like")}</button><button class="ult-message-action-btn" data-action="dislike" aria-label="Thumbs down">${this.icon("dislike")}</button>`,
+    );
+    group.appendChild(actions);
+  }
+
+  finalizeAssistantMessage(group) {
+    if (!group || group.dataset.role !== "assistant") return;
+    const messageDiv = group.querySelector(".ult-message.assistant");
+    if (messageDiv) this.highlight(messageDiv);
+    this.addMessageActions(group);
   }
 
   escapeHtml(text) {
