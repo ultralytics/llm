@@ -500,7 +500,10 @@ class UltralyticsChat {
         const group = actionBtn.closest(".ult-message-group");
         const message = group?.querySelector(".ult-message.assistant")?.textContent;
         if (action === "copy" && message) {
-          navigator.clipboard?.writeText(message)?.then(() => this.showCopySuccess(actionBtn)).catch(console.error);
+          navigator.clipboard
+            ?.writeText(message)
+            ?.then(() => this.showCopySuccess(actionBtn))
+            .catch(console.error);
         } else if (action === "like" || action === "dislike") {
           this.feedback(action === "like" ? "up" : "down");
           this.showCopySuccess(actionBtn);
