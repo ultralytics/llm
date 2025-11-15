@@ -498,12 +498,14 @@ class UltralyticsChat {
       if (actionBtn) {
         const action = actionBtn.dataset.action;
         const group = actionBtn.closest(".ult-message-group");
-        const message = group?.querySelector(".ult-message.assistant")?.textContent;
-        if (action === "copy" && message) {
-          navigator.clipboard
-            ?.writeText(message)
-            ?.then(() => this.showCopySuccess(actionBtn))
-            .catch(console.error);
+        if (action === "copy") {
+          const groups = this.qsa(".ult-message-group[data-role='assistant']", this.refs.messages);
+          const groupIndex = [...groups].indexOf(group);
+          const assistantMessages = this.messages.filter((m) => m.role === "assistant");
+          const messageContent = assistantMessages[groupIndex]?.content;
+          if (messageContent) {
+            navigator.clipboard?.writeText(messageContent)?.then(() => this.showCopySuccess(actionBtn)).catch(console.error);
+          }
         } else if (action === "like" || action === "dislike") {
           this.feedback(action === "like" ? "up" : "down");
           this.showCopySuccess(actionBtn);
