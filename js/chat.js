@@ -673,6 +673,7 @@ class UltralyticsChat {
     const groups = this.qsa(".ult-message-group", this.refs.messages);
     const lastAssistantGroup = [...groups].reverse().find((g) => g.querySelector(".ult-message.assistant"));
     if (lastAssistantGroup) lastAssistantGroup.remove();
+    if (this.refs.tooltip) this.refs.tooltip.classList.remove("show");
     void this.sendMessage(lastUserMsg.content, true);
   }
 
@@ -781,8 +782,10 @@ class UltralyticsChat {
       this.refs.input.focus();
       return;
     }
-    this.messages.push({ role: "user", content: text });
-    if (!isRetry) this.addMessageToUI("user", text);
+    if (!isRetry) {
+      this.messages.push({ role: "user", content: text });
+      this.addMessageToUI("user", text);
+    }
     this.refs.input.value = "";
     this.refs.input.style.height = "auto";
     this.isStreaming = true;
