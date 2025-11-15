@@ -832,7 +832,7 @@ class UltralyticsChat {
         "ult-message assistant",
         e.name === "AbortError"
           ? "Generation stopped."
-          : "Sorry, I encountered an error. Please try again.<br><br>If the problem persists, please <a href='https://github.com/ultralytics/llm/issues/new' target='_blank' rel='noopener noreferrer'>submit a bug report</a>.",
+          : "Sorry, I encountered an error. Please try again. If the problem persists, please <a href='https://github.com/ultralytics/llm/issues/new' target='_blank' rel='noopener noreferrer'>submit a bug report</a>.",
       );
       group.appendChild(msg);
       console.error("Chat error:", e);

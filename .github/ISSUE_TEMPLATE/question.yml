@@ -1,7 +1,7 @@
 # Ultralytics 🚀 AGPL-3.0 License - https://ultralytics.com/license
 
 name: ❓ Question
-description: Ask an Ultralytics software question
+description: Ask an Ultralytics LLM Chatbot question
 # title: " "
 labels: [question]
 body:
@@ -14,10 +14,10 @@ body:
     attributes:
       label: Search before asking
       description: >
-        Please search the Ultralytics [Docs](https://docs.ultralytics.com/), [issues](https://github.com/ultralytics/PROJECT_NAME/issues) and [discussions](https://github.com/orgs/ultralytics/discussions) to see if a similar question already exists.
+        Please search the [issues](https://github.com/ultralytics/llm/issues) and [discussions](https://github.com/ultralytics/llm/discussions) to see if a similar question already exists.
       options:
         - label: >
-            I have searched the Ultralytics [issues](https://github.com/ultralytics/PROJECT_NAME/issues) and [discussions](https://github.com/orgs/ultralytics/discussions) and found no similar questions.
+            I have searched the Ultralytics [issues](https://github.com/ultralytics/llm/issues) and [discussions](https://github.com/ultralytics/llm/discussions) and found no similar questions.
           required: true
 
   - type: textarea
