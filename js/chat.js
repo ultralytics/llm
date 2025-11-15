@@ -525,7 +525,10 @@ class UltralyticsChat {
       this.updateUIForMode();
       if (!this.messages.length) this.showWelcome(true);
       this.updateComposerState();
-      requestAnimationFrame(() => this.refs.input?.focus());
+      setTimeout(() => {
+        this.refs.input?.focus();
+        this.refs.input?.click();
+      }, 100);
     } else {
       document.body.classList.remove("ult-modal-open");
       document.body.style.top = "";
