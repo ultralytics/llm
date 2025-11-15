@@ -489,19 +489,29 @@ class UltralyticsChat {
       if (!this.isOpen && e.metaKey && e.key.toLowerCase() === "k") this.toggle(true);
     });
 
-    this.on(this.refs.messages, "mouseenter", (e) => {
-      const btn = e.target.closest("[data-tooltip]");
-      if (btn && this.refs.tooltip) {
-        const r = btn.getBoundingClientRect();
-        this.refs.tooltip.textContent = btn.dataset.tooltip;
-        this.refs.tooltip.style.left = r.left + r.width / 2 + "px";
-        this.refs.tooltip.style.top = r.top - 8 + "px";
-        this.refs.tooltip.classList.add("show");
-      }
-    }, true);
-    this.on(this.refs.messages, "mouseleave", (e) => {
-      if (e.target.closest("[data-tooltip]")) this.refs.tooltip?.classList.remove("show");
-    }, true);
+    this.on(
+      this.refs.messages,
+      "mouseenter",
+      (e) => {
+        const btn = e.target.closest("[data-tooltip]");
+        if (btn && this.refs.tooltip) {
+          const r = btn.getBoundingClientRect();
+          this.refs.tooltip.textContent = btn.dataset.tooltip;
+          this.refs.tooltip.style.left = r.left + r.width / 2 + "px";
+          this.refs.tooltip.style.top = r.top - 8 + "px";
+          this.refs.tooltip.classList.add("show");
+        }
+      },
+      true,
+    );
+    this.on(
+      this.refs.messages,
+      "mouseleave",
+      (e) => {
+        if (e.target.closest("[data-tooltip]")) this.refs.tooltip?.classList.remove("show");
+      },
+      true,
+    );
 
     this.on(this.refs.messages, "click", (e) => {
       if (e.target.closest(".ult-code-copy")) {
@@ -963,8 +973,8 @@ class UltralyticsChat {
       if (fence) {
         if (inCode) {
           html += skipCopyButtons
-          ? `</code></pre></div>`
-          : `</code></pre><button class="ult-code-copy" aria-label="Copy code" data-tooltip="Copy code">${this.icon("copy")}</button></div>`;
+            ? `</code></pre></div>`
+            : `</code></pre><button class="ult-code-copy" aria-label="Copy code" data-tooltip="Copy code">${this.icon("copy")}</button></div>`;
           inCode = false;
           codeIndent = 0;
         } else {
