@@ -494,7 +494,10 @@ class UltralyticsChat {
       if (e.target.closest(".ult-code-copy")) {
         const btn = e.target.closest(".ult-code-copy");
         const code = btn.previousElementSibling?.querySelector("code")?.textContent || "";
-        navigator.clipboard?.writeText(code).then(() => this.showCopySuccess(btn)).catch(console.error);
+        navigator.clipboard
+          ?.writeText(code)
+          .then(() => this.showCopySuccess(btn))
+          .catch(console.error);
       }
     });
   }
