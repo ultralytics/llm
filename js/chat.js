@@ -282,8 +282,7 @@ class UltralyticsChat {
       html[data-theme=dark] .ult-message{color:#f5f5f5}
       .ult-message-actions{display:flex;gap:4px;opacity:0;transition:opacity .15s;margin-top:6px;padding-left:2px}
       .ult-user-message-actions{position:absolute;right:2px;bottom:0;opacity:0;transition:opacity .15s;pointer-events:none}
-      .ult-user-message-actions .ult-chat-send{pointer-events:auto}
-      .ult-message-group:hover .ult-user-message-actions,.ult-message-group:focus-within .ult-user-message-actions{opacity:1}
+      .ult-message-group:hover .ult-user-message-actions,.ult-message-group:focus-within .ult-user-message-actions{opacity:1;pointer-events:auto}
       .ult-message a{color:var(--ult-primary);text-underline-offset:2px}.ult-message a:hover{text-decoration:underline}
       .ult-message strong{font-weight:700;color:var(--ult-text)}
       html[data-theme=dark] .ult-message strong{color:#fafafa}
