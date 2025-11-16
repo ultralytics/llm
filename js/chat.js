@@ -281,8 +281,8 @@ class UltralyticsChat {
       .ult-message{font-size:14px;line-height:1.6;color:var(--ult-text);padding:0 2px;word-break:break-word;text-align:left}
       html[data-theme=dark] .ult-message{color:#f5f5f5}
       .ult-message-actions{display:flex;gap:4px;opacity:0;transition:opacity .15s;margin-top:6px;padding-left:2px}
-      .ult-user-message-actions{display:flex;gap:4px;opacity:0;transition:opacity .15s;position:absolute;right:2px;bottom:0;pointer-events:none}
-      .ult-user-message-actions .ult-icon-btn{pointer-events:auto}
+      .ult-user-message-actions{position:absolute;right:2px;bottom:0;opacity:0;transition:opacity .15s;pointer-events:none}
+      .ult-user-message-actions .ult-chat-send{pointer-events:auto}
       .ult-message-group:hover .ult-user-message-actions,.ult-message-group:focus-within .ult-user-message-actions{opacity:1}
       .ult-message a{color:var(--ult-primary);text-underline-offset:2px}.ult-message a:hover{text-decoration:underline}
       .ult-message strong{font-weight:700;color:var(--ult-text)}
@@ -329,10 +329,11 @@ class UltralyticsChat {
       .ult-chat-send:hover{transform:translateY(-1px);color:var(--ult-text);background:#f7f7f9}
       html[data-theme=dark] .ult-chat-send{color:#a1a1aa}
       html[data-theme=dark] .ult-chat-send:hover{color:#fafafa;background:#17181d}
-      .ult-chat-input,.ult-message[contenteditable='true']{background:#f7f7f9;color:#0b0b0f;border-radius:12px;padding:10px 12px;outline:0}
-      .ult-chat-input{flex:1;border:0;font-size:14px;resize:none;max-height:140px}
-      .ult-message[contenteditable='true']{cursor:text;margin:-10px -12px}
-      html[data-theme=dark] .ult-chat-input,html[data-theme=dark] .ult-message[contenteditable='true']{background:#131318;color:#fafafa}
+      .ult-chat-input{flex:1;border:0;font-size:14px;resize:none;max-height:140px;background:#f7f7f9;color:#0b0b0f;border-radius:12px;padding:10px 12px;outline:0}
+      .ult-message[contenteditable='true']{cursor:text;outline:0}
+      .ult-message-group:hover .ult-message[contenteditable='true'],.ult-message[contenteditable='true']:focus{background:#f7f7f9;color:#0b0b0f;border-radius:12px;padding:10px 12px;margin:-10px -12px}
+      html[data-theme=dark] .ult-chat-input{background:#131318;color:#fafafa}
+      html[data-theme=dark] .ult-message-group:hover .ult-message[contenteditable='true'],html[data-theme=dark] .ult-message[contenteditable='true']:focus{background:#131318;color:#fafafa}
       .ult-chat-input::placeholder{color:#9ca3af}
 
       .ult-chat-footer{padding:8px 18px;text-align:left;font-size:11px;color:#9ca3af}
@@ -375,9 +376,8 @@ class UltralyticsChat {
         .ult-chat-input-container{padding:8px 14px 10px;flex:0 0 auto;gap:8px;border-top:1px solid #eceff5;background:#fff}
         .ult-chat-modal.welcome-mode .ult-chat-input-container{margin-top:auto}
         html[data-theme=dark] .ult-chat-input-container{border-top-color:#1c1c22;background:#0a0a0b}
-        .ult-chat-input,.ult-message[contenteditable='true']{padding:9px 11px;font-size:16px;border-radius:10px}
-        .ult-chat-input{max-height:100px}
-        .ult-message[contenteditable='true']{margin:-9px -11px}
+        .ult-chat-input{padding:9px 11px;font-size:16px;border-radius:10px;max-height:100px}
+        .ult-message-group:hover .ult-message[contenteditable='true'],.ult-message[contenteditable='true']:focus{padding:9px 11px;margin:-9px -11px;font-size:16px;border-radius:10px}
         .ult-chat-footer{padding:6px 14px;font-size:10px}
         .ult-message-group{gap:3px;padding:0 14px;margin:0 0 8px;position:relative}
         .ult-user-message-actions{right:0;bottom:0}
@@ -560,7 +560,11 @@ class UltralyticsChat {
           if (messageDiv && messageIndex !== undefined) {
             const newContent = messageDiv.textContent.trim();
             if (newContent) {
+              const actionsContainer = group.querySelector(".ult-user-message-actions");
               this.showCopySuccess(actionBtn);
+              setTimeout(() => {
+                if (actionsContainer) actionsContainer.style.opacity = "0";
+              }, 1500);
               void this.editAndRestart(parseInt(messageIndex), newContent);
             }
           }
@@ -990,7 +994,7 @@ class UltralyticsChat {
     const actions = this.el(
       "div",
       "ult-user-message-actions",
-      `<button class="ult-icon-btn" data-action="edit" aria-label="Edit and restart" data-tooltip="Edit and restart">${this.icon("arrowUp")}</button>`,
+      `<button class="ult-chat-send" data-action="edit" aria-label="Send" data-tooltip="Send"><span class="ult-icon-swap" data-icon="arrowUp">${this.icon("arrowUp")}</span></button>`,
     );
     group.appendChild(actions);
   }
