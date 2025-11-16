@@ -279,10 +279,7 @@ class UltralyticsChat {
       .ult-message-label img{max-height:24px;max-width:24px;border-radius:4px}
       .ult-user-icon{color:var(--ult-accent)}
       .ult-message{font-size:14px;line-height:1.6;color:var(--ult-text);padding:0 2px;word-break:break-word;text-align:left}
-      .ult-message[contenteditable='true']{outline:none;cursor:text}
-      .ult-message[contenteditable='true']:focus{background:rgba(4,42,255,0.03);border-radius:6px;padding:4px 6px;margin:-4px -4px}
       html[data-theme=dark] .ult-message{color:#f5f5f5}
-      html[data-theme=dark] .ult-message[contenteditable='true']:focus{background:rgba(4,42,255,0.08)}
       .ult-message-actions{display:flex;gap:4px;opacity:0;transition:opacity .15s;margin-top:6px;padding-left:2px}
       .ult-user-message-actions{display:flex;gap:4px;opacity:0;transition:opacity .15s;position:absolute;right:8px;top:4px}
       .ult-message-group:hover .ult-user-message-actions,.ult-message-group:focus-within .ult-user-message-actions,.ult-message[contenteditable]:focus ~ .ult-user-message-actions{opacity:1}
@@ -331,8 +328,11 @@ class UltralyticsChat {
       .ult-chat-send:hover{transform:translateY(-1px);color:var(--ult-text);background:#f7f7f9}
       html[data-theme=dark] .ult-chat-send{color:#a1a1aa}
       html[data-theme=dark] .ult-chat-send:hover{color:#fafafa;background:#17181d}
-      .ult-chat-input{flex:1;padding:10px 12px;border:0;border-radius:12px;font-size:14px;resize:none;max-height:140px;background:#f7f7f9;color:#0b0b0f;outline:0}
-      .ult-chat-input::placeholder{color:#9ca3af} html[data-theme=dark] .ult-chat-input{background:#131318;color:#fafafa}
+      .ult-chat-input,.ult-message[contenteditable='true']{background:#f7f7f9;color:#0b0b0f;border-radius:12px;padding:10px 12px;outline:0}
+      .ult-chat-input{flex:1;border:0;font-size:14px;resize:none;max-height:140px}
+      .ult-message[contenteditable='true']{cursor:text;margin:-10px -12px}
+      html[data-theme=dark] .ult-chat-input,html[data-theme=dark] .ult-message[contenteditable='true']{background:#131318;color:#fafafa}
+      .ult-chat-input::placeholder{color:#9ca3af}
 
       .ult-chat-footer{padding:8px 18px;text-align:left;font-size:11px;color:#9ca3af}
       html[data-theme=dark] .ult-chat-footer{color:#71717a}
@@ -374,7 +374,9 @@ class UltralyticsChat {
         .ult-chat-input-container{padding:8px 14px 10px;flex:0 0 auto;gap:8px;border-top:1px solid #eceff5;background:#fff}
         .ult-chat-modal.welcome-mode .ult-chat-input-container{margin-top:auto}
         html[data-theme=dark] .ult-chat-input-container{border-top-color:#1c1c22;background:#0a0a0b}
-        .ult-chat-input{padding:9px 11px;font-size:16px;max-height:100px;border-radius:10px}
+        .ult-chat-input,.ult-message[contenteditable='true']{padding:9px 11px;font-size:16px;border-radius:10px}
+        .ult-chat-input{max-height:100px}
+        .ult-message[contenteditable='true']{margin:-9px -11px}
         .ult-chat-footer{padding:6px 14px;font-size:10px}
         .ult-message-group{gap:3px;padding:0 14px;margin:0 0 8px;position:relative}
         .ult-user-message-actions{right:4px;top:2px}
@@ -553,24 +555,10 @@ class UltralyticsChat {
           void this.retryLast();
         } else if (action === "edit") {
           const messageDiv = group.querySelector(".ult-message");
-          if (messageDiv) {
-            // If already focused and clicked, submit the edit
-            if (document.activeElement === messageDiv) {
-              const messageIndex = group?.dataset.messageIndex;
-              if (messageIndex !== undefined) {
-                const newContent = messageDiv.textContent.trim();
-                if (newContent) void this.editAndRestart(parseInt(messageIndex), newContent);
-              }
-            } else {
-              // Otherwise, focus and select
-              messageDiv.focus();
-              const range = document.createRange();
-              const sel = window.getSelection();
-              range.selectNodeContents(messageDiv);
-              range.collapse(false);
-              sel?.removeAllRanges();
-              sel?.addRange(range);
-            }
+          const messageIndex = group?.dataset.messageIndex;
+          if (messageDiv && messageIndex !== undefined) {
+            const newContent = messageDiv.textContent.trim();
+            if (newContent) void this.editAndRestart(parseInt(messageIndex), newContent);
           }
         }
       }
