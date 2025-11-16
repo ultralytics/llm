@@ -269,7 +269,7 @@ class UltralyticsChat {
       html[data-theme=dark] .ult-example{background:#131318;color:#fafafa}
 
       .ult-chat-messages{flex:1;overflow-y:auto;padding:0 18px 18px;display:flex;flex-direction:column;gap:14px;-webkit-overflow-scrolling:touch}
-      .ult-message-group{padding:8px 8px 4px;margin:-8px -8px 0;border-radius:10px;transition:background .15s ease,border .15s ease;border:1px solid transparent}
+      .ult-message-group{padding:8px 8px 4px;margin:-8px -8px 0;border-radius:10px;transition:background .15s ease,border .15s ease;border:1px solid transparent;position:relative}
       .ult-message-group:first-child{margin-top:0}
       .ult-message-group:hover{background:rgba(247,247,249,.4);border-color:rgba(229,231,235,.6)}
       html[data-theme=dark] .ult-message-group:hover{background:rgba(19,19,24,.4);border-color:rgba(35,35,39,.6)}
@@ -284,6 +284,8 @@ class UltralyticsChat {
       html[data-theme=dark] .ult-message{color:#f5f5f5}
       html[data-theme=dark] .ult-message[contenteditable='true']:focus{background:rgba(4,42,255,0.08)}
       .ult-message-actions{display:flex;gap:4px;opacity:0;transition:opacity .15s;margin-top:6px;padding-left:2px}
+      .ult-user-message-actions{display:flex;gap:4px;opacity:0;transition:opacity .15s;position:absolute;right:8px;top:4px}
+      .ult-message-group:hover .ult-user-message-actions,.ult-message-group:focus-within .ult-user-message-actions,.ult-message[contenteditable]:focus ~ .ult-user-message-actions{opacity:1}
       .ult-message a{color:var(--ult-primary);text-underline-offset:2px}.ult-message a:hover{text-decoration:underline}
       .ult-message strong{font-weight:700;color:var(--ult-text)}
       html[data-theme=dark] .ult-message strong{color:#fafafa}
@@ -374,7 +376,8 @@ class UltralyticsChat {
         html[data-theme=dark] .ult-chat-input-container{border-top-color:#1c1c22;background:#0a0a0b}
         .ult-chat-input{padding:9px 11px;font-size:16px;max-height:100px;border-radius:10px}
         .ult-chat-footer{padding:6px 14px;font-size:10px}
-        .ult-message-group{gap:3px;padding:0 14px;margin:0 0 8px}
+        .ult-message-group{gap:3px;padding:0 14px;margin:0 0 8px;position:relative}
+        .ult-user-message-actions{right:4px;top:2px}
         .ult-message-label{font-size:11px;gap:5px;padding:0;margin-bottom:2px}
         .ult-message-label img{max-height:20px;max-width:20px}
         .ult-message-label svg{width:20px;height:20px}
@@ -551,13 +554,23 @@ class UltralyticsChat {
         } else if (action === "edit") {
           const messageDiv = group.querySelector(".ult-message");
           if (messageDiv) {
-            messageDiv.focus();
-            const range = document.createRange();
-            const sel = window.getSelection();
-            range.selectNodeContents(messageDiv);
-            range.collapse(false);
-            sel?.removeAllRanges();
-            sel?.addRange(range);
+            // If already focused and clicked, submit the edit
+            if (document.activeElement === messageDiv) {
+              const messageIndex = group?.dataset.messageIndex;
+              if (messageIndex !== undefined) {
+                const newContent = messageDiv.textContent.trim();
+                if (newContent) void this.editAndRestart(parseInt(messageIndex), newContent);
+              }
+            } else {
+              // Otherwise, focus and select
+              messageDiv.focus();
+              const range = document.createRange();
+              const sel = window.getSelection();
+              range.selectNodeContents(messageDiv);
+              range.collapse(false);
+              sel?.removeAllRanges();
+              sel?.addRange(range);
+            }
           }
         }
       }
@@ -979,10 +992,10 @@ class UltralyticsChat {
   }
 
   addUserMessageActions(group) {
-    if (group.querySelector(".ult-message-actions")) return;
+    if (group.querySelector(".ult-user-message-actions")) return;
     const actions = this.el(
       "div",
-      "ult-message-actions",
+      "ult-user-message-actions",
       `<button class="ult-icon-btn" data-action="edit" aria-label="Edit and restart" data-tooltip="Edit and restart">${this.icon("arrowUp")}</button>`,
     );
     group.appendChild(actions);
