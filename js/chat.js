@@ -62,6 +62,7 @@ class UltralyticsChat {
     this.abortController = null;
     this.sessionId = this.loadSessionId();
     this.autoScroll = true;
+    this.lastScrollTop = 0;
     this.mode = "chat";
     this.scrollY = 0;
     this.refs = {};
@@ -465,8 +466,9 @@ class UltralyticsChat {
     this.on(this.qs(".ult-chat-copy", m), "click", () => this.copyThread());
     this.on(this.qs(".ult-chat-download", m), "click", () => this.downloadThread());
     this.on(this.refs.messages, "scroll", () => {
-      const d = this.refs.messages;
-      this.autoScroll = d.scrollHeight - d.scrollTop - d.clientHeight < 100;
+      const d = this.refs.messages, st = d.scrollTop;
+      this.autoScroll = st >= (this.lastScrollTop || 0) && d.scrollHeight - st - d.clientHeight < 100;
+      this.lastScrollTop = st;
     });
     this.on(this.refs.input, "input", (e) => {
       const t = e.target;
