@@ -104,6 +104,21 @@ class UltralyticsChat {
     }, 1500);
   }
 
+  flashTooltip(target, message) {
+    const tip = this.refs.tooltip;
+    if (!target || !tip) return;
+    const rect = target.getBoundingClientRect();
+    tip.textContent = message;
+    tip.style.left = rect.left + rect.width / 2 + "px";
+    tip.style.top = rect.top - 8 + "px";
+    tip.classList.add("show");
+    if (tip.__timer) clearTimeout(tip.__timer);
+    tip.__timer = setTimeout(() => {
+      tip.classList.remove("show");
+      tip.__timer = null;
+    }, 1600);
+  }
+
   getPageContext() {
     const meta = (name) => document.querySelector(`meta[name="${name}"]`)?.content || "";
     return {
@@ -563,10 +578,19 @@ class UltralyticsChat {
           const messageIndex = group?.dataset.messageIndex;
           if (messageDiv && messageIndex !== undefined) {
             const newContent = messageDiv.textContent.trim();
-            if (newContent) {
-              this.showCopySuccess(actionBtn);
-              void this.editAndRestart(parseInt(messageIndex), newContent);
+            if (!newContent) return;
+            const idx = parseInt(messageIndex);
+            if (this.isStreaming) {
+              this.flashTooltip(actionBtn, "Finish generating first");
+              return;
             }
+            if (newContent.length > this.config.maxMessageLength) {
+              this.flashTooltip(actionBtn, `Too long (max ${this.config.maxMessageLength})`);
+              return;
+            }
+            void this.editAndRestart(idx, newContent).then((ok) => {
+              if (ok) this.showCopySuccess(actionBtn);
+            });
           }
         }
       }
@@ -580,8 +604,18 @@ class UltralyticsChat {
         const group = messageDiv.closest(".ult-message-group");
         const messageIndex = group?.dataset.messageIndex;
         if (messageIndex !== undefined) {
+          const idx = parseInt(messageIndex);
+          if (this.isStreaming) {
+            this.flashTooltip(messageDiv, "Finish generating first");
+            return;
+          }
           const newContent = messageDiv.textContent.trim();
-          if (newContent) void this.editAndRestart(parseInt(messageIndex), newContent);
+          if (!newContent) return;
+          if (newContent.length > this.config.maxMessageLength) {
+            this.flashTooltip(messageDiv, `Too long (max ${this.config.maxMessageLength})`);
+            return;
+          }
+          void this.editAndRestart(idx, newContent);
         }
       } else if (e.key === "Escape") {
         e.preventDefault();
@@ -731,22 +765,23 @@ class UltralyticsChat {
   }
 
   async editAndRestart(messageIndex, newContent) {
-    if (this.isStreaming) return;
-    if (messageIndex < 0 || messageIndex >= this.messages.length) return;
+    if (this.isStreaming) return false;
+    if (messageIndex < 0 || messageIndex >= this.messages.length) return false;
     const message = this.messages[messageIndex];
-    if (message.role !== "user") return;
-    if (newContent.length > this.config.maxMessageLength) {
-      console.warn(`Message too long: ${newContent.length} > ${this.config.maxMessageLength}`);
-      return;
-    }
+    if (message.role !== "user") return false;
+    if (newContent.length > this.config.maxMessageLength) return false;
     message.content = newContent;
     this.messages = this.messages.slice(0, messageIndex + 1);
+    const currentGroup = this.qs(`.ult-message-group[data-message-index="${messageIndex}"]`, this.refs.messages);
+    const currentMessage = currentGroup?.querySelector(".ult-message");
+    if (currentMessage) currentMessage.dataset.originalContent = newContent;
     const groups = this.qsa(".ult-message-group", this.refs.messages);
     groups.forEach((g, i) => {
       if (parseInt(g.dataset.messageIndex || "-1") > messageIndex) g.remove();
     });
     if (this.refs.tooltip) this.refs.tooltip.classList.remove("show");
     await this.sendMessage(newContent, false, messageIndex);
+    return true;
   }
 
   downloadThread() {
@@ -1002,7 +1037,7 @@ class UltralyticsChat {
     const actions = this.el(
       "div",
       "ult-user-message-actions",
-      `<button class="ult-chat-send" data-action="edit" aria-label="Send" data-tooltip="Send"><span class="ult-icon-swap" data-icon="arrowUp">${this.icon("arrowUp")}</span></button>`,
+      `<button class="ult-chat-send" data-action="edit" aria-label="Edit and restart" data-tooltip="Edit and restart"><span class="ult-icon-swap" data-icon="arrowUp">${this.icon("arrowUp")}</span></button>`,
     );
     group.appendChild(actions);
   }
