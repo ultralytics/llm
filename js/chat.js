@@ -74,6 +74,11 @@ class UltralyticsChat {
   qs = (sel, root = document) => root.querySelector(sel);
   qsa = (sel, root = document) => [...root.querySelectorAll(sel)];
   esc = (s) => this.escapeHtml(s);
+  getGroupIndex(group) {
+    if (!group) return null;
+    const idx = Number.parseInt(group.dataset?.messageIndex ?? "", 10);
+    return Number.isNaN(idx) ? null : idx;
+  }
 
   on(el, ev, fn) {
     if (!el) return;
@@ -575,11 +580,10 @@ class UltralyticsChat {
           void this.retryLast();
         } else if (action === "edit") {
           const messageDiv = group.querySelector(".ult-message");
-          const messageIndex = group?.dataset.messageIndex;
-          if (messageDiv && messageIndex !== undefined) {
+          const idx = this.getGroupIndex(group);
+          if (messageDiv && idx !== null) {
             const newContent = messageDiv.textContent.trim();
             if (!newContent) return;
-            const idx = parseInt(messageIndex);
             if (this.isStreaming) {
               this.flashTooltip(actionBtn, "Finish generating first");
               return;
@@ -602,9 +606,8 @@ class UltralyticsChat {
       if (e.key === "Enter" && !e.shiftKey) {
         e.preventDefault();
         const group = messageDiv.closest(".ult-message-group");
-        const messageIndex = group?.dataset.messageIndex;
-        if (messageIndex !== undefined) {
-          const idx = parseInt(messageIndex);
+        const idx = this.getGroupIndex(group);
+        if (idx !== null) {
           if (this.isStreaming) {
             this.flashTooltip(messageDiv, "Finish generating first");
             return;
@@ -766,7 +769,7 @@ class UltralyticsChat {
 
   async editAndRestart(messageIndex, newContent) {
     if (this.isStreaming) return false;
-    if (messageIndex < 0 || messageIndex >= this.messages.length) return false;
+    if (!Number.isInteger(messageIndex) || messageIndex < 0 || messageIndex >= this.messages.length) return false;
     const message = this.messages[messageIndex];
     if (message.role !== "user") return false;
     if (newContent.length > this.config.maxMessageLength) return false;
@@ -776,8 +779,9 @@ class UltralyticsChat {
     const currentMessage = currentGroup?.querySelector(".ult-message");
     if (currentMessage) currentMessage.dataset.originalContent = newContent;
     const groups = this.qsa(".ult-message-group", this.refs.messages);
-    groups.forEach((g, i) => {
-      if (parseInt(g.dataset.messageIndex || "-1") > messageIndex) g.remove();
+    groups.forEach((g) => {
+      const idx = this.getGroupIndex(g);
+      if (idx === null || idx > messageIndex) g.remove();
     });
     if (this.refs.tooltip) this.refs.tooltip.classList.remove("show");
     await this.sendMessage(newContent, false, messageIndex);
@@ -908,13 +912,15 @@ class UltralyticsChat {
     group.appendChild(thinking);
     this.scrollToBottom();
     this.abortController = new AbortController();
+    const safeEditIndex =
+      Number.isInteger(editIndex) && editIndex >= 0 && editIndex < this.messages.length ? editIndex : null;
     try {
       const body = {
         messages: [{ role: "user", content: text }],
         session_id: this.sessionId,
         context: this.getPageContext(),
       };
-      if (editIndex !== null) body.edit_index = editIndex;
+      if (safeEditIndex !== null) body.edit_index = safeEditIndex;
       const res = await fetch(this.apiUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -1014,6 +1020,9 @@ class UltralyticsChat {
     if (role === "user") {
       div.contentEditable = "true";
       div.dataset.originalContent = content;
+      div.setAttribute("role", "textbox");
+      div.setAttribute("aria-label", "Edit your message");
+      div.setAttribute("aria-multiline", "true");
       if (this.isStreaming) div.contentEditable = "false";
     }
     group.appendChild(div);
@@ -1037,7 +1046,7 @@ class UltralyticsChat {
     const actions = this.el(
       "div",
       "ult-user-message-actions",
-      `<button class="ult-chat-send" data-action="edit" aria-label="Edit and restart" data-tooltip="Edit and restart"><span class="ult-icon-swap" data-icon="arrowUp">${this.icon("arrowUp")}</span></button>`,
+      `<button class="ult-chat-send ult-chat-edit-btn" data-action="edit" aria-label="Edit and restart" data-tooltip="Edit and restart"><span class="ult-icon-swap" data-icon="arrowUp">${this.icon("arrowUp")}</span></button>`,
     );
     group.appendChild(actions);
   }
