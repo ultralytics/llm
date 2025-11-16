@@ -701,6 +701,7 @@ class UltralyticsChat {
     if (this.refs.messages) this.refs.messages.innerHTML = "";
     this.showWelcome(true);
     this.updateComposerState();
+    this.refs.input?.focus();
   }
 
   stopStreaming() {
