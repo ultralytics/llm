@@ -244,6 +244,9 @@
       .content {
         min-width: 0;
       }
+      .content > * + * {
+        margin-top: 16px;
+      }
       .hero {
         padding: 16px;
         border: 1px solid var(--border);
@@ -322,7 +325,6 @@
       .grid {
         display: grid;
         gap: 14px;
-        margin: 16px 0;
         grid-template-columns: repeat(2, minmax(0, 1fr));
       }
       @media (max-width: 720px) {
