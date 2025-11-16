@@ -852,7 +852,9 @@ class UltralyticsChat {
     this.refs.input.style.height = "auto";
     this.isStreaming = true;
     this.updateComposerState();
-    this.qsa(".ult-message[contenteditable='true']", this.refs.messages).forEach((el) => (el.contentEditable = "false"));
+    this.qsa(".ult-message[contenteditable='true']", this.refs.messages).forEach(
+      (el) => (el.contentEditable = "false"),
+    );
     const group = this.createMessageGroup("assistant", this.messages.length);
     const { el: thinking, clear } = this.createThinking();
     group.appendChild(thinking);
