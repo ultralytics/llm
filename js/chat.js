@@ -330,11 +330,11 @@ class UltralyticsChat {
       html[data-theme=dark] .ult-chat-send{color:#a1a1aa}
       html[data-theme=dark] .ult-chat-send:hover{color:#fafafa;background:#17181d}
       .ult-chat-input{flex:1;border:0;font-size:14px;resize:none;max-height:140px;background:#f7f7f9;color:#0b0b0f;border-radius:12px;padding:10px 12px;outline:0}
-      .ult-message[contenteditable='true']{cursor:text;outline:0}
-      .ult-message-group:hover .ult-message[contenteditable='true'],.ult-message[contenteditable='true']:focus{background:#f7f7f9;color:#0b0b0f;border-radius:12px;padding:10px 12px;margin:-10px -12px}
-      html[data-theme=dark] .ult-chat-input{background:#131318;color:#fafafa}
-      html[data-theme=dark] .ult-message-group:hover .ult-message[contenteditable='true'],html[data-theme=dark] .ult-message[contenteditable='true']:focus{background:#131318;color:#fafafa}
       .ult-chat-input::placeholder{color:#9ca3af}
+      html[data-theme=dark] .ult-chat-input{background:#131318;color:#fafafa}
+      .ult-message[contenteditable]{cursor:text;outline:0;background:transparent;padding:0 2px}
+      .ult-message-group:hover .ult-message[contenteditable],.ult-message[contenteditable]:focus{background:#f7f7f9;color:#0b0b0f;border-radius:12px;padding:10px 12px;margin:-10px -12px;border:0;font-size:14px;resize:none}
+      html[data-theme=dark] .ult-message-group:hover .ult-message[contenteditable],html[data-theme=dark] .ult-message[contenteditable]:focus{background:#131318;color:#fafafa}
 
       .ult-chat-footer{padding:8px 18px;text-align:left;font-size:11px;color:#9ca3af}
       html[data-theme=dark] .ult-chat-footer{color:#71717a}
@@ -377,7 +377,7 @@ class UltralyticsChat {
         .ult-chat-modal.welcome-mode .ult-chat-input-container{margin-top:auto}
         html[data-theme=dark] .ult-chat-input-container{border-top-color:#1c1c22;background:#0a0a0b}
         .ult-chat-input{padding:9px 11px;font-size:16px;border-radius:10px;max-height:100px}
-        .ult-message-group:hover .ult-message[contenteditable='true'],.ult-message[contenteditable='true']:focus{padding:9px 11px;margin:-9px -11px;font-size:16px;border-radius:10px}
+        .ult-message-group:hover .ult-message[contenteditable],.ult-message[contenteditable]:focus{padding:9px 11px;margin:-9px -11px;font-size:16px;border-radius:10px}
         .ult-chat-footer{padding:6px 14px;font-size:10px}
         .ult-message-group{gap:3px;padding:0 14px;margin:0 0 8px;position:relative}
         .ult-user-message-actions{right:0;bottom:0}
