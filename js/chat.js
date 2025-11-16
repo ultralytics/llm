@@ -559,11 +559,7 @@ class UltralyticsChat {
           if (messageDiv && messageIndex !== undefined) {
             const newContent = messageDiv.textContent.trim();
             if (newContent) {
-              const actionsContainer = group.querySelector(".ult-user-message-actions");
               this.showCopySuccess(actionBtn);
-              setTimeout(() => {
-                if (actionsContainer) actionsContainer.style.opacity = "0";
-              }, 1500);
               void this.editAndRestart(parseInt(messageIndex), newContent);
             }
           }
