@@ -558,7 +558,10 @@ class UltralyticsChat {
           const messageIndex = group?.dataset.messageIndex;
           if (messageDiv && messageIndex !== undefined) {
             const newContent = messageDiv.textContent.trim();
-            if (newContent) void this.editAndRestart(parseInt(messageIndex), newContent);
+            if (newContent) {
+              this.showCopySuccess(actionBtn);
+              void this.editAndRestart(parseInt(messageIndex), newContent);
+            }
           }
         }
       }
