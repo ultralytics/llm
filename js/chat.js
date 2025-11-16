@@ -279,7 +279,10 @@ class UltralyticsChat {
       .ult-message-label img{max-height:24px;max-width:24px;border-radius:4px}
       .ult-user-icon{color:var(--ult-accent)}
       .ult-message{font-size:14px;line-height:1.6;color:var(--ult-text);padding:0 2px;word-break:break-word;text-align:left}
+      .ult-message[contenteditable='true']{outline:none;cursor:text}
+      .ult-message[contenteditable='true']:focus{background:rgba(4,42,255,0.03);border-radius:6px;padding:4px 6px;margin:-4px -4px}
       html[data-theme=dark] .ult-message{color:#f5f5f5}
+      html[data-theme=dark] .ult-message[contenteditable='true']:focus{background:rgba(4,42,255,0.08)}
       .ult-message-actions{display:flex;gap:4px;opacity:0;transition:opacity .15s;margin-top:6px;padding-left:2px}
       .ult-message a{color:var(--ult-primary);text-underline-offset:2px}.ult-message a:hover{text-decoration:underline}
       .ult-message strong{font-weight:700;color:var(--ult-text)}
@@ -545,6 +548,32 @@ class UltralyticsChat {
           this.showCopySuccess(actionBtn);
         } else if (action === "retry") {
           void this.retryLast();
+        } else if (action === "edit") {
+          const messageDiv = group.querySelector(".ult-message");
+          if (messageDiv) {
+            messageDiv.focus();
+            const range = document.createRange();
+            const sel = window.getSelection();
+            range.selectNodeContents(messageDiv);
+            range.collapse(false);
+            sel?.removeAllRanges();
+            sel?.addRange(range);
+          }
+        }
+      }
+    });
+
+    this.on(this.refs.messages, "keydown", (e) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        const messageDiv = e.target.closest(".ult-message[contenteditable='true']");
+        if (messageDiv) {
+          e.preventDefault();
+          const group = messageDiv.closest(".ult-message-group");
+          const messageIndex = group?.dataset.messageIndex;
+          if (messageIndex !== undefined) {
+            const newContent = messageDiv.textContent.trim();
+            if (newContent) void this.editAndRestart(parseInt(messageIndex), newContent);
+          }
         }
       }
     });
@@ -615,7 +644,7 @@ class UltralyticsChat {
     this.showWelcome(false);
     const prevAutoScroll = this.autoScroll;
     this.autoScroll = false;
-    this.messages.forEach((m) => this.addMessageToUI(m.role, m.content));
+    this.messages.forEach((m, i) => this.addMessageToUI(m.role, m.content, i));
     this.autoScroll = prevAutoScroll;
     this.refs.messages.scrollTop = this.refs.messages.scrollHeight;
   }
@@ -678,12 +707,21 @@ class UltralyticsChat {
     const actualIdx = this.messages.length - 1 - lastAssistantIdx;
     const lastUserMsg = this.messages[actualIdx - 1];
     if (!lastUserMsg || lastUserMsg.role !== "user") return;
-    this.messages.splice(actualIdx, 1);
+    void this.editAndRestart(actualIdx - 1, lastUserMsg.content);
+  }
+
+  async editAndRestart(messageIndex, newContent) {
+    if (messageIndex < 0 || messageIndex >= this.messages.length) return;
+    const message = this.messages[messageIndex];
+    if (message.role !== "user") return;
+    message.content = newContent;
+    this.messages = this.messages.slice(0, messageIndex + 1);
     const groups = this.qsa(".ult-message-group", this.refs.messages);
-    const lastAssistantGroup = [...groups].reverse().find((g) => g.querySelector(".ult-message.assistant"));
-    if (lastAssistantGroup) lastAssistantGroup.remove();
+    groups.forEach((g, i) => {
+      if (parseInt(g.dataset.messageIndex || "-1") > messageIndex) g.remove();
+    });
     if (this.refs.tooltip) this.refs.tooltip.classList.remove("show");
-    void this.sendMessage(lastUserMsg.content, true);
+    await this.sendMessage(newContent, false, messageIndex);
   }
 
   downloadThread() {
@@ -782,7 +820,7 @@ class UltralyticsChat {
     }
   }
 
-  async sendMessage(text, isRetry = false) {
+  async sendMessage(text, isNew = true, editIndex = null) {
     if (!text || this.isStreaming || !this.refs.input || !this.refs.messages) return;
     this.showWelcome(false);
     this.autoScroll = true;
@@ -794,28 +832,30 @@ class UltralyticsChat {
       this.refs.input.focus();
       return;
     }
-    if (!isRetry) {
+    if (isNew) {
       this.messages.push({ role: "user", content: text });
-      this.addMessageToUI("user", text);
+      this.addMessageToUI("user", text, this.messages.length - 1);
     }
     this.refs.input.value = "";
     this.refs.input.style.height = "auto";
     this.isStreaming = true;
     this.updateComposerState();
-    const group = this.createMessageGroup("assistant");
+    const group = this.createMessageGroup("assistant", this.messages.length);
     const { el: thinking, clear } = this.createThinking();
     group.appendChild(thinking);
     this.scrollToBottom();
     this.abortController = new AbortController();
     try {
+      const body = {
+        messages: [{ role: "user", content: text }],
+        session_id: this.sessionId,
+        context: this.getPageContext(),
+      };
+      if (editIndex !== null) body.edit_index = editIndex;
       const res = await fetch(this.apiUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          messages: [{ role: "user", content: text }],
-          session_id: this.sessionId,
-          context: this.getPageContext(),
-        }),
+        body: JSON.stringify(body),
         signal: this.abortController.signal,
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -884,11 +924,12 @@ class UltralyticsChat {
     }
   }
 
-  createMessageGroup(role) {
+  createMessageGroup(role, messageIndex = null) {
     if (!this.refs.messages) return null;
     const { name, logomark } = this.config.branding;
     const group = this.el("div", "ult-message-group");
     group.dataset.role = role;
+    if (messageIndex !== null) group.dataset.messageIndex = messageIndex;
     const label = this.el(
       "div",
       "ult-message-label",
@@ -902,12 +943,17 @@ class UltralyticsChat {
     return group;
   }
 
-  addMessageToUI(role, content) {
-    const group = this.createMessageGroup(role);
+  addMessageToUI(role, content, messageIndex = null) {
+    const group = this.createMessageGroup(role, messageIndex);
     if (!group) return null;
     const div = this.el("div", `ult-message ${role === "assistant" ? "assistant" : ""}`, this.renderMarkdown(content));
+    if (role === "user") {
+      div.contentEditable = "true";
+      div.dataset.originalContent = content;
+    }
     group.appendChild(div);
     if (role === "assistant") this.finalizeAssistantMessage(group);
+    else this.addUserMessageActions(group);
     return div;
   }
 
@@ -917,6 +963,16 @@ class UltralyticsChat {
       "div",
       "ult-message-actions",
       `<button class="ult-icon-btn" data-action="copy" aria-label="Copy response" data-tooltip="Copy response">${this.icon("copy")}</button><button class="ult-icon-btn" data-action="like" aria-label="Good response" data-tooltip="Good response">${this.icon("like")}</button><button class="ult-icon-btn" data-action="dislike" aria-label="Bad response" data-tooltip="Bad response">${this.icon("dislike")}</button><button class="ult-icon-btn" data-action="retry" aria-label="Try again" data-tooltip="Try again">${this.icon("refresh")}</button>`,
+    );
+    group.appendChild(actions);
+  }
+
+  addUserMessageActions(group) {
+    if (group.querySelector(".ult-message-actions")) return;
+    const actions = this.el(
+      "div",
+      "ult-message-actions",
+      `<button class="ult-icon-btn" data-action="edit" aria-label="Edit and restart" data-tooltip="Edit and restart">${this.icon("arrowUp")}</button>`,
     );
     group.appendChild(actions);
   }
