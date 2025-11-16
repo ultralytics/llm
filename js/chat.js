@@ -534,7 +534,7 @@ class UltralyticsChat {
           .then(() => this.showCopySuccess(btn))
           .catch(console.error);
       }
-      const actionBtn = e.target.closest(".ult-icon-btn[data-action]");
+      const actionBtn = e.target.closest("[data-action]");
       if (actionBtn) {
         const action = actionBtn.dataset.action;
         const group = actionBtn.closest(".ult-message-group");
