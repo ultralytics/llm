@@ -564,17 +564,20 @@ class UltralyticsChat {
     });
 
     this.on(this.refs.messages, "keydown", (e) => {
+      const messageDiv = e.target.closest(".ult-message[contenteditable='true']");
+      if (!messageDiv) return;
       if (e.key === "Enter" && !e.shiftKey) {
-        const messageDiv = e.target.closest(".ult-message[contenteditable='true']");
-        if (messageDiv) {
-          e.preventDefault();
-          const group = messageDiv.closest(".ult-message-group");
-          const messageIndex = group?.dataset.messageIndex;
-          if (messageIndex !== undefined) {
-            const newContent = messageDiv.textContent.trim();
-            if (newContent) void this.editAndRestart(parseInt(messageIndex), newContent);
-          }
+        e.preventDefault();
+        const group = messageDiv.closest(".ult-message-group");
+        const messageIndex = group?.dataset.messageIndex;
+        if (messageIndex !== undefined) {
+          const newContent = messageDiv.textContent.trim();
+          if (newContent) void this.editAndRestart(parseInt(messageIndex), newContent);
         }
+      } else if (e.key === "Escape") {
+        e.preventDefault();
+        messageDiv.textContent = messageDiv.dataset.originalContent || "";
+        messageDiv.blur();
       }
     });
   }
@@ -711,9 +714,14 @@ class UltralyticsChat {
   }
 
   async editAndRestart(messageIndex, newContent) {
+    if (this.isStreaming) return;
     if (messageIndex < 0 || messageIndex >= this.messages.length) return;
     const message = this.messages[messageIndex];
     if (message.role !== "user") return;
+    if (newContent.length > this.config.maxMessageLength) {
+      console.warn(`Message too long: ${newContent.length} > ${this.config.maxMessageLength}`);
+      return;
+    }
     message.content = newContent;
     this.messages = this.messages.slice(0, messageIndex + 1);
     const groups = this.qsa(".ult-message-group", this.refs.messages);
@@ -840,6 +848,7 @@ class UltralyticsChat {
     this.refs.input.style.height = "auto";
     this.isStreaming = true;
     this.updateComposerState();
+    this.qsa(".ult-message[contenteditable='true']", this.refs.messages).forEach((el) => (el.contentEditable = "false"));
     const group = this.createMessageGroup("assistant", this.messages.length);
     const { el: thinking, clear } = this.createThinking();
     group.appendChild(thinking);
@@ -920,6 +929,7 @@ class UltralyticsChat {
       this.isStreaming = false;
       this.abortController = null;
       this.updateComposerState();
+      this.qsa(".ult-message[contenteditable]", this.refs.messages).forEach((el) => (el.contentEditable = "true"));
       this.refs.input?.focus();
     }
   }
@@ -950,6 +960,7 @@ class UltralyticsChat {
     if (role === "user") {
       div.contentEditable = "true";
       div.dataset.originalContent = content;
+      if (this.isStreaming) div.contentEditable = "false";
     }
     group.appendChild(div);
     if (role === "assistant") this.finalizeAssistantMessage(group);
