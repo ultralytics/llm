@@ -90,12 +90,17 @@ class UltralyticsChat {
 
   showCopySuccess(btn) {
     if (!btn) return;
-    const orig = btn.innerHTML;
+    if (btn.__successTimeout) clearTimeout(btn.__successTimeout);
+    if (!btn.dataset.successOriginal) btn.dataset.successOriginal = btn.innerHTML;
     btn.innerHTML = this.icon("check");
     btn.classList.add("success");
-    setTimeout(() => {
-      btn.innerHTML = orig;
+    btn.__successTimeout = setTimeout(() => {
+      if (btn.dataset.successOriginal) {
+        btn.innerHTML = btn.dataset.successOriginal;
+        delete btn.dataset.successOriginal;
+      }
       btn.classList.remove("success");
+      btn.__successTimeout = null;
     }, 1500);
   }
 
