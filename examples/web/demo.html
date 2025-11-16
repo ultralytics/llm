@@ -132,15 +132,13 @@
         font-weight: 800;
         min-width: 0;
       }
-      .brand img {
-        width: 20px;
-        height: 20px;
-        border-radius: 4px;
+      .brand a {
+        display: inline-flex;
+        cursor: pointer;
       }
-      .brand span {
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
+      .brand img {
+        max-height: 32px;
+        max-width: 180px;
       }
 
       .search-box {
@@ -182,6 +180,10 @@
           gap: 6px;
           padding-left: 12px;
           padding-right: 12px;
+        }
+        .brand img {
+          max-height: 24px;
+          max-width: 120px;
         }
         .search-input {
           padding-left: 36px;
@@ -427,13 +429,14 @@
     <header class="topbar">
       <div class="topbar-inner">
         <div class="brand">
-          <img
-            src="https://cdn.prod.website-files.com/646dd1f1a3703e451ba81ecc/64f727ed3fd1e5e074574368_ultralytics-favicon.png"
-            alt="Ultralytics"
-            loading="lazy"
-            decoding="async"
-          />
-          <span>Ultralytics</span>
+          <a href="https://www.ultralytics.com" target="_blank" rel="noopener">
+            <img
+              src="https://cdn.prod.website-files.com/680a070c3b99253410dd3dcf/68e4eb1e9893320b26cc02c3_Ultralytics%20Logo.png.svg"
+              alt="Ultralytics"
+              loading="lazy"
+              decoding="async"
+            />
+          </a>
         </div>
         <div class="search-box">
           <svg
