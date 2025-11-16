@@ -246,7 +246,7 @@ class UltralyticsChat {
         box-shadow:0 24px 60px rgba(2,6,23,.25),0 8px 24px rgba(2,6,23,.18);z-index:10001;
         transform:translate(-50%,-50%) translateZ(0);opacity:0;visibility:hidden;
         transition:opacity .2s ease-out,visibility .2s;
-        flex-direction:column;overflow:hidden;text-align:left;display:flex;pointer-events:none;will-change:opacity;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+        flex-direction:column;overflow:hidden;text-align:left;display:flex;pointer-events:none;will-change:opacity}
       .ult-chat-modal.open{opacity:1;visibility:visible;pointer-events:auto}
       html[data-theme=dark] .ult-chat-modal{background:rgba(10,10,11,.95)}
 
@@ -269,7 +269,7 @@ class UltralyticsChat {
       html[data-theme=dark] .ult-example{background:#131318;color:#fafafa}
 
       .ult-chat-messages{flex:1;overflow-y:auto;padding:0 18px 18px;display:flex;flex-direction:column;gap:14px;-webkit-overflow-scrolling:touch}
-      .ult-message-group{padding:8px;margin:-8px;border-radius:10px;transition:background .15s ease,border .15s ease;border:1px solid transparent}
+      .ult-message-group{padding:8px 8px 4px;margin:-8px -8px 0;border-radius:10px;transition:background .15s ease,border .15s ease;border:1px solid transparent}
       .ult-message-group:first-child{margin-top:0}
       .ult-message-group:hover{background:rgba(247,247,249,.4);border-color:rgba(229,231,235,.6)}
       html[data-theme=dark] .ult-message-group:hover{background:rgba(19,19,24,.4);border-color:rgba(35,35,39,.6)}
@@ -371,7 +371,7 @@ class UltralyticsChat {
         html[data-theme=dark] .ult-chat-input-container{border-top-color:#1c1c22;background:#0a0a0b}
         .ult-chat-input{padding:9px 11px;font-size:16px;max-height:100px;border-radius:10px}
         .ult-chat-footer{padding:6px 14px;font-size:10px}
-        .ult-message-group{gap:3px;padding:0 14px;margin-bottom:8px}
+        .ult-message-group{gap:3px;padding:0 14px;margin:0 0 8px}
         .ult-message-label{font-size:11px;gap:5px;padding:0;margin-bottom:2px}
         .ult-message-label img{max-height:20px;max-width:20px}
         .ult-message-label svg{width:20px;height:20px}
