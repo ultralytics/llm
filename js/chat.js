@@ -466,7 +466,8 @@ class UltralyticsChat {
     this.on(this.qs(".ult-chat-copy", m), "click", () => this.copyThread());
     this.on(this.qs(".ult-chat-download", m), "click", () => this.downloadThread());
     this.on(this.refs.messages, "scroll", () => {
-      const d = this.refs.messages, st = d.scrollTop;
+      const d = this.refs.messages,
+        st = d.scrollTop;
       this.autoScroll = st >= (this.lastScrollTop || 0) && d.scrollHeight - st - d.clientHeight < 100;
       this.lastScrollTop = st;
     });
