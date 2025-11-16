@@ -241,13 +241,13 @@ class UltralyticsChat {
       .ultralytics-chat-pill img{width:30px;height:30px;border-radius:3px}
       html[data-theme=dark] .ultralytics-chat-pill{background:#40434f;color:#fff;box-shadow:0 20px 38px rgba(0,0,0,.5),0 8px 18px rgba(0,0,0,.32)}
 
-      .ult-chat-modal{position:fixed;left:50%;top:50%;width:min(760px,calc(100vw - 40px));height:min(80vh,820px);background:#fff;border:0;border-radius:16px;
+      .ult-chat-modal{position:fixed;left:50%;top:50%;width:min(760px,calc(100vw - 40px));height:min(80vh,820px);background:rgba(255,255,255,.95);border:0;border-radius:16px;
         box-shadow:0 24px 60px rgba(2,6,23,.25),0 8px 24px rgba(2,6,23,.18);z-index:10001;
         transform:translate(-50%,-50%) translateZ(0);opacity:0;visibility:hidden;
         transition:opacity .2s ease-out,visibility .2s;
-        flex-direction:column;overflow:hidden;text-align:left;display:flex;pointer-events:none;will-change:opacity}
+        flex-direction:column;overflow:hidden;text-align:left;display:flex;pointer-events:none;will-change:opacity;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
       .ult-chat-modal.open{opacity:1;visibility:visible;pointer-events:auto}
-      html[data-theme=dark] .ult-chat-modal{background:#0a0a0b}
+      html[data-theme=dark] .ult-chat-modal{background:rgba(10,10,11,.95)}
 
       .ult-chat-header{padding:16px 18px;display:flex;justify-content:space-between;align-items:center}
       .ult-chat-title{display:flex;align-items:center;gap:10px}
@@ -268,6 +268,10 @@ class UltralyticsChat {
       html[data-theme=dark] .ult-example{background:#131318;color:#fafafa}
 
       .ult-chat-messages{flex:1;overflow-y:auto;padding:0 18px 18px;display:flex;flex-direction:column;gap:14px;-webkit-overflow-scrolling:touch}
+      .ult-message-group{padding:8px;margin:-8px;border-radius:10px;transition:background .15s ease,border .15s ease;border:1px solid transparent}
+      .ult-message-group:first-child{margin-top:0}
+      .ult-message-group:hover{background:rgba(247,247,249,.4);border-color:rgba(229,231,235,.6)}
+      html[data-theme=dark] .ult-message-group:hover{background:rgba(19,19,24,.4);border-color:rgba(35,35,39,.6)}
       .ult-message-group:hover .ult-message-actions,.ult-message-group:focus-within .ult-message-actions{opacity:1}
       .ult-message-label{display:flex;align-items:center;gap:8px;font-size:11px;font-weight:800;color:#6b7280;text-transform:uppercase;letter-spacing:.03em;padding:0 2px}
       html[data-theme=dark] .ult-message-label{color:#a1a1aa}
