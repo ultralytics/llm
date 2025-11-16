@@ -281,8 +281,9 @@ class UltralyticsChat {
       .ult-message{font-size:14px;line-height:1.6;color:var(--ult-text);padding:0 2px;word-break:break-word;text-align:left}
       html[data-theme=dark] .ult-message{color:#f5f5f5}
       .ult-message-actions{display:flex;gap:4px;opacity:0;transition:opacity .15s;margin-top:6px;padding-left:2px}
-      .ult-user-message-actions{display:flex;gap:4px;opacity:0;transition:opacity .15s;position:absolute;right:8px;top:4px}
-      .ult-message-group:hover .ult-user-message-actions,.ult-message-group:focus-within .ult-user-message-actions,.ult-message[contenteditable]:focus ~ .ult-user-message-actions{opacity:1}
+      .ult-user-message-actions{display:flex;gap:4px;opacity:0;transition:opacity .15s;position:absolute;right:2px;bottom:0;pointer-events:none}
+      .ult-user-message-actions .ult-icon-btn{pointer-events:auto}
+      .ult-message-group:hover .ult-user-message-actions,.ult-message-group:focus-within .ult-user-message-actions{opacity:1}
       .ult-message a{color:var(--ult-primary);text-underline-offset:2px}.ult-message a:hover{text-decoration:underline}
       .ult-message strong{font-weight:700;color:var(--ult-text)}
       html[data-theme=dark] .ult-message strong{color:#fafafa}
@@ -379,7 +380,7 @@ class UltralyticsChat {
         .ult-message[contenteditable='true']{margin:-9px -11px}
         .ult-chat-footer{padding:6px 14px;font-size:10px}
         .ult-message-group{gap:3px;padding:0 14px;margin:0 0 8px;position:relative}
-        .ult-user-message-actions{right:4px;top:2px}
+        .ult-user-message-actions{right:0;bottom:0}
         .ult-message-label{font-size:11px;gap:5px;padding:0;margin-bottom:2px}
         .ult-message-label img{max-height:20px;max-width:20px}
         .ult-message-label svg{width:20px;height:20px}
