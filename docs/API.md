@@ -20,38 +20,42 @@ All fields are optional—sane defaults are applied whenever a value is omitted.
 
 ```javascript
 const chat = new UltralyticsChat({
-  apiUrl: "https://chat-885297101091.us-central1.run.app/api/chat", // SSE endpoint
-  maxMessageLength: 10000, // Character cap enforced before sending
+    apiUrl: "https://chat-885297101091.us-central1.run.app/api/chat", // SSE endpoint
+    maxMessageLength: 10000, // Character cap enforced before sending
 
-  branding: {
-    name: "Ultralytics AI",
-    tagline: "Ask anything about Ultralytics, YOLO, and more",
-    logo: "https://cdn.../Ultralytics%20Logo.png.svg",
-    logomark: "https://storage.googleapis.com/.../botAvatar.svg",
-    logoUrl: "https://www.ultralytics.com",
-    pillText: "Ask AI",
-  },
+    branding: {
+        name: "Ultralytics AI",
+        tagline: "Ask anything about Ultralytics, YOLO, and more",
+        logo: "https://cdn.../Ultralytics%20Logo.png.svg",
+        logomark: "https://storage.googleapis.com/.../botAvatar.svg",
+        logoUrl: "https://www.ultralytics.com",
+        pillText: "Ask AI",
+    },
 
-  theme: {
-    primary: "#042AFF",
-    dark: "#111F68",
-    accent: "#E1FF25", // falls back to theme.yellow for compatibility
-    text: "#0b0b0f",
-  },
+    theme: {
+        primary: "#042AFF",
+        dark: "#111F68",
+        accent: "#E1FF25", // falls back to theme.yellow for compatibility
+        text: "#0b0b0f",
+    },
 
-  welcome: {
-    title: "Hello 👋",
-    message: "I'm an AI assistant trained on Ultralytics documentation - ask me anything!",
-    chatExamples: ["What's new in YOLO11?", "How do I get started with YOLO?", "Tell me about Enterprise Licensing"],
-    searchExamples: ["YOLO quickstart", "model training parameters", "export formats", "dataset configuration"],
-  },
+    welcome: {
+        title: "Hello 👋",
+        message: "I'm an AI assistant trained on Ultralytics documentation - ask me anything!",
+        chatExamples: [
+            "What's new in YOLO11?",
+            "How do I get started with YOLO?",
+            "Tell me about Enterprise Licensing",
+        ],
+        searchExamples: ["YOLO quickstart", "model training parameters", "export formats", "dataset configuration"],
+    },
 
-  ui: {
-    placeholder: "Ask anything…",
-    copyText: "Copy thread",
-    downloadText: "Download thread",
-    clearText: "New chat",
-  },
+    ui: {
+        placeholder: "Ask anything…",
+        copyText: "Copy thread",
+        downloadText: "Download thread",
+        clearText: "New chat",
+    },
 });
 ```
 
@@ -81,11 +85,11 @@ Other helper methods (`copyThread`, `retryLast`, etc.) are exposed on the class 
 #### Properties
 
 ```javascript
-chat.isOpen;       // boolean - modal state
-chat.isStreaming;  // boolean - actively receiving SSE chunks
-chat.mode;         // "chat" | "search"
-chat.messages;     // Array<{ role: "user" | "assistant", content: string }>
-chat.sessionId;    // string|null - persisted session identifier
+chat.isOpen; // boolean - modal state
+chat.isStreaming; // boolean - actively receiving SSE chunks
+chat.mode; // "chat" | "search"
+chat.messages; // Array<{ role: "user" | "assistant", content: string }>
+chat.sessionId; // string|null - persisted session identifier
 ```
 
 #### Keyboard & Accessibility
@@ -109,20 +113,20 @@ Request body:
 
 ```json
 {
-  "messages": [
-    {
-      "role": "user",
-      "content": "What is YOLO11?"
-    }
-  ],
-  "session_id": "optional-session-id",
-  "context": {
-    "url": "https://docs.ultralytics.com/models/yolov9/",
-    "title": "YOLOv9: A Leap Forward in Object Detection Technology",
-    "description": "Meta description value",
-    "path": "/models/yolov9/"
-  },
-  "edit_index": 4
+    "messages": [
+        {
+            "role": "user",
+            "content": "What is YOLO11?"
+        }
+    ],
+    "session_id": "optional-session-id",
+    "context": {
+        "url": "https://docs.ultralytics.com/models/yolov9/",
+        "title": "YOLOv9: A Leap Forward in Object Detection Technology",
+        "description": "Meta description value",
+        "path": "/models/yolov9/"
+    },
+    "edit_index": 4
 }
 ```
 
@@ -148,7 +152,7 @@ When the widget is switched into search mode (`chat.toggle(true, "search")` or v
 
 ```json
 {
-  "query": "YOLO training parameters"
+    "query": "YOLO training parameters"
 }
 ```
 
@@ -156,14 +160,14 @@ Response:
 
 ```json
 {
-  "results": [
-    {
-      "title": "Training Configuration",
-      "url": "https://docs.ultralytics.com/usage/training/",
-      "text": "Step-by-step instructions for configuring Ultralytics training jobs…",
-      "score": 0.95
-    }
-  ]
+    "results": [
+        {
+            "title": "Training Configuration",
+            "url": "https://docs.ultralytics.com/usage/training/",
+            "text": "Step-by-step instructions for configuring Ultralytics training jobs…",
+            "score": 0.95
+        }
+    ]
 }
 ```
 
@@ -219,9 +223,9 @@ The package also exposes `ultralytics_llm.__version__` so you can pin features p
 
 ```javascript
 try {
-  await chat.sendMessage("test");
+    await chat.sendMessage("test");
 } catch (err) {
-  console.error("Chat error:", err);
+    console.error("Chat error:", err);
 }
 ```
 
