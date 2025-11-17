@@ -14,13 +14,13 @@
 [![Ultralytics Forums](https://img.shields.io/discourse/users?server=https%3A%2F%2Fcommunity.ultralytics.com&logo=discourse&label=Forums&color=blue)](https://community.ultralytics.com/)
 [![Ultralytics Reddit](https://img.shields.io/reddit/subreddit-subscribers/ultralytics?style=flat&logo=reddit&logoColor=white&label=Reddit&color=blue)](https://reddit.com/r/ultralytics)
 
-![Ultralytics Chat Window](https://github.com/user-attachments/assets/359e1138-ca03-4d9a-a1da-a9c1018a4976)
+![Ultralytics Chat Window](https://github.com/user-attachments/assets/a5e02018-b0df-4366-939d-402bbbd234f2)
 
 ## 🎯 Current Status
 
-> **⚠️ Experimental Development**: This repository currently contains our JavaScript chat client for Ultralytics experimentation and internal use. **No official releases yet** - the `main` branch is actively developed and may change without notice.
+> **⚠️ Experimental Development**: The chat widget ships as a CDN-ready `chat.min.js` bundle and as part of the `ultralytics-llm` Python package published on PyPI. Track tagged releases for production deployments and reserve `@main` for testing nightly changes.
 >
-> **Coming Soon**: We plan to open-source additional components including our **Python backend `LLMClient`** class, FastAPI server implementation, and supporting utilities once they reach production maturity.
+> **Ecosystem:** This repo hosts both the in-browser chat widget and the Python scaffolding we use for backend workflows. The widget is production ready, while the Python client remains a lightweight placeholder until the managed API is released.
 
 ## 📦 Installation
 
@@ -33,7 +33,7 @@ Load the chat widget via [jsDelivr CDN](https://www.jsdelivr.com/package/gh/ultr
 <script src="https://cdn.jsdelivr.net/gh/ultralytics/llm@latest/js/chat.min.js"></script>
 
 <!-- Specific version (guaranteed stability) -->
-<script src="https://cdn.jsdelivr.net/gh/ultralytics/llm@v0.0.1/js/chat.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/ultralytics/llm@v0.0.2/js/chat.min.js"></script>
 
 <!-- Main branch (experimental, for testing) -->
 <script src="https://cdn.jsdelivr.net/gh/ultralytics/llm@main/js/chat.min.js"></script>
@@ -56,7 +56,7 @@ Load the chat widget via [jsDelivr CDN](https://www.jsdelivr.com/package/gh/ultr
 
 ## 🎯 Quick Start
 
-![Ultralytics Chat Pill](https://github.com/user-attachments/assets/ee59ed02-6888-4f59-9a8c-8a21eaee5a38)
+![Ultralytics Chat Pill](https://github.com/user-attachments/assets/c160e901-9851-456e-8fef-0632ce546c2e)
 
 ### JavaScript Chat Widget
 
@@ -107,8 +107,8 @@ Load the chat widget via [jsDelivr CDN](https://www.jsdelivr.com/package/gh/ultr
 ```javascript
 const chat = new UltralyticsChat({
   // API Configuration
-  apiUrl: "/api/chat", // Your chat API endpoint
-  maxMessageLength: 10000, // Character limit per message
+  apiUrl: "/api/chat", // Chat endpoint that streams SSE
+  maxMessageLength: 10000, // Character limit enforced per user message
 
   // Branding
   branding: {
@@ -116,6 +116,7 @@ const chat = new UltralyticsChat({
     tagline: "How can I help?", // Tagline text
     logo: "https://...", // Header logo URL
     logomark: "https://...", // Pill button logo URL
+    logoUrl: "https://example.com", // Link when header logo is clicked
     pillText: "Ask AI", // Pill button text
   },
 
@@ -123,7 +124,7 @@ const chat = new UltralyticsChat({
   theme: {
     primary: "#042AFF", // Primary brand color
     dark: "#111F68", // Dark theme accent
-    yellow: "#E1FF25", // Highlight color
+    accent: "#E1FF25", // Highlight color (falls back to theme.yellow)
     text: "#0b0b0f", // Text color
   },
 
@@ -131,7 +132,8 @@ const chat = new UltralyticsChat({
   welcome: {
     title: "Hi!",
     message: "How can I help you today?",
-    examples: ["What is YOLO11?", "How do I train a model?"],
+    chatExamples: ["What is YOLO11?", "How do I train a model?"],
+    searchExamples: ["YOLO quickstart", "model training parameters"],
   },
 
   // UI Text
@@ -144,6 +146,8 @@ const chat = new UltralyticsChat({
 });
 ```
 
+`UltralyticsChat` automatically injects document context (title, URL, description, path) into each request so your backend can provide page-aware responses without extra work on the integrator side.
+
 ### API Requirements
 
 Your backend should implement:
@@ -154,7 +158,14 @@ Content-Type: application/json
 
 {
   "messages": [{"role": "user", "content": "Hello"}],
-  "session_id": "optional-session-id"
+  "session_id": "optional-session-id",
+  "context": {
+    "url": "https://example.com/docs/widget",
+    "title": "Docs page title",
+    "description": "Meta description text",
+    "path": "/docs/widget"
+  },
+  "edit_index": 3 // optional when user edits a previous turn
 }
 
 Response: Server-Sent Events (SSE)
@@ -165,7 +176,10 @@ data: [DONE]
 
 Headers:
 X-Session-ID: session-uuid (for persistence)
+Content-Type: text/event-stream
 ```
+
+When the widget is switched to **Search** mode it will call the same base URL with `/search` replacing `/chat` via `POST /api/search` and expects a JSON body `{ "results": [{ title, url, text, score }] }`.
 
 ## 📱 Mobile Support
 
@@ -248,7 +262,8 @@ We plan to open-source our Python components once mature:
 
 ## 📖 Documentation
 
-For comprehensive documentation and usage guides, visit [docs.ultralytics.com/llm](https://docs.ultralytics.com) (coming soon).
+- API reference for the widget and backend contracts: [`docs/API.md`](docs/API.md)
+- Product announcements and tutorials: [docs.ultralytics.com](https://docs.ultralytics.com) (LLM section rolling out alongside SDK updates)
 
 ## 💡 Contribute
 
