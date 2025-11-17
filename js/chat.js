@@ -30,7 +30,11 @@ class UltralyticsChat {
       },
       welcome: {
         title: d(config.welcome, "title", "Hello 👋"),
-        message: d(config.welcome, "message", "I'm an AI assistant trained on Ultralytics documentation - ask me anything!"),
+        message: d(
+          config.welcome,
+          "message",
+          "I'm an AI assistant trained on Ultralytics documentation - ask me anything!",
+        ),
         chatExamples: d(config.welcome, "chatExamples") ??
           d(config.welcome, "examples") ?? [
             "What's new in YOLO11?",
