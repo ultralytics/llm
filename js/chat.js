@@ -1214,10 +1214,10 @@ class UltralyticsChat {
       /(?<!href=")(?<!src=")(?<!>)\b(https?:\/\/[^\s<>'")\]]+?)(?=[.,;:!?]*(?:\s|<|'|"|\)|]|$))/g,
       (url) => `<a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>`,
     );
-    text = text.replace(/\*\*([^"]+?)\*\*/g, "<strong>$1</strong>");
-    text = text.replace(/__([^"]+?)__/g, "<strong>$1</strong>");
-    text = text.replace(/(?<!\*)\*(?!\*)([^"]+?)\*(?!\*)/g, "<em>$1</em>");
-    text = text.replace(/(?<!_)_(?!_)([^"]+?)_(?!_)/g, "<em>$1</em>");
+    text = text.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+    text = text.replace(/__(.+?)__/g, "<strong>$1</strong>");
+    text = text.replace(/(?<!\*)\*(?!\*)(.+?)\*(?!\*)/g, "<em>$1</em>");
+    text = text.replace(/(?<!_)_(?!_)(.+?)_(?!_)/g, "<em>$1</em>");
     text = text.replace(/@@ULTCODE(\d+)@@/g, (match, idx) => `<code>${codeBlocks[idx]}</code>`);
     return text.replace(/ {2}\n/g, "<br>");
   }
