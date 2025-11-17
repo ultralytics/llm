@@ -23,9 +23,6 @@ class UltralyticsChat {
         pillText: d(config.branding, "pillText", "Ask AI"),
       },
 
-
-
-      
       theme: {
         primary: d(config.theme, "primary", "#042AFF"),
         dark: d(config.theme, "dark", "#111F68"),
