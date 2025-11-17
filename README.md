@@ -14,7 +14,7 @@
 [![Ultralytics Forums](https://img.shields.io/discourse/users?server=https%3A%2F%2Fcommunity.ultralytics.com&logo=discourse&label=Forums&color=blue)](https://community.ultralytics.com/)
 [![Ultralytics Reddit](https://img.shields.io/reddit/subreddit-subscribers/ultralytics?style=flat&logo=reddit&logoColor=white&label=Reddit&color=blue)](https://reddit.com/r/ultralytics)
 
-![Ultralytics Chat Window](https://github.com/user-attachments/assets/359e1138-ca03-4d9a-a1da-a9c1018a4976)
+![Ultralytics Chat Window](https://github.com/user-attachments/assets/a5e02018-b0df-4366-939d-402bbbd234f2)
 
 ## 🎯 Current Status
 
@@ -56,7 +56,7 @@ Load the chat widget via [jsDelivr CDN](https://www.jsdelivr.com/package/gh/ultr
 
 ## 🎯 Quick Start
 
-![Ultralytics Chat Pill](https://github.com/user-attachments/assets/ee59ed02-6888-4f59-9a8c-8a21eaee5a38)
+![Ultralytics Chat Pill](https://github.com/user-attachments/assets/c160e901-9851-456e-8fef-0632ce546c2e)
 
 ### JavaScript Chat Widget
 
