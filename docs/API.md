@@ -1,250 +1,217 @@
 # API Reference
 
-Complete API reference for Ultralytics LLM toolkit.
+Ultralytics LLM ships with a zero-dependency JavaScript widget and a Python package that will grow into our backend SDK. This document captures the public surface area of both components plus the HTTP contracts the widget expects.
 
 ## JavaScript API
 
-### UltralyticsChat Class
+### `UltralyticsChat` Class
 
 #### Constructor
 
 ```javascript
-new UltralyticsChat(config);
+const chat = new UltralyticsChat(config);
 ```
 
-Creates a new chat widget instance.
+Creates a new widget instance. The constructor immediately injects the floating pill, modal, backdrop, tooltip, and global styles.
 
-**Parameters:**
+#### Configuration
 
-- `config` (Object, optional) - Configuration object
-
-**Config Options:**
+All fields are optional—sane defaults are applied whenever a value is omitted.
 
 ```javascript
-{
-  // API Configuration
-  apiUrl: string,                  // API endpoint (default: "/api/chat")
+const chat = new UltralyticsChat({
+  apiUrl: "https://chat-885297101091.us-central1.run.app/api/chat", // SSE endpoint
+  maxMessageLength: 10000, // Character cap enforced before sending
 
-  // Branding
   branding: {
-    name: string,                  // Assistant name (default: "AI")
-    tagline: string,               // Header tagline
-    logo: string,                  // URL to header logo
-    logomark: string,              // URL to pill button logo
-    pillText: string,              // Pill button text (default: "Ask AI")
+    name: "Ultralytics AI",
+    tagline: "Ask anything about Ultralytics, YOLO, and more",
+    logo: "https://cdn.../Ultralytics%20Logo.png.svg",
+    logomark: "https://storage.googleapis.com/.../botAvatar.svg",
+    logoUrl: "https://www.ultralytics.com",
+    pillText: "Ask AI",
   },
 
-  // Theme Colors
   theme: {
-    primary: string,               // Primary color (default: "#042AFF")
-    dark: string,                  // Dark accent (default: "#111F68")
-    yellow: string,                // Highlight color (default: "#E1FF25")
-    text: string,                  // Text color (default: "#0b0b0f")
+    primary: "#042AFF",
+    dark: "#111F68",
+    accent: "#E1FF25", // falls back to theme.yellow for compatibility
+    text: "#0b0b0f",
   },
 
-  // Welcome Message
   welcome: {
-    title: string,                 // Welcome title (default: "Hi!")
-    message: string,               // Welcome message HTML
-    examples: string[],            // Example questions
+    title: "Hello 👋",
+    message: "I'm an AI assistant trained on Ultralytics documentation - ask me anything!",
+    chatExamples: ["What's new in YOLO11?", "How do I get started with YOLO?", "Tell me about Enterprise Licensing"],
+    searchExamples: ["YOLO quickstart", "model training parameters", "export formats", "dataset configuration"],
   },
 
-  // UI Text
   ui: {
-    placeholder: string,           // Input placeholder (default: "Ask anything…")
-    copyText: string,              // Copy button text
-    downloadText: string,          // Download button text
-    clearText: string,             // Clear button text
-  }
-}
+    placeholder: "Ask anything…",
+    copyText: "Copy thread",
+    downloadText: "Download thread",
+    clearText: "New chat",
+  },
+});
 ```
+
+> `welcome.examples` is still supported as a fallback but the widget now differentiates between `chatExamples` and `searchExamples`.
+
+The widget automatically snapshots the current page (`title`, `url`, `description`, and `path`) and forwards it to the backend as `context` on every chat request.
 
 #### Methods
 
-##### `toggle(forceOpen, mode)`
+- `toggle(forceOpen = null, mode = null)`  
+  Opens/closes the widget programmatically. Pass `"chat"` or `"search"` for the `mode` argument to choose which interface to render when opening.
 
-Toggle chat widget open/closed.
+- `sendMessage(text, isNew = true, editIndex = null)`  
+  Sends a prompt to the chat endpoint. While streaming, all editable user bubbles are locked and you can call `abortController.abort()` via the Stop button. When `mode === "search"` this method automatically forwards the query to `/search` instead of the SSE endpoint.
 
-```javascript
-chat.toggle(); // Toggle current state
-chat.toggle(true); // Force open
-chat.toggle(false); // Force close
-chat.toggle(true, "search"); // Open in search mode
-```
+- `clearSession()`  
+  Clears the in-memory conversation, removes `localStorage["ult-chat-session"]`, resets UI state, and focuses the composer.
 
-**Parameters:**
+- `setExamples(list)`  
+  Replaces the welcome-example buttons with a new array of strings. Useful when the host site wants to control onboarding hints dynamically.
 
-- `forceOpen` (boolean|null) - Force open (true), close (false), or toggle (null)
-- `mode` (string|null) - Set mode: "chat" or "search"
+- `destroy()`  
+  Tears down the widget, removes injected DOM, and detaches listeners. Call this before unmounting if you embed the widget into SPA routes.
 
-##### `sendMessage(text)`
-
-Send a message programmatically.
-
-```javascript
-chat.sendMessage("What is YOLO11?");
-```
-
-**Parameters:**
-
-- `text` (string) - Message to send
-
-##### `clearSession()`
-
-Clear chat history and start new session.
-
-```javascript
-chat.clearSession();
-```
-
-##### `destroy()`
-
-Clean up and remove chat widget.
-
-```javascript
-chat.destroy();
-```
-
-##### `setExamples(list)`
-
-Update example questions.
-
-```javascript
-chat.setExamples(["How do I train a model?", "What formats can I export to?"]);
-```
-
-**Parameters:**
-
-- `list` (string[]) - Array of example questions
-
-#### Events
-
-The widget uses keyboard shortcuts:
-
-- `Cmd/Ctrl + K` - Open chat
-- `Escape` - Close chat (when open)
-- `Enter` - Send message
-- `Shift + Enter` - New line in message
+Other helper methods (`copyThread`, `retryLast`, etc.) are exposed on the class and can be called if needed, but the list above represents the stable external surface.
 
 #### Properties
 
 ```javascript
-chat.isOpen; // boolean - Is widget open
-chat.isStreaming; // boolean - Is response streaming
-chat.mode; // string - Current mode ("chat" or "search")
-chat.messages; // Array - Message history
-chat.sessionId; // string|null - Current session ID
+chat.isOpen;       // boolean - modal state
+chat.isStreaming;  // boolean - actively receiving SSE chunks
+chat.mode;         // "chat" | "search"
+chat.messages;     // Array<{ role: "user" | "assistant", content: string }>
+chat.sessionId;    // string|null - persisted session identifier
 ```
+
+#### Keyboard & Accessibility
+
+- `Cmd/Ctrl + K` toggles the widget.
+- `Esc` closes it.
+- `Enter` sends a message when not holding `Shift`.
+- `Shift + Enter` inserts a newline.
+- Buttons expose ARIA labels, and interactive elements are reachable via keyboard navigation. The layout respects reduced motion, prefers-color-scheme, safe areas, and screen reader semantics.
+
+### Backend Contracts
+
+#### `POST /api/chat`
+
+```http
+POST /api/chat
+Content-Type: application/json
+```
+
+Request body:
+
+```json
+{
+  "messages": [
+    {
+      "role": "user",
+      "content": "What is YOLO11?"
+    }
+  ],
+  "session_id": "optional-session-id",
+  "context": {
+    "url": "https://docs.ultralytics.com/models/yolov9/",
+    "title": "YOLOv9: A Leap Forward in Object Detection Technology",
+    "description": "Meta description value",
+    "path": "/models/yolov9/"
+  },
+  "edit_index": 4
+}
+```
+
+Response headers:
+
+- `Content-Type: text/event-stream`
+- `X-Session-ID: session-uuid` (save this for follow-up turns)
+
+Response stream (SSE):
+
+```
+data: {"content": "You're on the Ultralytics docs page: "}
+data: {"content": "\"YOLOv9: A Leap Forward in Object Detection Technology\" — "}
+data: {"content": "URL: https://docs.ultralytics.com/models/yolov9/"}
+data: [DONE]
+```
+
+Errors should be emitted as `data: {"error": "...message..."}` so the widget can present a friendly fallback bubble.
+
+#### `POST /api/search`
+
+When the widget is switched into search mode (`chat.toggle(true, "search")` or via the UI tabs) it derives the search URL by swapping `/chat` for `/search` on `apiUrl`.
+
+```json
+{
+  "query": "YOLO training parameters"
+}
+```
+
+Response:
+
+```json
+{
+  "results": [
+    {
+      "title": "Training Configuration",
+      "url": "https://docs.ultralytics.com/usage/training/",
+      "text": "Step-by-step instructions for configuring Ultralytics training jobs…",
+      "score": 0.95
+    }
+  ]
+}
+```
+
+### Session Lifecycle
+
+1. The first outbound message omits `session_id`.
+2. The backend returns `X-Session-ID`.
+3. The widget caches that value in `localStorage["ult-chat-session"]`.
+4. All subsequent chat calls send the cached ID until `clearSession()` or a user-triggered thread reset.
+
+### Security
+
+All inbound and outbound text runs through HTML escaping prior to markdown rendering. Code blocks receive optional copy buttons, and links are forced to open in a new tab with `rel="noopener noreferrer"`. To keep CSP strict, serve `chat.min.js` from jsDelivr or host it yourself and allowlist the domain in `script-src`.
+
+### Browser Support
+
+- Chrome / Edge 90+
+- Safari 14+
+- Firefox 88+
+- iOS Safari / Chrome
+- Android Chrome / Samsung Internet / Firefox
 
 ## Python API
 
-### LLMClient Class
+### Installation
 
-#### Constructor
+```bash
+pip install ultralytics-llm
+```
+
+### `LLMClient` Class (preview)
 
 ```python
 from ultralytics_llm import LLMClient
 
-client = LLMClient(
-    api_key="your-api-key",
-    api_url="https://api.ultralytics.com",  # optional
-)
+client = LLMClient(api_key="your-api-key", api_url="https://api.ultralytics.com")
+
+try:
+    response = client.chat("What's new in YOLO11?")
+except NotImplementedError:
+    print("Python SDK functionality is coming soon.")
 ```
 
-**Parameters:**
+- `api_key` – Authentication token to use when backend helpers land.
+- `api_url` – Override if you host your own bridge.
+- `.chat(message: str)` – Placeholder that will expose streaming helpers in a future release. It currently raises `NotImplementedError`.
 
-- `api_key` (str) - API key for authentication
-- `api_url` (str, optional) - Base URL for API endpoints (default: "https://api.ultralytics.com")
-
-#### Methods
-
-##### `chat(message)`
-
-Send a chat message and receive response.
-
-```python
-response = client.chat("What's new in YOLO11?")
-print(response)
-```
-
-**Parameters:**
-
-- `message` (str) - User message to send
-
-**Returns:**
-
-- `str` - Assistant response text
-
-**Raises:**
-
-- `NotImplementedError` - Currently not implemented (coming soon)
-
-## API Endpoints
-
-### Chat Endpoint
-
-```
-POST /api/chat
-```
-
-**Request:**
-
-```json
-{
-    "messages": [
-        {
-            "role": "user",
-            "content": "What is YOLO11?"
-        }
-    ],
-    "session_id": "optional-session-id"
-}
-```
-
-**Response (Streaming):**
-
-Server-Sent Events (SSE) stream:
-
-```
-data: {"content": "YOLO"}
-data: {"content": "11"}
-data: {"content": " is"}
-data: [DONE]
-```
-
-**Response Headers:**
-
-- `X-Session-ID` - Session identifier for continuing conversations
-- `Content-Type: text/event-stream`
-
-### Search Endpoint
-
-```
-POST /api/search
-```
-
-**Request:**
-
-```json
-{
-    "query": "YOLO training parameters"
-}
-```
-
-**Response:**
-
-```json
-{
-    "results": [
-        {
-            "title": "Training Configuration",
-            "url": "https://...",
-            "text": "Snippet of matching content...",
-            "score": 0.95
-        }
-    ]
-}
-```
+The package also exposes `ultralytics_llm.__version__` so you can pin features per deployment.
 
 ## Error Handling
 
@@ -252,83 +219,29 @@ POST /api/search
 
 ```javascript
 try {
-    await chat.sendMessage("test");
-} catch (error) {
-    console.error("Chat error:", error);
+  await chat.sendMessage("test");
+} catch (err) {
+  console.error("Chat error:", err);
 }
 ```
 
-Errors are handled gracefully with user-friendly messages displayed in the chat.
+The widget already wraps network failures and displays a friendly bubble, but catching the promise lets you plug in custom telemetry.
 
 ### Python
 
 ```python
 try:
     response = client.chat("test")
-except NotImplementedError as e:
-    print(f"Feature not available: {e}")
-except Exception as e:
-    print(f"Error: {e}")
-```
-
-## Session Management
-
-Sessions are automatically managed:
-
-1. First message creates new session
-2. Session ID returned in `X-Session-ID` header
-3. Session ID stored in localStorage
-4. Subsequent messages use same session
-5. Clear session with `clearSession()` or localStorage.removeItem("ult-chat-session")
-
-## Security
-
-### XSS Protection
-
-All user content and API responses are sanitized:
-
-```javascript
-// HTML is escaped
-const escaped = chat.escapeHtml(userInput);
-
-// Markdown is safely rendered
-const html = chat.renderMarkdown(content);
-```
-
-### Content Security Policy
-
-The widget is compatible with CSP. Recommended headers:
-
-```
-Content-Security-Policy:
-  default-src 'self';
-  script-src 'self' 'unsafe-inline' cdn.jsdelivr.net;
-  style-src 'self' 'unsafe-inline';
-  connect-src 'self' your-api-domain.com;
-  img-src 'self' data: https:;
-```
-
-## Browser Support
-
-- Chrome/Edge 90+
-- Firefox 88+
-- Safari 14+
-- Mobile browsers (iOS Safari, Chrome Mobile)
-
-## TypeScript (Coming Soon)
-
-TypeScript definitions will be available in future releases.
-
-```typescript
-interface UltralyticsConfig {
-    apiUrl?: string;
-    branding?: BrandingConfig;
-    theme?: ThemeConfig;
-    welcome?: WelcomeConfig;
-    ui?: UIConfig;
-}
+except NotImplementedError:
+    # Current release is a stub
+    pass
+except Exception as exc:
+    print(f"Unexpected error: {exc}")
 ```
 
 ## Examples
 
-See the [examples](../examples) directory for complete working examples.
+- [`examples/js/chat.html`](../examples/js/chat.html) – Raw browser integration.
+- [`examples/web/demo`](../examples/web/demo) – Demo deployed on Vercel (see README badge).
+
+For UI assets and release notes refer back to [`README.md`](../README.md).
