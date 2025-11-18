@@ -631,6 +631,12 @@ class UltralyticsChat {
       const messageDiv = e.target.closest(".ult-message[contenteditable='true']");
       if (messageDiv) messageDiv.classList.remove("ult-message-editing");
     });
+    this.on(this.refs.messages, "input", (e) => {
+      const messageDiv = e.target.closest(".ult-message[contenteditable='true']");
+      if (!messageDiv) return;
+      const trimmed = this.trimMessage(messageDiv.textContent || "", messageDiv);
+      if (trimmed !== (messageDiv.textContent || "")) messageDiv.textContent = trimmed;
+    });
   }
 
   toggle(forceOpen = null, mode = null) {
