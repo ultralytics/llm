@@ -508,6 +508,7 @@ class UltralyticsChat {
       const t = e.target;
       t.style.height = "auto";
       t.style.height = Math.min(t.scrollHeight, 140) + "px";
+      if (t.value.length === this.config.maxMessageLength) this.flashTooltip(t, "⚠️ Message shortened to fit");
       if (this.inputDebounceTimer) clearTimeout(this.inputDebounceTimer);
       this.inputDebounceTimer = setTimeout(() => this.updateComposerState(), 50);
     });
