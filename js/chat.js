@@ -508,6 +508,7 @@ class UltralyticsChat {
       const t = e.target;
       t.style.height = "auto";
       t.style.height = Math.min(t.scrollHeight, 140) + "px";
+      if (t.value.length === this.config.maxMessageLength) this.flashTooltip(t, "⚠️ Message shortened to fit");
       if (this.inputDebounceTimer) clearTimeout(this.inputDebounceTimer);
       this.inputDebounceTimer = setTimeout(() => this.updateComposerState(), 50);
     });
@@ -582,16 +583,14 @@ class UltralyticsChat {
           const messageDiv = group.querySelector(".ult-message");
           const idx = this.getGroupIndex(group);
           if (messageDiv && idx !== null) {
-            const newContent = messageDiv.textContent.trim();
+            let newContent = messageDiv.textContent.trim();
             if (!newContent) return;
             if (this.isStreaming) {
-              this.flashTooltip(actionBtn, "Finish generating first");
+              this.flashTooltip(actionBtn, "⚠️ Finish generating first");
               return;
             }
-            if (newContent.length > this.config.maxMessageLength) {
-              this.flashTooltip(actionBtn, `Too long (max ${this.config.maxMessageLength})`);
-              return;
-            }
+            newContent = this.trimMessage(newContent, actionBtn);
+            messageDiv.textContent = newContent;
             void this.editAndRestart(idx, newContent).then((ok) => {
               if (ok) this.showCopySuccess(actionBtn);
             });
@@ -609,15 +608,13 @@ class UltralyticsChat {
         const idx = this.getGroupIndex(group);
         if (idx !== null) {
           if (this.isStreaming) {
-            this.flashTooltip(messageDiv, "Finish generating first");
+            this.flashTooltip(messageDiv, "⚠️ Finish generating first");
             return;
           }
-          const newContent = messageDiv.textContent.trim();
+          let newContent = messageDiv.textContent.trim();
           if (!newContent) return;
-          if (newContent.length > this.config.maxMessageLength) {
-            this.flashTooltip(messageDiv, `Too long (max ${this.config.maxMessageLength})`);
-            return;
-          }
+          newContent = this.trimMessage(newContent, messageDiv);
+          messageDiv.textContent = newContent;
           void this.editAndRestart(idx, newContent);
         }
       } else if (e.key === "Escape") {
@@ -633,6 +630,12 @@ class UltralyticsChat {
     this.on(this.refs.messages, "focusout", (e) => {
       const messageDiv = e.target.closest(".ult-message[contenteditable='true']");
       if (messageDiv) messageDiv.classList.remove("ult-message-editing");
+    });
+    this.on(this.refs.messages, "input", (e) => {
+      const messageDiv = e.target.closest(".ult-message[contenteditable='true']");
+      if (!messageDiv) return;
+      const trimmed = this.trimMessage(messageDiv.textContent || "", messageDiv);
+      if (trimmed !== (messageDiv.textContent || "")) messageDiv.textContent = trimmed;
     });
   }
 
@@ -736,6 +739,13 @@ class UltralyticsChat {
     this.swapSendIcon(this.isStreaming ? "square" : hasText ? "arrowUp" : "square");
   }
 
+  trimMessage(text, target = null) {
+    const max = this.config.maxMessageLength;
+    if (!text || text.length <= max) return text || "";
+    if (target) this.flashTooltip(target, "⚠️ Message shortened to fit");
+    return text.slice(0, max);
+  }
+
   scrollToBottom() {
     if (!this.autoScroll || !this.refs.messages) return;
     requestAnimationFrame(() => {
@@ -772,7 +782,7 @@ class UltralyticsChat {
     if (!Number.isInteger(messageIndex) || messageIndex < 0 || messageIndex >= this.messages.length) return false;
     const message = this.messages[messageIndex];
     if (message.role !== "user") return false;
-    if (newContent.length > this.config.maxMessageLength) return false;
+    newContent = this.trimMessage(newContent);
     message.content = newContent;
     this.messages = this.messages.slice(0, messageIndex + 1);
     const currentGroup = this.qs(`.ult-message-group[data-message-index="${messageIndex}"]`, this.refs.messages);
@@ -886,6 +896,8 @@ class UltralyticsChat {
 
   async sendMessage(text, isNew = true, editIndex = null) {
     if (!text || this.isStreaming || !this.refs.input || !this.refs.messages) return;
+    text = this.trimMessage(text, this.refs.input);
+    if (!text) return;
     this.showWelcome(false);
     this.autoScroll = true;
     if (this.mode === "search") {
