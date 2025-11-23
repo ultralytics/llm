@@ -1,5 +1,13 @@
 // Ultralytics 🚀 AGPL-3.0 License - https://ultralytics.com/license
 
+const ULT_CHAT_PERM_IDS = {
+  style: "ult-chat-style",
+  pill: "ult-chat-pill",
+  modal: "ult-chat-modal",
+  backdrop: "ult-chat-backdrop",
+  tooltip: "ult-chat-tooltip",
+};
+
 class UltralyticsChat {
   constructor(config = {}) {
     const d = (o, k, v) => o?.[k] ?? v;
@@ -68,14 +76,16 @@ class UltralyticsChat {
     this.refs = {};
     this.listeners = new Map();
     this.inputDebounceTimer = null;
+    this.domObserver = null;
     this.init();
   }
 
   qs = (sel, root = document) => root.querySelector(sel);
   qsa = (sel, root = document) => [...root.querySelectorAll(sel)];
   esc = (s) => this.escapeHtml(s);
-  markPermanent(el) {
+  markPermanent(el, id) {
     if (!el) return;
+    if (id) el.id = id;
     el.setAttribute("data-turbo-permanent", "true");
     el.setAttribute("data-turbolinks-permanent", "true");
   }
@@ -209,17 +219,17 @@ class UltralyticsChat {
       { element: () => this.refs.backdrop, parent: () => document.body },
       { element: () => this.refs.tooltip, parent: () => document.body },
     ];
-    const ensureAttached = () => {
+
+    const ensureAttached = () =>
       elements.forEach(({ element, parent }) => {
         const el = element();
         const parentNode = parent?.();
-        if (!el || !parentNode) return;
-        if (el.parentNode !== parentNode) parentNode.appendChild(el);
+        if (el && parentNode && el.parentNode !== parentNode) parentNode.appendChild(el);
       });
-    };
+
+    const observer = new MutationObserver(() => ensureAttached());
     ensureAttached();
-    const observer = new MutationObserver(ensureAttached);
-    observer.observe(document.documentElement, { childList: true, subtree: true });
+    observer.observe(document.documentElement, { childList: true });
     this.domObserver = observer;
   }
 
@@ -227,6 +237,7 @@ class UltralyticsChat {
     this.toggle(false);
     if (this.inputDebounceTimer) clearTimeout(this.inputDebounceTimer);
     this.domObserver?.disconnect();
+    this.domObserver = null;
     this.listeners.forEach((eventList, el) => eventList.forEach(({ ev, fn }) => el.removeEventListener(ev, fn)));
     this.listeners.clear();
     this.styleElement?.remove();
@@ -429,7 +440,7 @@ class UltralyticsChat {
       }
     `,
     );
-    this.markPermanent(this.styleElement);
+    this.markPermanent(this.styleElement, ULT_CHAT_PERM_IDS.style);
     document.head.appendChild(this.styleElement);
   }
 
@@ -458,7 +469,7 @@ class UltralyticsChat {
     const { placeholder, copyText, downloadText, clearText } = this.config.ui;
 
     this.refs.backdrop = this.el("div", "ult-backdrop");
-    this.markPermanent(this.refs.backdrop);
+    this.markPermanent(this.refs.backdrop, ULT_CHAT_PERM_IDS.backdrop);
     document.body.appendChild(this.refs.backdrop);
 
     this.refs.pill = this.el(
@@ -466,7 +477,7 @@ class UltralyticsChat {
       "ultralytics-chat-pill",
       `<span>${this.esc(pillText)}</span><img src="${this.esc(logomark)}" alt="${this.esc(name)}" />`,
     );
-    this.markPermanent(this.refs.pill);
+    this.markPermanent(this.refs.pill, ULT_CHAT_PERM_IDS.pill);
     this.refs.pill.setAttribute("aria-label", pillText);
     this.refs.pill.title = pillText;
     document.body.appendChild(this.refs.pill);
@@ -476,13 +487,13 @@ class UltralyticsChat {
       "ult-chat-modal",
       `<div class="ult-chat-header"><div class="ult-chat-title"><a href="${this.esc(logoUrl)}" target="_blank" rel="noopener"><img src="${this.esc(logo)}" alt="${this.esc(name)}" /></a><div class="ult-subtle">${this.esc(tagline)}</div></div><div class="ult-header-actions"><button class="ult-icon-btn ult-chat-copy" aria-label="${this.esc(copyText)}" data-tooltip="${this.esc(copyText)}">${this.icon("copy")}</button><button class="ult-icon-btn ult-chat-download" aria-label="${this.esc(downloadText)}" data-tooltip="${this.esc(downloadText)}">${this.icon("download")}</button><button class="ult-icon-btn ult-chat-clear" aria-label="${this.esc(clearText)}" data-tooltip="${this.esc(clearText)}">${this.icon("refresh")}</button><button class="ult-icon-btn ult-chat-close" aria-label="Close" data-tooltip="Close">${this.icon("close")}</button></div></div><div id="ult-welcome" class="ult-welcome" style="display:none"><h1>${this.esc(title)}</h1><p>${message}</p></div><div id="ult-examples" class="ult-examples" style="display:none"></div><div class="ult-chat-messages" id="ult-messages" aria-live="polite"></div><div class="ult-chat-input-container"><textarea name="message" class="ult-chat-input" placeholder="${this.esc(placeholder)}" rows="1" maxlength="${this.config.maxMessageLength}" autocomplete="off"></textarea><button class="ult-chat-send" aria-label="Ready" data-tooltip="Ready"><span class="ult-icon-swap" data-icon="square">${this.icon("square")}</span></button></div><div class="ult-chat-footer">Powered by <a href="https://github.com/ultralytics/llm" target="_blank" rel="noopener">Ultralytics Chat</a> · open source</div>`,
     );
-    this.markPermanent(this.refs.modal);
+    this.markPermanent(this.refs.modal, ULT_CHAT_PERM_IDS.modal);
     this.refs.modal.setAttribute("role", "dialog");
     this.refs.modal.setAttribute("aria-modal", "true");
     document.body.appendChild(this.refs.modal);
 
     this.refs.tooltip = this.el("div", "ult-global-tooltip");
-    this.markPermanent(this.refs.tooltip);
+    this.markPermanent(this.refs.tooltip, ULT_CHAT_PERM_IDS.tooltip);
     document.body.appendChild(this.refs.tooltip);
 
     this.refs.messages = this.qs("#ult-messages", this.refs.modal);
