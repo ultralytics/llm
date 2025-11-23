@@ -74,6 +74,11 @@ class UltralyticsChat {
   qs = (sel, root = document) => root.querySelector(sel);
   qsa = (sel, root = document) => [...root.querySelectorAll(sel)];
   esc = (s) => this.escapeHtml(s);
+  markPermanent(el) {
+    if (!el) return;
+    el.setAttribute("data-turbo-permanent", "true");
+    el.setAttribute("data-turbolinks-permanent", "true");
+  }
   getGroupIndex(group) {
     if (!group) return null;
     const idx = Number.parseInt(group.dataset?.messageIndex ?? "", 10);
@@ -198,19 +203,23 @@ class UltralyticsChat {
 
   watchForRemoval() {
     const elements = [
-      { element: () => this.styleElement, parent: document.head },
-      { element: () => this.refs.pill, parent: document.body },
-      { element: () => this.refs.modal, parent: document.body },
-      { element: () => this.refs.backdrop, parent: document.body },
+      { element: () => this.styleElement, parent: () => document.head },
+      { element: () => this.refs.pill, parent: () => document.body },
+      { element: () => this.refs.modal, parent: () => document.body },
+      { element: () => this.refs.backdrop, parent: () => document.body },
+      { element: () => this.refs.tooltip, parent: () => document.body },
     ];
-    const observer = new MutationObserver(() =>
+    const ensureAttached = () => {
       elements.forEach(({ element, parent }) => {
         const el = element();
-        if (el?.parentNode !== parent) parent.appendChild(el);
-      }),
-    );
-    observer.observe(document.head, { childList: true });
-    observer.observe(document.body, { childList: true });
+        const parentNode = parent?.();
+        if (!el || !parentNode) return;
+        if (el.parentNode !== parentNode) parentNode.appendChild(el);
+      });
+    };
+    ensureAttached();
+    const observer = new MutationObserver(ensureAttached);
+    observer.observe(document.documentElement, { childList: true, subtree: true });
     this.domObserver = observer;
   }
 
@@ -420,6 +429,7 @@ class UltralyticsChat {
       }
     `,
     );
+    this.markPermanent(this.styleElement);
     document.head.appendChild(this.styleElement);
   }
 
@@ -448,6 +458,7 @@ class UltralyticsChat {
     const { placeholder, copyText, downloadText, clearText } = this.config.ui;
 
     this.refs.backdrop = this.el("div", "ult-backdrop");
+    this.markPermanent(this.refs.backdrop);
     document.body.appendChild(this.refs.backdrop);
 
     this.refs.pill = this.el(
@@ -455,6 +466,7 @@ class UltralyticsChat {
       "ultralytics-chat-pill",
       `<span>${this.esc(pillText)}</span><img src="${this.esc(logomark)}" alt="${this.esc(name)}" />`,
     );
+    this.markPermanent(this.refs.pill);
     this.refs.pill.setAttribute("aria-label", pillText);
     this.refs.pill.title = pillText;
     document.body.appendChild(this.refs.pill);
@@ -464,11 +476,13 @@ class UltralyticsChat {
       "ult-chat-modal",
       `<div class="ult-chat-header"><div class="ult-chat-title"><a href="${this.esc(logoUrl)}" target="_blank" rel="noopener"><img src="${this.esc(logo)}" alt="${this.esc(name)}" /></a><div class="ult-subtle">${this.esc(tagline)}</div></div><div class="ult-header-actions"><button class="ult-icon-btn ult-chat-copy" aria-label="${this.esc(copyText)}" data-tooltip="${this.esc(copyText)}">${this.icon("copy")}</button><button class="ult-icon-btn ult-chat-download" aria-label="${this.esc(downloadText)}" data-tooltip="${this.esc(downloadText)}">${this.icon("download")}</button><button class="ult-icon-btn ult-chat-clear" aria-label="${this.esc(clearText)}" data-tooltip="${this.esc(clearText)}">${this.icon("refresh")}</button><button class="ult-icon-btn ult-chat-close" aria-label="Close" data-tooltip="Close">${this.icon("close")}</button></div></div><div id="ult-welcome" class="ult-welcome" style="display:none"><h1>${this.esc(title)}</h1><p>${message}</p></div><div id="ult-examples" class="ult-examples" style="display:none"></div><div class="ult-chat-messages" id="ult-messages" aria-live="polite"></div><div class="ult-chat-input-container"><textarea name="message" class="ult-chat-input" placeholder="${this.esc(placeholder)}" rows="1" maxlength="${this.config.maxMessageLength}" autocomplete="off"></textarea><button class="ult-chat-send" aria-label="Ready" data-tooltip="Ready"><span class="ult-icon-swap" data-icon="square">${this.icon("square")}</span></button></div><div class="ult-chat-footer">Powered by <a href="https://github.com/ultralytics/llm" target="_blank" rel="noopener">Ultralytics Chat</a> · open source</div>`,
     );
+    this.markPermanent(this.refs.modal);
     this.refs.modal.setAttribute("role", "dialog");
     this.refs.modal.setAttribute("aria-modal", "true");
     document.body.appendChild(this.refs.modal);
 
     this.refs.tooltip = this.el("div", "ult-global-tooltip");
+    this.markPermanent(this.refs.tooltip);
     document.body.appendChild(this.refs.tooltip);
 
     this.refs.messages = this.qs("#ult-messages", this.refs.modal);
