@@ -74,15 +74,19 @@
             <li>Open the chat with the <strong>Open Chat</strong> button.</li>
             <li>Switch to <a href="demo.html">the original demo</a> (same domain, different page).</li>
             <li>Watch for the pill/modal—they should stay visible without rebuilding the DOM elements.</li>
-            <li>Go back to this page and open the chat again to confirm the session persisted via <code>localStorage</code>.</li>
+            <li>
+              Go back to this page and open the chat again to confirm the session persisted via
+              <code>localStorage</code>.
+            </li>
           </ol>
         </div>
 
         <div class="card">
           <h3>Why this demo exists</h3>
           <p>
-            Some frameworks replace the <code>&lt;body&gt;</code> and <code>&lt;head&gt;</code> on each navigation. The chat
-            widget now marks its elements as permanent and watches for missing parents so the UI never flashes away.
+            Some frameworks replace the <code>&lt;body&gt;</code> and <code>&lt;head&gt;</code> on each navigation. The
+            chat widget now marks its elements as permanent and watches for missing parents so the UI never flashes
+            away.
           </p>
           <p class="lead">
             Feel free to script rapid navigation between these pages to reproduce the bug you observed.
