@@ -100,6 +100,10 @@ Load the chat widget via [jsDelivr CDN](https://www.jsdelivr.com/package/gh/ultr
 - **🎨 Customizable**: Full theme and branding control
 - **🔒 Security**: XSS protection with HTML escaping, input length limits
 
+### Multi-page demo
+
+`examples/web/demo-multi.html` provides a two-page experience that links back to the original demo so you can verify the widget survives navigation without disappearing.
+
 ## ⚙️ Configuration Options
 
 ### JavaScript Widget
