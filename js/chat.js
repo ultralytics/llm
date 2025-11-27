@@ -150,7 +150,35 @@ class UltralyticsChat {
     }
   }
 
+  hideModalFlash() {
+    const STYLE_ID = "ult-temp-hide-popup-style";
+    const CLASS = "ult-chat-modal";
+    const DURATION = 1000;
+    const apply = () => {
+      const existing = document.getElementById(STYLE_ID);
+      if (existing) existing.remove();
+      const styleEl = document.createElement("style");
+      styleEl.id = STYLE_ID;
+      styleEl.textContent = `
+        .${CLASS} {
+          display: none !important;
+          visibility: hidden !important;
+        }
+      `;
+      document.documentElement.appendChild(styleEl);
+      setTimeout(() => styleEl.remove(), DURATION);
+    };
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", apply, { once: true });
+    } else {
+      apply();
+    }
+    if (window.document$?.subscribe) window.document$.subscribe(apply);
+  }
+
   init() {
+    this.hideModalFlash();
     this.ensureViewport();
     this.loadHighlightJS();
     this.createStyles();
