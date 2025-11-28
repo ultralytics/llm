@@ -56,6 +56,15 @@ class UltralyticsChat {
       },
     };
     this.apiUrl = this.config.apiUrl;
+    this.feedbackUrl = d(
+      config,
+      "feedbackUrl",
+      (() => {
+        if (this.apiUrl.endsWith("/chat")) return this.apiUrl.replace(/\/chat$/, "/feedback");
+        const trimmed = this.apiUrl.replace(/\/$/, "");
+        return `${trimmed}/feedback`;
+      })(),
+    );
     this.messages = [];
     this.isOpen = false;
     this.isStreaming = false;
@@ -150,35 +159,7 @@ class UltralyticsChat {
     }
   }
 
-  hideModalFlash() {
-    const STYLE_ID = "ult-temp-hide-popup-style";
-    const CLASS = "ult-chat-modal";
-    const DURATION = 1000;
-    const apply = () => {
-      const existing = document.getElementById(STYLE_ID);
-      if (existing) existing.remove();
-      const styleEl = document.createElement("style");
-      styleEl.id = STYLE_ID;
-      styleEl.textContent = `
-        .${CLASS} {
-          display: none !important;
-          visibility: hidden !important;
-        }
-      `;
-      document.documentElement.appendChild(styleEl);
-      setTimeout(() => styleEl.remove(), DURATION);
-    };
-
-    if (document.readyState === "loading") {
-      document.addEventListener("DOMContentLoaded", apply, { once: true });
-    } else {
-      apply();
-    }
-    if (window.document$?.subscribe) window.document$.subscribe(apply);
-  }
-
   init() {
-    this.hideModalFlash();
     this.ensureViewport();
     this.loadHighlightJS();
     this.createStyles();
@@ -477,6 +458,7 @@ class UltralyticsChat {
 
     this.refs.backdrop = this.el("div", "ult-backdrop");
     document.body.appendChild(this.refs.backdrop);
+    this.refs.backdrop.style.display = "none";
 
     this.refs.pill = this.el(
       "button",
@@ -495,6 +477,7 @@ class UltralyticsChat {
     this.refs.modal.setAttribute("role", "dialog");
     this.refs.modal.setAttribute("aria-modal", "true");
     document.body.appendChild(this.refs.modal);
+    this.refs.modal.style.display = "none";
 
     this.refs.tooltip = this.el("div", "ult-global-tooltip");
     document.body.appendChild(this.refs.tooltip);
@@ -669,11 +652,33 @@ class UltralyticsChat {
 
   toggle(forceOpen = null, mode = null) {
     const next = forceOpen === null ? !this.isOpen : !!forceOpen;
-    this.isOpen = next;
     if (mode) this.mode = mode;
-    this.refs.modal?.classList.toggle("open", next);
-    this.refs.backdrop?.classList.toggle("open", next);
-    this.refs.pill?.classList.toggle("hidden", next);
+    if (next === this.isOpen && !mode) return;
+    this.isOpen = next;
+    const modal = this.refs.modal;
+    const backdrop = this.refs.backdrop;
+    const pill = this.refs.pill;
+    if (next) {
+      if (modal) modal.style.display = "flex";
+      if (backdrop) backdrop.style.display = "block";
+      requestAnimationFrame(() => {
+        modal?.classList.add("open");
+        backdrop?.classList.add("open");
+        pill?.classList.add("hidden");
+      });
+    } else {
+      modal?.classList.remove("open");
+      backdrop?.classList.remove("open");
+      pill?.classList.remove("hidden");
+      const hide = () => {
+        if (this.isOpen) return;
+        if (modal) modal.style.display = "none";
+        if (backdrop) backdrop.style.display = "none";
+      };
+      modal?.addEventListener("transitionend", hide, { once: true });
+      backdrop?.addEventListener("transitionend", hide, { once: true });
+      setTimeout(hide, 250);
+    }
     if (next) {
       this.scrollY = window.scrollY;
       document.body.classList.add("ult-modal-open");
@@ -792,8 +797,30 @@ class UltralyticsChat {
     this.showCopySuccess(this.qs(".ult-chat-copy", this.refs.modal));
   }
 
-  feedback(type) {
-    console.log("feedback:", type);
+  async feedback(type) {
+    const vote = type === "up";
+    const userCount = this.messages.filter((m) => m.role === "user").length;
+    if (!userCount) {
+      console.warn("feedback ignored: no user messages yet");
+      return;
+    }
+    const queryIndex = userCount - 1;
+    try {
+      const response = await fetch(this.feedbackUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          session_id: this.sessionId,
+          query_index: queryIndex,
+          vote,
+        }),
+      });
+      if (!response.ok) {
+        throw new Error(`feedback failed with status ${response.status}`);
+      }
+    } catch (err) {
+      console.warn("feedback failed", err);
+    }
   }
 
   retryLast() {
