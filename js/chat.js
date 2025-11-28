@@ -458,6 +458,7 @@ class UltralyticsChat {
 
     this.refs.backdrop = this.el("div", "ult-backdrop");
     document.body.appendChild(this.refs.backdrop);
+    this.refs.backdrop.style.display = "none";
 
     this.refs.pill = this.el(
       "button",
@@ -476,6 +477,7 @@ class UltralyticsChat {
     this.refs.modal.setAttribute("role", "dialog");
     this.refs.modal.setAttribute("aria-modal", "true");
     document.body.appendChild(this.refs.modal);
+    this.refs.modal.style.display = "none";
 
     this.refs.tooltip = this.el("div", "ult-global-tooltip");
     document.body.appendChild(this.refs.tooltip);
@@ -650,11 +652,33 @@ class UltralyticsChat {
 
   toggle(forceOpen = null, mode = null) {
     const next = forceOpen === null ? !this.isOpen : !!forceOpen;
-    this.isOpen = next;
     if (mode) this.mode = mode;
-    this.refs.modal?.classList.toggle("open", next);
-    this.refs.backdrop?.classList.toggle("open", next);
-    this.refs.pill?.classList.toggle("hidden", next);
+    if (next === this.isOpen && !mode) return;
+    this.isOpen = next;
+    const modal = this.refs.modal;
+    const backdrop = this.refs.backdrop;
+    const pill = this.refs.pill;
+    if (next) {
+      if (modal) modal.style.display = "flex";
+      if (backdrop) backdrop.style.display = "block";
+      requestAnimationFrame(() => {
+        modal?.classList.add("open");
+        backdrop?.classList.add("open");
+        pill?.classList.add("hidden");
+      });
+    } else {
+      modal?.classList.remove("open");
+      backdrop?.classList.remove("open");
+      pill?.classList.remove("hidden");
+      const hide = () => {
+        if (this.isOpen) return;
+        if (modal) modal.style.display = "none";
+        if (backdrop) backdrop.style.display = "none";
+      };
+      modal?.addEventListener("transitionend", hide, { once: true });
+      backdrop?.addEventListener("transitionend", hide, { once: true });
+      setTimeout(hide, 250);
+    }
     if (next) {
       this.scrollY = window.scrollY;
       document.body.classList.add("ult-modal-open");
