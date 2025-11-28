@@ -56,6 +56,11 @@ class UltralyticsChat {
       },
     };
     this.apiUrl = this.config.apiUrl;
+    this.feedbackUrl = d(
+      config,
+      "feedbackUrl",
+      this.apiUrl.replace(/\/chat$/, "/feedback") || `${this.apiUrl}/feedback`,
+    );
     this.messages = [];
     this.isOpen = false;
     this.isStreaming = false;
@@ -764,8 +769,22 @@ class UltralyticsChat {
     this.showCopySuccess(this.qs(".ult-chat-copy", this.refs.modal));
   }
 
-  feedback(type) {
-    console.log("feedback:", type);
+  async feedback(type) {
+    const vote = type === "up";
+    const queryIndex = Math.max(0, this.messages.filter((m) => m.role === "user").length - 1);
+    try {
+      await fetch(this.feedbackUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          session_id: this.sessionId,
+          query_index: queryIndex,
+          vote,
+        }),
+      });
+    } catch (err) {
+      console.warn("feedback failed", err);
+    }
   }
 
   retryLast() {
