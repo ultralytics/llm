@@ -6,6 +6,9 @@ on:
   pull_request:
     paths:
       - "js/chat.js"
+  push:
+    paths:
+      - "js/chat.js"
   workflow_dispatch:
 
 permissions:
@@ -14,18 +17,17 @@ permissions:
 
 jobs:
   minify:
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'push' || (github.event.pull_request && github.event.pull_request.head.repo.full_name == github.repository)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
-          repository: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
-          ref: ${{ github.event.pull_request.head.ref || github.ref }}
-          fetch-depth: 1
-          token: ${{ secrets._GITHUB_TOKEN }}
+          ref: ${{ github.head_ref || github.ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: "22"
 
@@ -35,30 +37,10 @@ jobs:
       - name: Minify chat.js
         run: terser js/chat.js -o js/chat.min.js -c -m --comments false
 
-      - name: Detect changes
-        run: git diff --quiet js/chat.min.js || echo "MINIFIED_CHANGED=true" >> $GITHUB_ENV
-
       - name: Commit minified file
-        if: github.event_name == 'workflow_dispatch' || (github.event.pull_request && github.event.pull_request.head.repo.full_name == github.repository)
         run: |
           git config --local user.email "web@ultralytics.com"
           git config --local user.name "UltralyticsAssistant"
           git add js/chat.min.js
           git diff --quiet && git diff --staged --quiet || git commit -m "Auto-minify chat.js"
           git push
-
-      - name: Comment for external contributors
-        if: env.MINIFIED_CHANGED == 'true' && github.event.pull_request && github.event.pull_request.head.repo.full_name != github.repository
-        uses: actions/github-script@v7
-        with:
-          script: |
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: [
-                "Heads up: `js/chat.min.js` was updated by the CI minifier.",
-                "",
-                "For forked PRs we can't push changes back to your branch. Please run `npm install -g terser` and `terser js/chat.js -o js/chat.min.js -c -m --comments false`, then commit the updated `js/chat.min.js` to resolve the check."
-              ].join("\n")
-            })
