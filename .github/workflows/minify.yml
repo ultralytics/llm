@@ -6,10 +6,6 @@ on:
   pull_request:
     paths:
       - "js/chat.js"
-  push:
-    paths:
-      - "js/chat.js"
-  workflow_dispatch:
 
 permissions:
   contents: write # Modify code in PRs

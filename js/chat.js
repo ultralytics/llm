@@ -1,5 +1,7 @@
 // Ultralytics 🚀 AGPL-3.0 License - https://ultralytics.com/license
 
+
+
 class UltralyticsChat {
   constructor(config = {}) {
     const d = (o, k, v) => o?.[k] ?? v;
