@@ -56,11 +56,11 @@ class UltralyticsChat {
       },
     };
     this.apiUrl = this.config.apiUrl;
-    this.feedbackUrl = d(
-      config,
-      "feedbackUrl",
-      this.apiUrl.replace(/\/chat$/, "/feedback") || `${this.apiUrl}/feedback`,
-    );
+    this.feedbackUrl = d(config, "feedbackUrl", (() => {
+      if (this.apiUrl.endsWith("/chat")) return this.apiUrl.replace(/\/chat$/, "/feedback");
+      const trimmed = this.apiUrl.replace(/\/$/, "");
+      return `${trimmed}/feedback`;
+    })());
     this.messages = [];
     this.isOpen = false;
     this.isStreaming = false;
@@ -771,9 +771,14 @@ class UltralyticsChat {
 
   async feedback(type) {
     const vote = type === "up";
-    const queryIndex = Math.max(0, this.messages.filter((m) => m.role === "user").length - 1);
+    const userCount = this.messages.filter((m) => m.role === "user").length;
+    if (!userCount) {
+      console.warn("feedback ignored: no user messages yet");
+      return;
+    }
+    const queryIndex = userCount - 1;
     try {
-      await fetch(this.feedbackUrl, {
+      const response = await fetch(this.feedbackUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -782,6 +787,9 @@ class UltralyticsChat {
           vote,
         }),
       });
+      if (!response.ok) {
+        throw new Error(`feedback failed with status ${response.status}`);
+      }
     } catch (err) {
       console.warn("feedback failed", err);
     }
