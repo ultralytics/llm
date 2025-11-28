@@ -56,11 +56,15 @@ class UltralyticsChat {
       },
     };
     this.apiUrl = this.config.apiUrl;
-    this.feedbackUrl = d(config, "feedbackUrl", (() => {
-      if (this.apiUrl.endsWith("/chat")) return this.apiUrl.replace(/\/chat$/, "/feedback");
-      const trimmed = this.apiUrl.replace(/\/$/, "");
-      return `${trimmed}/feedback`;
-    })());
+    this.feedbackUrl = d(
+      config,
+      "feedbackUrl",
+      (() => {
+        if (this.apiUrl.endsWith("/chat")) return this.apiUrl.replace(/\/chat$/, "/feedback");
+        const trimmed = this.apiUrl.replace(/\/$/, "");
+        return `${trimmed}/feedback`;
+      })(),
+    );
     this.messages = [];
     this.isOpen = false;
     this.isStreaming = false;
