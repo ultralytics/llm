@@ -19,7 +19,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
         with:
-          ref: ${{ github.head_ref }}
+          ref: ${{ github.head_ref || github.ref }}
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Node.js
@@ -33,10 +33,30 @@ jobs:
       - name: Minify chat.js
         run: terser js/chat.js -o js/chat.min.js -c -m --comments false
 
+      - name: Detect changes
+        run: git diff --quiet js/chat.min.js || echo "MINIFIED_CHANGED=true" >> $GITHUB_ENV
+
       - name: Commit minified file
+        if: github.event_name == 'workflow_dispatch' || (github.event.pull_request && github.event.pull_request.head.repo.full_name == github.repository)
         run: |
           git config --local user.email "web@ultralytics.com"
           git config --local user.name "UltralyticsAssistant"
           git add js/chat.min.js
           git diff --quiet && git diff --staged --quiet || git commit -m "Auto-minify chat.js"
           git push
+
+      - name: Comment for external contributors
+        if: env.MINIFIED_CHANGED == 'true' && github.event.pull_request && github.event.pull_request.head.repo.full_name != github.repository
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: [
+                "Heads up: `js/chat.min.js` was updated by the CI minifier.",
+                "",
+                "For forked PRs we can't push changes back to your branch. Please run `npm install -g terser` and `terser js/chat.js -o js/chat.min.js -c -m --comments false`, then commit the updated `js/chat.min.js` to resolve the check."
+              ].join("\n")
+            })
