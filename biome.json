@@ -6,17 +6,18 @@
     "useIgnoreFile": true
   },
   "files": {
-    "ignoreUnknown": true,
-    "ignore": ["**/*.min.js", "**/*.min.css"]
+    "ignoreUnknown": true
   },
   "formatter": {
     "enabled": true,
     "indentStyle": "space",
     "indentWidth": 2,
-    "lineWidth": 120
+    "lineWidth": 120,
+    "ignore": ["**/*.min.js", "**/*.min.css"]
   },
   "linter": {
     "enabled": true,
+    "ignore": ["**/*.min.js", "**/*.min.css"],
     "rules": {
       "recommended": true,
       "style": {
