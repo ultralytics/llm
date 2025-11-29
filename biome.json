@@ -12,12 +12,10 @@
     "enabled": true,
     "indentStyle": "space",
     "indentWidth": 2,
-    "lineWidth": 120,
-    "ignore": ["**/*.min.js", "**/*.min.css"]
+    "lineWidth": 120
   },
   "linter": {
     "enabled": true,
-    "ignore": ["**/*.min.js", "**/*.min.css"],
     "rules": {
       "recommended": true,
       "style": {
@@ -35,5 +33,16 @@
       "quoteStyle": "double",
       "semicolons": "always"
     }
-  }
+  },
+  "overrides": [
+    {
+      "include": ["**/*.min.js", "**/*.min.css"],
+      "formatter": {
+        "enabled": false
+      },
+      "linter": {
+        "enabled": false
+      }
+    }
+  ]
 }
