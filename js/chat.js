@@ -708,7 +708,7 @@ class UltralyticsChat {
         tagline.innerHTML = `<strong style="color: ${this.config.theme.primary}; font-weight: 700;">SEARCH</strong> · Find answers in our docs and guides`;
       if (this.refs.messages) this.refs.messages.innerHTML = "";
       if (this.refs.welcome)
-        this.refs.welcome.innerHTML = `<p>Enter keywords to find relevant documentation, guides, and resources</p>`;
+        this.refs.welcome.innerHTML = "<p>Enter keywords to find relevant documentation, guides, and resources</p>";
       this.setExamples(this.config.welcome.searchExamples || []);
       this.showWelcome(true);
     } else {
@@ -1177,7 +1177,7 @@ class UltralyticsChat {
       if (fence) {
         if (inCode) {
           html += skipCopyButtons
-            ? `</code></pre></div>`
+            ? "</code></pre></div>"
             : `</code></pre><button class="ult-code-copy" aria-label="Copy code" data-tooltip="Copy code">${this.icon("copy")}</button></div>`;
           inCode = false;
           codeIndent = 0;
