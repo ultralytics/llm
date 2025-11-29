@@ -6,7 +6,8 @@
     "useIgnoreFile": true
   },
   "files": {
-    "ignoreUnknown": true
+    "ignoreUnknown": true,
+    "ignore": ["**/*.min.js", "**/*.min.css"]
   },
   "formatter": {
     "enabled": true,
