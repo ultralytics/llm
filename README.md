@@ -219,7 +219,7 @@ terser js/chat.js -o js/chat.min.js -c -m
 ```bash
 # Serve examples locally
 python -m http.server 8000
-# Open http://localhost:8000/examples/js/chat.html
+# Open http://localhost:8000/examples/web/demo.html
 ```
 
 ### Browser Compatibility
