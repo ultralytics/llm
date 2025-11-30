@@ -97,12 +97,12 @@
       /* Reduce motion for users who prefer it */
       @media (prefers-reduced-motion: reduce) {
         * {
-          animation-duration: 0.001s !important;
-          transition-duration: 0.001s !important;
+          animation-duration: 0.001s;
+          transition-duration: 0.001s;
         }
         .btn:hover,
         .btn.primary:hover {
-          transform: none !important;
+          transform: none;
         }
       }
 
@@ -670,10 +670,10 @@ results[0].show()</code></pre>
         }
       })();
 
-      function openChat() {
+      function _openChat() {
         if (chatInstance) chatInstance.toggle(true, "chat");
       }
-      function openSearch() {
+      function _openSearch() {
         if (chatInstance) chatInstance.toggle(true, "search");
       }
 
