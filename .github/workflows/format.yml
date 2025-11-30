@@ -28,6 +28,7 @@ jobs:
           labels: true # Auto-label issues/PRs using AI
           python: true # Format Python with Ruff and docformatter
           prettier: true # Format YAML, JSON, Markdown, CSS
+          biome: false # Format JS/TS with Biome (auto-detected via biome.json)
           swift: false # Format Swift (requires macos-latest)
           spelling: true # Check spelling with codespell
           links: true # Check broken links with Lychee
