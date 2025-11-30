@@ -123,8 +123,8 @@ class UltralyticsChat {
     if (!target || !tip) return;
     const rect = target.getBoundingClientRect();
     tip.textContent = message;
-    tip.style.left = rect.left + rect.width / 2 + "px";
-    tip.style.top = rect.top - 8 + "px";
+    tip.style.left = `${rect.left + rect.width / 2}px`;
+    tip.style.top = `${rect.top - 8}px`;
     tip.classList.add("show");
     if (tip.__timer) clearTimeout(tip.__timer);
     tip.__timer = setTimeout(() => {
@@ -518,7 +518,7 @@ class UltralyticsChat {
     this.on(this.refs.input, "input", (e) => {
       const t = e.target;
       t.style.height = "auto";
-      t.style.height = Math.min(t.scrollHeight, 140) + "px";
+      t.style.height = `${Math.min(t.scrollHeight, 140)}px`;
       if (t.value.length === this.config.maxMessageLength) this.flashTooltip(t, "⚠️ Message shortened to fit");
       if (this.inputDebounceTimer) clearTimeout(this.inputDebounceTimer);
       this.inputDebounceTimer = setTimeout(() => this.updateComposerState(), 50);
@@ -548,8 +548,8 @@ class UltralyticsChat {
         btn.dataset.tooltipActive = "true";
         const r = btn.getBoundingClientRect();
         this.refs.tooltip.textContent = btn.dataset.tooltip;
-        this.refs.tooltip.style.left = r.left + r.width / 2 + "px";
-        this.refs.tooltip.style.top = r.top - 8 + "px";
+        this.refs.tooltip.style.left = `${r.left + r.width / 2}px`;
+        this.refs.tooltip.style.top = `${r.top - 8}px`;
         this.refs.tooltip.classList.add("show");
       }
     });
@@ -708,7 +708,7 @@ class UltralyticsChat {
         tagline.innerHTML = `<strong style="color: ${this.config.theme.primary}; font-weight: 700;">SEARCH</strong> · Find answers in our docs and guides`;
       if (this.refs.messages) this.refs.messages.innerHTML = "";
       if (this.refs.welcome)
-        this.refs.welcome.innerHTML = `<p>Enter keywords to find relevant documentation, guides, and resources</p>`;
+        this.refs.welcome.innerHTML = "<p>Enter keywords to find relevant documentation, guides, and resources</p>";
       this.setExamples(this.config.welcome.searchExamples || []);
       this.showWelcome(true);
     } else {
@@ -749,8 +749,8 @@ class UltralyticsChat {
         if (!t) return;
         const r = e.currentTarget.getBoundingClientRect();
         t.textContent = e.currentTarget.dataset.tooltip;
-        t.style.left = r.left + r.width / 2 + "px";
-        t.style.top = r.top - 8 + "px";
+        t.style.left = `${r.left + r.width / 2}px`;
+        t.style.top = `${r.top - 8}px`;
         t.classList.add("show");
       });
       this.on(btn, "mouseleave", () => this.refs.tooltip?.classList.remove("show"));
@@ -924,7 +924,7 @@ class UltralyticsChat {
       }
       this.refs.messages.innerHTML = data.results
         .map((r) => {
-          const snippet = r.text?.length > 150 ? r.text.slice(0, 150) + "..." : r.text || "";
+          const snippet = r.text?.length > 150 ? `${r.text.slice(0, 150)}...` : r.text || "";
           const host = (() => {
             try {
               return new URL(r.url).hostname;
@@ -958,7 +958,7 @@ class UltralyticsChat {
     if (this.mode === "search") {
       this.refs.input.value = text;
       this.refs.input.style.height = "auto";
-      this.refs.input.style.height = Math.min(this.refs.input.scrollHeight, 140) + "px";
+      this.refs.input.style.height = `${Math.min(this.refs.input.scrollHeight, 140)}px`;
       await this.performSearch(text);
       this.refs.input.focus();
       return;
@@ -1177,7 +1177,7 @@ class UltralyticsChat {
       if (fence) {
         if (inCode) {
           html += skipCopyButtons
-            ? `</code></pre></div>`
+            ? "</code></pre></div>"
             : `</code></pre><button class="ult-code-copy" aria-label="Copy code" data-tooltip="Copy code">${this.icon("copy")}</button></div>`;
           inCode = false;
           codeIndent = 0;
@@ -1193,7 +1193,7 @@ class UltralyticsChat {
       }
       if (inCode) {
         const stripped = raw.slice(codeIndent);
-        html += esc(stripped) + "\n";
+        html += `${esc(stripped)}\n`;
         continue;
       }
       const q = /^>\s?(.*)$/.exec(raw);
@@ -1269,7 +1269,7 @@ class UltralyticsChat {
     if (!text) return "";
     text = this.escapeHtml(text);
     const codeBlocks = [];
-    text = text.replace(/`([^`]+)`/g, (match, code) => {
+    text = text.replace(/`([^`]+)`/g, (_match, code) => {
       codeBlocks.push(code);
       return `@@ULTCODE${codeBlocks.length - 1}@@`;
     });
@@ -1285,7 +1285,7 @@ class UltralyticsChat {
     text = text.replace(/__(.+?)__/g, "<strong>$1</strong>");
     text = text.replace(/(?<!\*)\*(?!\*)(.+?)\*(?!\*)/g, "<em>$1</em>");
     text = text.replace(/(?<!_)_(?!_)(.+?)_(?!_)/g, "<em>$1</em>");
-    text = text.replace(/@@ULTCODE(\d+)@@/g, (match, idx) => `<code>${codeBlocks[idx]}</code>`);
+    text = text.replace(/@@ULTCODE(\d+)@@/g, (_match, idx) => `<code>${codeBlocks[idx]}</code>`);
     return text.replace(/ {2}\n/g, "<br>");
   }
 }
