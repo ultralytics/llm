@@ -227,7 +227,11 @@ class UltralyticsChat {
     this.toggle(false);
     if (this.inputDebounceTimer) clearTimeout(this.inputDebounceTimer);
     this.domObserver?.disconnect();
-    this.listeners.forEach((eventList, el) => eventList.forEach(({ ev, fn }) => el.removeEventListener(ev, fn)));
+    for (const [el, eventList] of this.listeners) {
+      for (const { ev, fn } of eventList) {
+        el.removeEventListener(ev, fn);
+      }
+    }
     this.listeners.clear();
     this.styleElement?.remove();
     this.refs.modal?.remove();
@@ -495,9 +499,9 @@ class UltralyticsChat {
     this.refs.examples.innerHTML = list
       .map((q) => `<button class="ult-example" data-q="${this.esc(q)}">${this.esc(q)}</button>`)
       .join("");
-    this.qsa(".ult-example", this.refs.examples).forEach((b) =>
-      this.on(b, "click", () => void this.sendMessage(b.dataset.q)),
-    );
+    for (const b of this.qsa(".ult-example", this.refs.examples)) {
+      this.on(b, "click", () => void this.sendMessage(b.dataset.q));
+    }
   }
 
   attachEvents() {
@@ -737,7 +741,10 @@ class UltralyticsChat {
     this.showWelcome(false);
     const prevAutoScroll = this.autoScroll;
     this.autoScroll = false;
-    this.messages.forEach((m, i) => this.addMessageToUI(m.role, m.content, i));
+    for (let i = 0; i < this.messages.length; i += 1) {
+      const m = this.messages[i];
+      this.addMessageToUI(m.role, m.content, i);
+    }
     this.autoScroll = prevAutoScroll;
     this.refs.messages.scrollTop = this.refs.messages.scrollHeight;
   }
@@ -971,9 +978,9 @@ class UltralyticsChat {
     this.refs.input.style.height = "auto";
     this.isStreaming = true;
     this.updateComposerState();
-    this.qsa(".ult-message[contenteditable='true']", this.refs.messages).forEach(
-      (el) => (el.contentEditable = "false"),
-    );
+    for (const el of this.qsa(".ult-message[contenteditable='true']", this.refs.messages)) {
+      el.contentEditable = "false";
+    }
     const group = this.createMessageGroup("assistant", this.messages.length);
     const { el: thinking, clear } = this.createThinking();
     group.appendChild(thinking);
@@ -1056,7 +1063,9 @@ class UltralyticsChat {
       this.isStreaming = false;
       this.abortController = null;
       this.updateComposerState();
-      this.qsa(".ult-message[contenteditable]", this.refs.messages).forEach((el) => (el.contentEditable = "true"));
+      for (const el of this.qsa(".ult-message[contenteditable]", this.refs.messages)) {
+        el.contentEditable = "true";
+      }
       this.refs.input?.focus();
     }
   }
@@ -1206,8 +1215,8 @@ class UltralyticsChat {
         }
         raw = q[1];
       } else closeQuote();
-      let m;
-      if ((m = raw.match(/^\s*([-*+])\s+(.+)$/))) {
+      const unorderedListMatch = raw.match(/^\s*([-*+])\s+(.+)$/);
+      if (unorderedListMatch) {
         if (!listOpen || listType !== "ul") {
           closePara();
           closeList();
@@ -1215,10 +1224,11 @@ class UltralyticsChat {
           listOpen = true;
           listType = "ul";
         }
-        html += `<li>${this.renderInline(m[2])}</li>`;
+        html += `<li>${this.renderInline(unorderedListMatch[2])}</li>`;
         continue;
       }
-      if ((m = raw.match(/^\s*(\d+)\.\s+(.+)$/))) {
+      const orderedListMatch = raw.match(/^\s*(\d+)\.\s+(.+)$/);
+      if (orderedListMatch) {
         if (!listOpen || listType !== "ol") {
           closePara();
           closeList();
@@ -1226,7 +1236,7 @@ class UltralyticsChat {
           listOpen = true;
           listType = "ol";
         }
-        html += `<li>${this.renderInline(m[2])}</li>`;
+        html += `<li>${this.renderInline(orderedListMatch[2])}</li>`;
         continue;
       }
       if (/^\s*$/.test(raw)) {
@@ -1235,25 +1245,28 @@ class UltralyticsChat {
         closeQuote();
         continue;
       }
-      if ((m = raw.match(/^###\s+(.+)$/))) {
+      const h3Match = raw.match(/^###\s+(.+)$/);
+      if (h3Match) {
         closePara();
         closeList();
         closeQuote();
-        html += `<h3>${this.renderInline(m[1])}</h3>`;
+        html += `<h3>${this.renderInline(h3Match[1])}</h3>`;
         continue;
       }
-      if ((m = raw.match(/^##\s+(.+)$/))) {
+      const h2Match = raw.match(/^##\s+(.+)$/);
+      if (h2Match) {
         closePara();
         closeList();
         closeQuote();
-        html += `<h2>${this.renderInline(m[1])}</h2>`;
+        html += `<h2>${this.renderInline(h2Match[1])}</h2>`;
         continue;
       }
-      if ((m = raw.match(/^#\s+(.+)$/))) {
+      const h1Match = raw.match(/^#\s+(.+)$/);
+      if (h1Match) {
         closePara();
         closeList();
         closeQuote();
-        html += `<h1>${this.renderInline(m[1])}</h1>`;
+        html += `<h1>${this.renderInline(h1Match[1])}</h1>`;
         continue;
       }
       openPara();
