@@ -23,7 +23,7 @@
         "useConst": "error"
       },
       "suspicious": {
-        "noConsole": "warn",
+        "noConsole": "off",
         "noExplicitAny": "warn"
       }
     }
@@ -33,16 +33,5 @@
       "quoteStyle": "double",
       "semicolons": "always"
     }
-  },
-  "overrides": [
-    {
-      "include": ["**/*.min.js", "**/*.min.css"],
-      "formatter": {
-        "enabled": false
-      },
-      "linter": {
-        "enabled": false
-      }
-    }
-  ]
+  }
 }
