@@ -1302,3 +1302,8 @@ class UltralyticsChat {
     return text.replace(/ {2}\n/g, "<br>");
   }
 }
+
+// Export to window for compatibility with module bundlers (Next.js, etc.)
+if (typeof window !== "undefined") {
+  window.UltralyticsChat = UltralyticsChat;
+}
