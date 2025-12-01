@@ -1304,6 +1304,6 @@ class UltralyticsChat {
 }
 
 // Export to window for compatibility with module bundlers (Next.js, etc.)
-if (typeof window !== "undefined") {
+if (typeof globalThis !== "undefined" && !globalThis.UltralyticsChat) globalThis.UltralyticsChat = UltralyticsChat;
   window.UltralyticsChat = UltralyticsChat;
 }
