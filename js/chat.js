@@ -632,19 +632,24 @@ class UltralyticsChat {
       const badge = e.target.closest(".ult-tool-badge");
       if (badge) this.removeTool(badge.dataset.tool);
     });
-    this.on(this.refs.toolBadges, "mouseenter", (e) => {
-      const badge = e.target.closest(".ult-tool-badge");
-      if (badge) {
-        const tooltip = this.refs.tooltip;
-        if (tooltip) {
-          const rect = badge.getBoundingClientRect();
-          tooltip.textContent = "Remove";
-          tooltip.style.left = `${rect.left + rect.width / 2}px`;
-          tooltip.style.top = `${rect.top - 8}px`;
-          tooltip.classList.add("show");
+    this.on(
+      this.refs.toolBadges,
+      "mouseenter",
+      (e) => {
+        const badge = e.target.closest(".ult-tool-badge");
+        if (badge) {
+          const tooltip = this.refs.tooltip;
+          if (tooltip) {
+            const rect = badge.getBoundingClientRect();
+            tooltip.textContent = "Remove";
+            tooltip.style.left = `${rect.left + rect.width / 2}px`;
+            tooltip.style.top = `${rect.top - 8}px`;
+            tooltip.classList.add("show");
+          }
         }
-      }
-    }, true);
+      },
+      true,
+    );
     this.on(this.refs.toolBadges, "mouseleave", () => {
       this.refs.tooltip?.classList.remove("show");
     });
