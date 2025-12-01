@@ -1303,7 +1303,7 @@ class UltralyticsChat {
   }
 }
 
-// Export to window for compatibility with module bundlers (Next.js, etc.)
-if (typeof globalThis !== "undefined" && !globalThis.UltralyticsChat) globalThis.UltralyticsChat = UltralyticsChat;
-  window.UltralyticsChat = UltralyticsChat;
+// Export to globalThis for compatibility with module bundlers and various JS environments
+if (typeof globalThis !== "undefined" && !globalThis.UltralyticsChat) {
+  globalThis.UltralyticsChat = UltralyticsChat;
 }
