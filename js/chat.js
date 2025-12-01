@@ -580,17 +580,25 @@ class UltralyticsChat {
   updateToolBadges() {
     const toolNames = { search: "Search", github: "GitHub" };
     const toolIcons = { search: "globe", github: "github" };
+    
+    // Clear any pending timeout to prevent race condition
+    if (this._badgesClearTimeout) {
+      clearTimeout(this._badgesClearTimeout);
+      this._badgesClearTimeout = null;
+    }
+    
     if (this.selectedTools.size === 0) {
       this.refs.toolBadges.classList.add("hidden");
-      setTimeout(() => {
+      this._badgesClearTimeout = setTimeout(() => {
         this.refs.toolBadges.innerHTML = "";
+        this._badgesClearTimeout = null;
       }, 250);
       return;
     }
     this.refs.toolBadges.innerHTML = [...this.selectedTools]
       .map(
         (id) =>
-          `<div class="ult-tool-badge" data-tool="${id}"><div class="ult-tool-badge-icon"><span class="ult-icon-main">${this.icon(toolIcons[id])}</span><span class="ult-icon-remove">${this.icon("x")}</span></div>${toolNames[id]}</div>`,
+          `<button type="button" class="ult-tool-badge" data-tool="${id}" aria-label="Remove ${toolNames[id]}" tabindex="0"><div class="ult-tool-badge-icon"><span class="ult-icon-main">${this.icon(toolIcons[id])}</span><span class="ult-icon-remove">${this.icon("x")}</span></div>${toolNames[id]}</button>`,
       )
       .join("");
     this.refs.toolBadges.classList.remove("hidden");
