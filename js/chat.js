@@ -77,6 +77,8 @@ class UltralyticsChat {
     this.refs = {};
     this.listeners = new Map();
     this.inputDebounceTimer = null;
+    this.selectedTools = new Set();
+    this.toolsOpen = false;
     this.init();
   }
 
@@ -361,14 +363,42 @@ class UltralyticsChat {
       @keyframes ultTyping{0%,60%,100%{transform:translateY(0);opacity:1}30%{transform:translateY(-6px);opacity:.75}}
       .ult-thinking{display:flex;align-items:center;gap:8px;padding:0;color:inherit;font-size:inherit}
 
-      .ult-chat-input-container{padding:12px 12px 16px;display:flex;gap:8px;align-items:flex-end}
-      .ult-chat-send{background:transparent;border:0;border-radius:8px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.15s;flex-shrink:0;touch-action:manipulation;color:#6b7280;position:relative}
-      .ult-chat-send:hover{transform:translateY(-1px);color:var(--ult-text);background:#f7f7f9}
-      html[data-theme=dark] .ult-chat-send{color:#a1a1aa}
-      html[data-theme=dark] .ult-chat-send:hover{color:#fafafa;background:#17181d}
-      .ult-chat-input{flex:1;border:0;font-size:14px;resize:none;max-height:140px;background:#f7f7f9;color:#0b0b0f;border-radius:12px;padding:10px 12px;outline:0}
+      .ult-chat-input-container{padding:12px 12px 16px;position:relative}
+      .ult-chat-input-wrapper{background:#f7f7f9;border-radius:12px;padding:6px 8px;display:flex;flex-direction:column;gap:0;position:relative;transition:gap .25s ease}
+      .ult-chat-input-wrapper:has(.ult-tool-badges:not(.hidden)){gap:6px}
+      html[data-theme=dark] .ult-chat-input-wrapper{background:#131318}
+      .ult-chat-input-row{display:flex;gap:6px;align-items:center}
+      .ult-tool-add,.ult-chat-send{background:transparent;border:0;width:32px;height:32px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#6b7280;transition:.15s;touch-action:manipulation;position:relative;flex-shrink:0}
+      .ult-tool-add:hover,.ult-chat-send:hover{transform:translateY(-1px);color:var(--ult-text);background:#f7f7f9}
+      html[data-theme=dark] .ult-tool-add,html[data-theme=dark] .ult-chat-send{color:#a1a1aa}
+      html[data-theme=dark] .ult-tool-add:hover,html[data-theme=dark] .ult-chat-send:hover{color:#fafafa;background:#17181d}
+      .ult-chat-send{margin-left:auto}
+      .ult-chat-send svg{width:16px;height:16px}
+      .ult-tools-dropdown{position:absolute;bottom:100%;left:0;margin-bottom:8px;background:#fff;border:1px solid #e5e7eb;border-radius:10px;box-shadow:0 8px 20px rgba(2,6,23,.12);padding:6px;min-width:180px;display:none;z-index:10}
+      .ult-tools-dropdown.open{display:block}
+      html[data-theme=dark] .ult-tools-dropdown{background:#131318;border-color:#232327}
+      .ult-tool-option{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:6px;cursor:pointer;font-size:14px;color:var(--ult-text);transition:.12s;border:0;background:transparent;width:100%;text-align:left}
+      .ult-tool-option:hover{background:#f7f7f9}
+      .ult-tool-option.selected{color:#0485ff}
+      html[data-theme=dark] .ult-tool-option{color:#fafafa}
+      html[data-theme=dark] .ult-tool-option:hover{background:#17181d}
+      html[data-theme=dark] .ult-tool-option.selected{color:#5b9fff}
+      .ult-tool-option svg{flex-shrink:0}
+      .ult-tool-badges{display:flex;gap:6px;flex-wrap:wrap;padding-top:2px;max-height:100px;opacity:1;transition:max-height .25s ease,opacity .25s ease,padding .25s ease}
+      .ult-tool-badges.hidden{max-height:0;opacity:0;padding-top:0;overflow:hidden}
+      .ult-tool-badge{display:inline-flex;align-items:center;gap:8px;padding:4px 10px;background:#ebf4ff;color:#0485ff;border:1px solid transparent;border-radius:6px;font-size:14px;font-weight:500;position:relative;transition:.12s;cursor:pointer}
+      .ult-tool-badge:hover{background:#d9ebff;color:#0475e6}
+      html[data-theme=dark] .ult-tool-badge{background:rgba(4,133,255,.15);color:#5b9fff}
+      html[data-theme=dark] .ult-tool-badge:hover{background:rgba(4,133,255,.2);color:#7db3ff}
+      .ult-tool-badge-icon{position:relative;width:16px;height:16px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+      .ult-tool-badge-icon svg{position:absolute;width:16px;height:16px;top:50%;left:50%;transform:translate(-50%,-50%);transition:opacity .15s}
+      .ult-tool-badge-icon .ult-icon-main{opacity:1}
+      .ult-tool-badge-icon .ult-icon-remove{opacity:0}
+      .ult-tool-badge:hover .ult-tool-badge-icon .ult-icon-main{opacity:0}
+      .ult-tool-badge:hover .ult-tool-badge-icon .ult-icon-remove{opacity:1}
+      .ult-chat-input{flex:1;border:0;font-size:14px;resize:none;max-height:140px;background:transparent;color:#0b0b0f;padding:0;outline:0}
       .ult-chat-input::placeholder{color:#9ca3af}
-      html[data-theme=dark] .ult-chat-input{background:#131318;color:#fafafa}
+      html[data-theme=dark] .ult-chat-input{color:#fafafa}
       .ult-message[contenteditable]{cursor:text;outline:0;background:transparent;padding:0 2px;border:1px solid transparent;border-radius:0;transition:background .15s ease,border-color .15s ease}
       .ult-message-editing{background:#f7f7f9;color:#0b0b0f;border-radius:12px;padding:10px 12px;margin:6px 0;border:1px solid #eceff5;font-size:14px;line-height:1.45;min-height:42px;max-height:140px;overflow:auto}
       html[data-theme=dark] .ult-message-editing{background:#131318;color:#fafafa;border-color:#1c1c22}
@@ -410,10 +440,11 @@ class UltralyticsChat {
         .ult-welcome p{font-size:13px;margin:0;line-height:1.35}
         .ult-examples{padding:6px 14px;gap:6px;flex-wrap:wrap}
         .ult-example{padding:8px 11px;font-size:12px}
-        .ult-chat-input-container{padding:8px 14px 10px;flex:0 0 auto;gap:8px;border-top:1px solid #eceff5;background:#fff}
+        .ult-chat-input-container{padding:8px 14px 10px;flex:0 0 auto;border-top:1px solid #eceff5;background:#fff}
         .ult-chat-modal.welcome-mode .ult-chat-input-container{margin-top:auto}
         html[data-theme=dark] .ult-chat-input-container{border-top-color:#1c1c22;background:#0a0a0b}
-        .ult-chat-input{padding:9px 11px;font-size:16px;border-radius:10px;max-height:100px}
+        .ult-chat-input-wrapper{padding:5px 7px;border-radius:10px}
+        .ult-chat-input{font-size:16px;max-height:100px}
         .ult-message-editing{padding:9px 11px;font-size:16px;border-radius:10px;max-height:100px}
         .ult-chat-footer{padding:6px 14px;font-size:10px}
         .ult-message-group{gap:3px;padding:0 14px;margin:0 0 8px;position:relative}
@@ -451,6 +482,12 @@ class UltralyticsChat {
       arrowUp: '<line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/>',
       square: '<rect x="4.8" y="4.8" width="14.4" height="14.4" rx="2" ry="2"/>',
       check: '<polyline points="20 6 9 17 4 12"/>',
+      plus: '<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>',
+      x: '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>',
+      globe:
+        '<circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>',
+      github:
+        '<path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/>',
     };
     return `<svg width="18" height="18" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" fill="none">${paths[name] || ""}</svg>`;
   }
@@ -476,7 +513,7 @@ class UltralyticsChat {
     this.refs.modal = this.el(
       "div",
       "ult-chat-modal",
-      `<div class="ult-chat-header"><div class="ult-chat-title"><a href="${this.esc(logoUrl)}" target="_blank" rel="noopener"><img src="${this.esc(logo)}" alt="${this.esc(name)}" /></a><div class="ult-subtle">${this.esc(tagline)}</div></div><div class="ult-header-actions"><button class="ult-icon-btn ult-chat-copy" aria-label="${this.esc(copyText)}" data-tooltip="${this.esc(copyText)}">${this.icon("copy")}</button><button class="ult-icon-btn ult-chat-download" aria-label="${this.esc(downloadText)}" data-tooltip="${this.esc(downloadText)}">${this.icon("download")}</button><button class="ult-icon-btn ult-chat-clear" aria-label="${this.esc(clearText)}" data-tooltip="${this.esc(clearText)}">${this.icon("refresh")}</button><button class="ult-icon-btn ult-chat-close" aria-label="Close" data-tooltip="Close">${this.icon("close")}</button></div></div><div id="ult-welcome" class="ult-welcome" style="display:none"><h1>${this.esc(title)}</h1><p>${message}</p></div><div id="ult-examples" class="ult-examples" style="display:none"></div><div class="ult-chat-messages" id="ult-messages" aria-live="polite"></div><div class="ult-chat-input-container"><textarea name="message" class="ult-chat-input" placeholder="${this.esc(placeholder)}" rows="1" maxlength="${this.config.maxMessageLength}" autocomplete="off"></textarea><button class="ult-chat-send" aria-label="Ready" data-tooltip="Ready"><span class="ult-icon-swap" data-icon="square">${this.icon("square")}</span></button></div><div class="ult-chat-footer">Powered by <a href="https://github.com/ultralytics/llm" target="_blank" rel="noopener">Ultralytics Chat</a> · open source</div>`,
+      `<div class="ult-chat-header"><div class="ult-chat-title"><a href="${this.esc(logoUrl)}" target="_blank" rel="noopener"><img src="${this.esc(logo)}" alt="${this.esc(name)}" /></a><div class="ult-subtle">${this.esc(tagline)}</div></div><div class="ult-header-actions"><button class="ult-icon-btn ult-chat-copy" aria-label="${this.esc(copyText)}" data-tooltip="${this.esc(copyText)}">${this.icon("copy")}</button><button class="ult-icon-btn ult-chat-download" aria-label="${this.esc(downloadText)}" data-tooltip="${this.esc(downloadText)}">${this.icon("download")}</button><button class="ult-icon-btn ult-chat-clear" aria-label="${this.esc(clearText)}" data-tooltip="${this.esc(clearText)}">${this.icon("refresh")}</button><button class="ult-icon-btn ult-chat-close" aria-label="Close" data-tooltip="Close">${this.icon("close")}</button></div></div><div id="ult-welcome" class="ult-welcome" style="display:none"><h1>${this.esc(title)}</h1><p>${message}</p></div><div id="ult-examples" class="ult-examples" style="display:none"></div><div class="ult-chat-messages" id="ult-messages" aria-live="polite"></div><div class="ult-chat-input-container"><div class="ult-chat-input-wrapper"><div class="ult-chat-input-row"><button class="ult-tool-add" aria-label="Add tools" data-tooltip="Add tools">${this.icon("plus")}</button><textarea name="message" class="ult-chat-input" placeholder="${this.esc(placeholder)}" rows="1" maxlength="${this.config.maxMessageLength}" autocomplete="off"></textarea><button class="ult-chat-send" aria-label="Ready" data-tooltip="Ready" style="display:none"><span class="ult-icon-swap" data-icon="square">${this.icon("square")}</span></button></div><div class="ult-tool-badges hidden"></div><div class="ult-tools-dropdown"></div></div></div><div class="ult-chat-footer">Powered by <a href="https://github.com/ultralytics/llm" target="_blank" rel="noopener">Ultralytics Chat</a> · open source</div>`,
     );
     this.refs.modal.setAttribute("role", "dialog");
     this.refs.modal.setAttribute("aria-modal", "true");
@@ -491,7 +528,72 @@ class UltralyticsChat {
     this.refs.examples = this.qs("#ult-examples", this.refs.modal);
     this.refs.input = this.qs(".ult-chat-input", this.refs.modal);
     this.refs.send = this.qs(".ult-chat-send", this.refs.modal);
+    this.refs.toolAdd = this.qs(".ult-tool-add", this.refs.modal);
+    this.refs.toolsDropdown = this.qs(".ult-tools-dropdown", this.refs.modal);
+    this.refs.toolBadges = this.qs(".ult-tool-badges", this.refs.modal);
     this.setExamples(chatExamples || []);
+    this.createToolsDropdown();
+  }
+
+  createToolsDropdown() {
+    const tools = [
+      { id: "search", name: "Search", icon: "globe" },
+      { id: "github", name: "GitHub", icon: "github" },
+    ];
+    this.refs.toolsDropdown.innerHTML = tools
+      .map((t) => `<button class="ult-tool-option" data-tool="${t.id}">${this.icon(t.icon)}${t.name}</button>`)
+      .join("");
+  }
+
+  toggleToolsDropdown(show) {
+    this.toolsOpen = show ?? !this.toolsOpen;
+    this.refs.toolsDropdown?.classList.toggle("open", this.toolsOpen);
+    if (this.toolsOpen) {
+      this.qsa(".ult-tool-option", this.refs.toolsDropdown).forEach((opt) => {
+        opt.classList.toggle("selected", this.selectedTools.has(opt.dataset.tool));
+      });
+    }
+  }
+
+  addTool(toolId) {
+    if (this.selectedTools.has(toolId)) return;
+    this.selectedTools.add(toolId);
+    this.updateToolBadges();
+    this.toggleToolsDropdown(false);
+    if (this.refs.input) {
+      this.refs.input.focus();
+      const len = this.refs.input.value.length;
+      this.refs.input.setSelectionRange(len, len);
+    }
+  }
+
+  removeTool(toolId) {
+    this.selectedTools.delete(toolId);
+    this.updateToolBadges();
+    if (this.refs.input) {
+      this.refs.input.focus();
+      const len = this.refs.input.value.length;
+      this.refs.input.setSelectionRange(len, len);
+    }
+  }
+
+  updateToolBadges() {
+    const toolNames = { search: "Search", github: "GitHub" };
+    const toolIcons = { search: "globe", github: "github" };
+    if (this.selectedTools.size === 0) {
+      this.refs.toolBadges.classList.add("hidden");
+      setTimeout(() => {
+        this.refs.toolBadges.innerHTML = "";
+      }, 250);
+      return;
+    }
+    this.refs.toolBadges.innerHTML = [...this.selectedTools]
+      .map(
+        (id) =>
+          `<div class="ult-tool-badge" data-tool="${id}"><div class="ult-tool-badge-icon"><span class="ult-icon-main">${this.icon(toolIcons[id])}</span><span class="ult-icon-remove">${this.icon("x")}</span></div>${toolNames[id]}</div>`,
+      )
+      .join("");
+    this.refs.toolBadges.classList.remove("hidden");
   }
 
   setExamples(list) {
@@ -513,6 +615,39 @@ class UltralyticsChat {
     this.on(this.qs(".ult-chat-clear", m), "click", () => this.clearSession());
     this.on(this.qs(".ult-chat-copy", m), "click", () => this.copyThread());
     this.on(this.qs(".ult-chat-download", m), "click", () => this.downloadThread());
+    this.on(this.refs.toolAdd, "click", (e) => {
+      e.stopPropagation();
+      this.toggleToolsDropdown();
+    });
+    this.on(document, "click", (e) => {
+      if (this.toolsOpen && !this.refs.toolsDropdown?.contains(e.target) && e.target !== this.refs.toolAdd) {
+        this.toggleToolsDropdown(false);
+      }
+    });
+    this.on(this.refs.toolsDropdown, "click", (e) => {
+      const option = e.target.closest(".ult-tool-option");
+      if (option) this.addTool(option.dataset.tool);
+    });
+    this.on(this.refs.toolBadges, "click", (e) => {
+      const badge = e.target.closest(".ult-tool-badge");
+      if (badge) this.removeTool(badge.dataset.tool);
+    });
+    this.on(this.refs.toolBadges, "mouseenter", (e) => {
+      const badge = e.target.closest(".ult-tool-badge");
+      if (badge) {
+        const tooltip = this.refs.tooltip;
+        if (tooltip) {
+          const rect = badge.getBoundingClientRect();
+          tooltip.textContent = "Remove";
+          tooltip.style.left = `${rect.left + rect.width / 2}px`;
+          tooltip.style.top = `${rect.top - 8}px`;
+          tooltip.classList.add("show");
+        }
+      }
+    }, true);
+    this.on(this.refs.toolBadges, "mouseleave", () => {
+      this.refs.tooltip?.classList.remove("show");
+    });
     this.on(this.refs.messages, "scroll", () => {
       const d = this.refs.messages,
         st = d.scrollTop;
@@ -522,7 +657,8 @@ class UltralyticsChat {
     this.on(this.refs.input, "input", (e) => {
       const t = e.target;
       t.style.height = "auto";
-      t.style.height = `${Math.min(t.scrollHeight, 140)}px`;
+      const h = Math.min(t.scrollHeight, 140);
+      t.style.height = `${h}px`;
       if (t.value.length === this.config.maxMessageLength) this.flashTooltip(t, "⚠️ Message shortened to fit");
       if (this.inputDebounceTimer) clearTimeout(this.inputDebounceTimer);
       this.inputDebounceTimer = setTimeout(() => this.updateComposerState(), 50);
@@ -776,7 +912,15 @@ class UltralyticsChat {
 
   updateComposerState() {
     const hasText = !!this.refs.input?.value.trim().length;
-    this.swapSendIcon(this.isStreaming ? "square" : hasText ? "arrowUp" : "square");
+    if (this.isStreaming) {
+      this.swapSendIcon("square");
+      this.refs.send.style.display = "flex";
+    } else if (hasText) {
+      this.swapSendIcon("arrowUp");
+      this.refs.send.style.display = "flex";
+    } else {
+      this.refs.send.style.display = "none";
+    }
   }
 
   trimMessage(text, target = null) {
@@ -995,6 +1139,7 @@ class UltralyticsChat {
         context: this.getPageContext(),
       };
       if (safeEditIndex !== null) body.edit_index = safeEditIndex;
+      if (this.selectedTools.size > 0) body.tools = [...this.selectedTools];
       const res = await fetch(this.apiUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
