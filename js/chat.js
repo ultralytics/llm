@@ -229,8 +229,7 @@ class UltralyticsChat {
 
   loadHighlightJS() {
     const scriptId = "hljs-script";
-    if (window.hljs || document.getElementById(scriptId)) return;
-    if (!document.getElementById(scriptId)) {
+    if (!window.hljs && !document.getElementById(scriptId)) {
       const script = this.el("script");
       script.src = "https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js";
       script.id = scriptId;
@@ -319,7 +318,8 @@ class UltralyticsChat {
     const { primary, dark, accent, text } = this.config.theme;
     const styleContent = `
       *{box-sizing:border-box}
-      :root{--ult-dark:${dark};--ult-primary:${primary};--ult-accent:${accent};--ult-text:${text};color-scheme:light}
+      :root{color-scheme:light}
+      .ultralytics-chat-pill,.ult-chat-modal{--ult-dark:${dark};--ult-primary:${primary};--ult-accent:${accent};--ult-text:${text}}
 
       .ult-backdrop{display:none;position:fixed;inset:0;background:rgba(255,255,255,.07);
         backdrop-filter:blur(5px) saturate(120%) brightness(1.025);-webkit-backdrop-filter:blur(5px) saturate(120%) brightness(1.025);
