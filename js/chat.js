@@ -318,7 +318,6 @@ class UltralyticsChat {
     const { primary, dark, accent, text } = this.config.theme;
     const styleContent = `
       *{box-sizing:border-box}
-      :root{color-scheme:light}
       .ultralytics-chat-pill,.ult-chat-modal{--ult-dark:${dark};--ult-primary:${primary};--ult-accent:${accent};--ult-text:${text}}
 
       .ult-backdrop{display:none;position:fixed;inset:0;background:rgba(255,255,255,.07);
@@ -481,7 +480,6 @@ class UltralyticsChat {
         .ultralytics-chat-pill img{width:28px;height:28px}
       }
       @media (prefers-color-scheme: dark){
-        :root{color-scheme:dark}
         .ultralytics-chat-pill{background:#40434f;color:#fff;box-shadow:0 20px 38px rgba(0,0,0,.5),0 8px 18px rgba(0,0,0,.32)}
         .ult-chat-modal{background:rgba(10,10,11,.95)}
         .ult-subtle{color:#a1a1aa}
