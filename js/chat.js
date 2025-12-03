@@ -78,6 +78,10 @@ class UltralyticsChat {
     this.listeners = new Map();
     this.inputDebounceTimer = null;
     this.selectedTools = new Set();
+    this.tools = d(config, "tools", [
+      { id: "search", name: "Search", icon: "globe" },
+      { id: "github", name: "GitHub", icon: "github" },
+    ]);
     this.toolsOpen = false;
     this.init();
   }
@@ -89,6 +93,62 @@ class UltralyticsChat {
     if (!group) return null;
     const idx = Number.parseInt(group.dataset?.messageIndex ?? "", 10);
     return Number.isNaN(idx) ? null : idx;
+  }
+
+  positionTooltip(target, message) {
+    const tip = this.refs.tooltip;
+    if (!target || !tip) return;
+    const rect = target.getBoundingClientRect();
+    tip.textContent = message;
+    tip.style.left = `${rect.left + rect.width / 2}px`;
+    tip.style.top = `${rect.top - 8}px`;
+    tip.classList.add("show");
+  }
+
+  hideTooltip() {
+    const tip = this.refs.tooltip;
+    if (!tip) return;
+    tip.classList.remove("show");
+    if (tip.__timer) {
+      clearTimeout(tip.__timer);
+      tip.__timer = null;
+    }
+  }
+
+  focusInput(placeCursorEnd = true) {
+    if (!this.refs.input) return;
+    try {
+      this.refs.input.focus({ preventScroll: true });
+    } catch {
+      this.refs.input.focus();
+    }
+    if (placeCursorEnd && this.refs.input.setSelectionRange) {
+      const len = this.refs.input.value.length;
+      this.refs.input.setSelectionRange(len, len);
+    }
+  }
+
+  resizeInput() {
+    if (!this.refs.input) return;
+    this.refs.input.style.height = "auto";
+    this.refs.input.style.height = `${Math.min(this.refs.input.scrollHeight, 140)}px`;
+  }
+
+  setInputValue(value) {
+    if (!this.refs.input) return;
+    this.refs.input.value = value ?? "";
+    this.resizeInput();
+  }
+
+  setUserMessagesEditable(enabled) {
+    if (!this.refs.messages) return;
+    this.qsa(".ult-message[contenteditable]", this.refs.messages).forEach((el) => {
+      el.contentEditable = enabled ? "true" : "false";
+    });
+  }
+
+  getTool(toolId) {
+    return (this.tools || []).find((t) => t.id === toolId);
   }
 
   on(el, ev, fn) {
@@ -123,15 +183,10 @@ class UltralyticsChat {
   flashTooltip(target, message) {
     const tip = this.refs.tooltip;
     if (!target || !tip) return;
-    const rect = target.getBoundingClientRect();
-    tip.textContent = message;
-    tip.style.left = `${rect.left + rect.width / 2}px`;
-    tip.style.top = `${rect.top - 8}px`;
-    tip.classList.add("show");
+    this.positionTooltip(target, message);
     if (tip.__timer) clearTimeout(tip.__timer);
     tip.__timer = setTimeout(() => {
-      tip.classList.remove("show");
-      tip.__timer = null;
+      this.hideTooltip();
     }, 1600);
   }
 
@@ -167,22 +222,38 @@ class UltralyticsChat {
     this.createStyles();
     this.createUI();
     this.attachEvents();
-    this.syncThemeWithSite();
     this.showWelcome(true);
     this.updateComposerState();
     this.watchForRemoval();
   }
 
   loadHighlightJS() {
-    if (window.hljs || document.getElementById("hljs-theme")) return;
-    const link = this.el("link");
-    link.rel = "stylesheet";
-    link.id = "hljs-theme";
-    document.head.appendChild(link);
-    const script = this.el("script");
-    script.src = "https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js";
-    script.onload = () => window.hljs?.configure({ ignoreUnescapedHTML: true });
-    document.head.appendChild(script);
+    const scriptId = "hljs-script";
+    if (!window.hljs && !document.getElementById(scriptId)) {
+      const script = this.el("script");
+      script.src = "https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js";
+      script.id = scriptId;
+      script.onload = () => window.hljs?.configure({ ignoreUnescapedHTML: true });
+      document.head.appendChild(script);
+    }
+    const lightThemeId = "hljs-theme-light";
+    const darkThemeId = "hljs-theme-dark";
+    if (!document.getElementById(lightThemeId)) {
+      const light = this.el("link");
+      light.rel = "stylesheet";
+      light.id = lightThemeId;
+      light.href = "https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github.min.css";
+      light.media = "(prefers-color-scheme: light)";
+      document.head.appendChild(light);
+    }
+    if (!document.getElementById(darkThemeId)) {
+      const dark = this.el("link");
+      dark.rel = "stylesheet";
+      dark.id = darkThemeId;
+      dark.href = "https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css";
+      dark.media = "(prefers-color-scheme: dark)";
+      document.head.appendChild(dark);
+    }
   }
 
   highlight(el) {
@@ -243,29 +314,11 @@ class UltralyticsChat {
     this.refs = {};
   }
 
-  syncThemeWithSite() {
-    const root = document.documentElement;
-    const mql = window.matchMedia("(prefers-color-scheme: dark)");
-    const applyTheme = () => {
-      if (!root.hasAttribute("data-theme")) root.setAttribute("data-theme", mql.matches ? "dark" : "light");
-      const link = document.getElementById("hljs-theme");
-      if (link) {
-        const dark = root.getAttribute("data-theme") === "dark";
-        link.href = `https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github${dark ? "-dark" : ""}.min.css`;
-      }
-    };
-    applyTheme();
-    mql.addEventListener("change", applyTheme);
-  }
-
   createStyles() {
     const { primary, dark, accent, text } = this.config.theme;
-    this.styleElement = this.el(
-      "style",
-      "",
-      `
+    const styleContent = `
       *{box-sizing:border-box}
-      :root{--ult-dark:${dark};--ult-primary:${primary};--ult-accent:${accent};--ult-text:${text}}
+      .ultralytics-chat-pill,.ult-chat-modal{--ult-dark:${dark};--ult-primary:${primary};--ult-accent:${accent};--ult-text:${text}}
 
       .ult-backdrop{display:none;position:fixed;inset:0;background:rgba(255,255,255,.07);
         backdrop-filter:blur(5px) saturate(120%) brightness(1.025);-webkit-backdrop-filter:blur(5px) saturate(120%) brightness(1.025);
@@ -280,7 +333,6 @@ class UltralyticsChat {
       .ultralytics-chat-pill:hover{transform:scale(1.05) translateZ(0)}
       .ultralytics-chat-pill.hidden{opacity:0;pointer-events:none}
       .ultralytics-chat-pill img{width:30px;height:30px;border-radius:3px}
-      html[data-theme=dark] .ultralytics-chat-pill{background:#40434f;color:#fff;box-shadow:0 20px 38px rgba(0,0,0,.5),0 8px 18px rgba(0,0,0,.32)}
 
       .ult-chat-modal{position:fixed;left:50%;top:50%;width:min(760px,calc(100vw - 40px));height:min(80vh,820px);background:rgba(255,255,255,.95);border:0;border-radius:16px;
         box-shadow:0 24px 60px rgba(2,6,23,.25),0 8px 24px rgba(2,6,23,.18);z-index:10001;
@@ -288,74 +340,54 @@ class UltralyticsChat {
         transition:opacity .2s ease-out,visibility .2s;
         flex-direction:column;overflow:hidden;text-align:left;display:flex;pointer-events:none;will-change:opacity}
       .ult-chat-modal.open{opacity:1;visibility:visible;pointer-events:auto}
-      html[data-theme=dark] .ult-chat-modal{background:rgba(10,10,11,.95)}
 
       .ult-chat-header{padding:16px 18px;display:flex;justify-content:space-between;align-items:center}
       .ult-chat-title{display:flex;align-items:center;gap:10px}
       .ult-chat-title a{display:inline-flex;cursor:pointer}
       .ult-chat-title img{max-height:32px;max-width:180px}
-      .ult-subtle{font-size:12px;color:#6b7280} html[data-theme=dark] .ult-subtle{color:#a1a1aa}
+      .ult-subtle{font-size:12px;color:#6b7280}
       .ult-header-actions{display:flex;gap:6px;align-items:center}
       .ult-icon-btn{background:transparent;border:0;width:32px;height:32px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#6b7280;transition:.15s;touch-action:manipulation;position:relative}
       .ult-icon-btn:hover{transform:translateY(-1px);color:var(--ult-text);background:#f7f7f9}
-      html[data-theme=dark] .ult-icon-btn{color:#a1a1aa}
-      html[data-theme=dark] .ult-icon-btn:hover{color:#fafafa;background:#17181d}
 
       .ult-welcome{padding:18px}.ult-welcome h1{font-size:16px;margin:0 0 6px}.ult-welcome p{margin:0;color:#4b5563}
-      html[data-theme=dark] .ult-welcome p{color:#a1a1aa}
       .ult-examples{padding:12px 18px 6px;display:flex;flex-wrap:wrap;gap:10px}
       .ult-example{padding:10px 12px;background:#f7f7f9;border:0;border-radius:999px;cursor:pointer;font-size:12px;color:#0b0b0f;transition:.12s;touch-action:manipulation}
       .ult-example:hover{transform:translateY(-1px);filter:brightness(.98)}
-      html[data-theme=dark] .ult-example{background:#131318;color:#fafafa}
 
       .ult-chat-messages{flex:1;overflow-y:auto;padding:0 18px 18px;display:flex;flex-direction:column;gap:14px;-webkit-overflow-scrolling:touch}
       .ult-message-group{padding:8px 8px 4px;margin:-8px -8px 0;border-radius:10px;transition:background .15s ease,border .15s ease;border:1px solid transparent;position:relative}
       .ult-message-group:first-child{margin-top:0}
       .ult-message-group:hover{background:rgba(247,247,249,.4);border-color:rgba(229,231,235,.6)}
-      html[data-theme=dark] .ult-message-group:hover{background:rgba(19,19,24,.4);border-color:rgba(35,35,39,.6)}
       .ult-message-group:hover .ult-message-actions,.ult-message-group:focus-within .ult-message-actions{opacity:1}
       .ult-message-label{display:flex;align-items:center;gap:8px;font-size:11px;font-weight:800;color:#6b7280;text-transform:uppercase;letter-spacing:.03em;padding:0 2px}
-      html[data-theme=dark] .ult-message-label{color:#a1a1aa}
       .ult-message-label img{max-height:24px;max-width:24px;border-radius:4px}
       .ult-user-icon{color:var(--ult-accent)}
       .ult-message{font-size:14px;line-height:1.6;color:var(--ult-text);padding:0 2px;word-break:break-word;text-align:left}
-      html[data-theme=dark] .ult-message{color:#f5f5f5}
       .ult-message-actions{display:flex;gap:4px;opacity:0;transition:opacity .15s;margin-top:6px;padding-left:2px}
       .ult-user-message-actions{position:absolute;right:2px;bottom:0;opacity:0;transition:opacity .15s;pointer-events:none}
       .ult-message-group:hover .ult-user-message-actions,.ult-message-group:focus-within .ult-user-message-actions{opacity:1;pointer-events:auto}
       .ult-message a{color:var(--ult-primary);text-underline-offset:2px}.ult-message a:hover{text-decoration:underline}
       .ult-message strong{font-weight:700;color:var(--ult-text)}
-      html[data-theme=dark] .ult-message strong{color:#fafafa}
       .ult-code-block{position:relative;margin:6px 0}
       .ult-global-tooltip{position:fixed;background:#1f2937;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:500;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .1s;z-index:10003;transform:translate(-50%,-100%)}
       .ult-global-tooltip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:4px solid transparent;border-top-color:#1f2937}
       .ult-global-tooltip.show{opacity:1}
-      html[data-theme=dark] .ult-global-tooltip{background:#374151}
-      html[data-theme=dark] .ult-global-tooltip::after{border-top-color:#374151}
       .ult-code-copy{position:absolute;top:8px;right:8px;background:#f1f2f6;border:0;border-radius:8px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:0;transition:.12s;color:#6b7280}
       .ult-code-block:hover .ult-code-copy{opacity:1}
       .ult-code-copy:hover{transform:translateY(-1px);filter:brightness(.98);color:var(--ult-text)}
       .ult-code-copy.success,.ult-icon-btn.success{color:#26C000}
-      html[data-theme=dark] .ult-code-copy{background:#17181d;color:#a1a1aa}
-      html[data-theme=dark] .ult-code-copy:hover{color:#fafafa}
-      html[data-theme=dark] .ult-code-copy.success,html[data-theme=dark] .ult-icon-btn.success{color:#26C000}
       .ult-message pre{padding:10px 12px;border-radius:10px;overflow:auto;border:1px solid #e5e7eb;background:#f6f8fa}
       .ult-message code{background:#f4f4f5;padding:2px 6px;border-radius:6px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;border:0}
       .ult-message pre code{background:transparent;padding:0;border:0;display:block;font-size:13px}
-      html[data-theme=dark] .ult-message pre{background:#0d1117;border-color:#30363d}
-      html[data-theme=dark] .ult-message code{background:#1e1e22}
-      html[data-theme=dark] .ult-message pre code{background:transparent}
 
       .ult-search-result{padding:14px;border:1px solid #e5e7eb;border-radius:10px;background:#fff;margin-bottom:10px;transition:.12s}
       .ult-search-result:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(2,6,23,.08)}
-      html[data-theme=dark] .ult-search-result{background:#131318;border-color:#232327}
       .ult-search-result-title{font-size:15px;font-weight:700;margin-bottom:6px;display:flex;align-items:center;gap:8px}
       .ult-search-result-title a{text-decoration:none;color:var(--ult-primary)}
       .ult-search-result-favicon{width:18px;height:18px;border-radius:4px;flex-shrink:0;background:#f4f4f5;box-shadow:0 0 0 1px rgba(0,0,0,.05)}
-      html[data-theme=dark] .ult-search-result-favicon{background:#1f1f25;box-shadow:0 0 0 1px rgba(255,255,255,.06)}
       .ult-search-result-snippet{font-size:13px;line-height:1.5;color:#4b5563;margin-bottom:8px}
-      html[data-theme=dark] .ult-search-result-snippet{color:#a1a1aa}
-      .ult-search-result-meta{display:flex;gap:12px;font-size:11px;color:#9ca3af} html[data-theme=dark] .ult-search-result-meta{color:#71717a}
+      .ult-search-result-meta{display:flex;gap:12px;font-size:11px;color:#9ca3af}
 
       .ult-typing{display:inline-flex;gap:4px}
       .ult-typing span{width:6px;height:6px;background:#a1a1aa;border-radius:50%;animation:ultTyping 1.2s infinite}
@@ -366,30 +398,21 @@ class UltralyticsChat {
       .ult-chat-input-container{padding:12px 12px 16px;position:relative}
       .ult-chat-input-wrapper{background:#f7f7f9;border-radius:12px;padding:6px 8px;display:flex;flex-direction:column;gap:0;position:relative;transition:gap .25s ease}
       .ult-chat-input-wrapper:has(.ult-tool-badges:not(.hidden)){gap:6px}
-      html[data-theme=dark] .ult-chat-input-wrapper{background:#131318}
       .ult-chat-input-row{display:flex;gap:6px;align-items:center}
       .ult-tool-add,.ult-chat-send{background:transparent;border:0;width:32px;height:32px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#6b7280;transition:.15s;touch-action:manipulation;position:relative;flex-shrink:0}
       .ult-tool-add:hover,.ult-chat-send:hover{transform:translateY(-1px);color:var(--ult-text);background:#f7f7f9}
-      html[data-theme=dark] .ult-tool-add,html[data-theme=dark] .ult-chat-send{color:#a1a1aa}
-      html[data-theme=dark] .ult-tool-add:hover,html[data-theme=dark] .ult-chat-send:hover{color:#fafafa;background:#17181d}
       .ult-chat-send{margin-left:auto}
       .ult-chat-send svg{width:16px;height:16px}
       .ult-tools-dropdown{position:absolute;bottom:100%;left:0;margin-bottom:8px;background:#fff;border:1px solid #e5e7eb;border-radius:10px;box-shadow:0 8px 20px rgba(2,6,23,.12);padding:6px;min-width:180px;display:none;z-index:10}
       .ult-tools-dropdown.open{display:block}
-      html[data-theme=dark] .ult-tools-dropdown{background:#131318;border-color:#232327}
       .ult-tool-option{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:6px;cursor:pointer;font-size:14px;color:var(--ult-text);transition:.12s;border:0;background:transparent;width:100%;text-align:left}
       .ult-tool-option:hover{background:#f7f7f9}
       .ult-tool-option.selected{color:#0485ff}
-      html[data-theme=dark] .ult-tool-option{color:#fafafa}
-      html[data-theme=dark] .ult-tool-option:hover{background:#17181d}
-      html[data-theme=dark] .ult-tool-option.selected{color:#5b9fff}
       .ult-tool-option svg{flex-shrink:0}
       .ult-tool-badges{display:flex;gap:6px;flex-wrap:wrap;padding-top:2px;max-height:100px;opacity:1;transition:max-height .25s ease,opacity .25s ease,padding .25s ease}
       .ult-tool-badges.hidden{max-height:0;opacity:0;padding-top:0;overflow:hidden}
       .ult-tool-badge{display:inline-flex;align-items:center;gap:8px;padding:4px 10px;background:#ebf4ff;color:#0485ff;border:1px solid transparent;border-radius:6px;font-size:14px;font-weight:500;position:relative;transition:.12s;cursor:pointer}
       .ult-tool-badge:hover{background:#d9ebff;color:#0475e6}
-      html[data-theme=dark] .ult-tool-badge{background:rgba(4,133,255,.15);color:#5b9fff}
-      html[data-theme=dark] .ult-tool-badge:hover{background:rgba(4,133,255,.2);color:#7db3ff}
       .ult-tool-badge-icon{position:relative;width:16px;height:16px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
       .ult-tool-badge-icon svg{position:absolute;width:16px;height:16px;top:50%;left:50%;transform:translate(-50%,-50%);transition:opacity .15s}
       .ult-tool-badge-icon .ult-icon-main{opacity:1}
@@ -398,19 +421,15 @@ class UltralyticsChat {
       .ult-tool-badge:hover .ult-tool-badge-icon .ult-icon-remove{opacity:1}
       .ult-chat-input{flex:1;border:0;font-size:14px;resize:none;max-height:140px;background:transparent;color:#0b0b0f;padding:0;outline:0}
       .ult-chat-input::placeholder{color:#9ca3af}
-      html[data-theme=dark] .ult-chat-input{color:#fafafa}
       .ult-message[contenteditable]{cursor:text;outline:0;background:transparent;padding:0 2px;border:1px solid transparent;border-radius:0;transition:background .15s ease,border-color .15s ease}
       .ult-message-editing{background:#f7f7f9;color:#0b0b0f;border-radius:12px;padding:10px 12px;margin:6px 0;border:1px solid #eceff5;font-size:14px;line-height:1.45;min-height:42px;max-height:140px;overflow:auto}
-      html[data-theme=dark] .ult-message-editing{background:#131318;color:#fafafa;border-color:#1c1c22}
 
       .ult-chat-footer{padding:8px 18px;text-align:left;font-size:11px;color:#9ca3af}
-      html[data-theme=dark] .ult-chat-footer{color:#71717a}
       .ult-chat-footer a{color:var(--ult-primary)}
       .ult-chat-footer a:hover{text-decoration:underline}
 
       .ult-chat-modal[data-mode="search"] .ult-chat-header{order:0}
       .ult-chat-modal[data-mode="search"] .ult-chat-input-container{order:1;padding:16px 18px;border-top:1px solid #eceff5;border-bottom:1px solid #eceff5;background:#fdfdff;align-items:center}
-      html[data-theme=dark] .ult-chat-modal[data-mode="search"] .ult-chat-input-container{border-color:#1c1c22;background:#0e0e13}
       .ult-chat-modal[data-mode="search"] #ult-welcome,
       .ult-chat-modal[data-mode="search"] #ult-examples{order:2;width:100%}
       .ult-chat-modal[data-mode="search"] .ult-chat-messages{order:3}
@@ -428,7 +447,6 @@ class UltralyticsChat {
         .ult-subtle{display:none!important}
         .ult-message-actions{margin-top:4px}
         .ult-chat-header{padding:8px 12px;min-height:48px;flex-shrink:0;border-bottom:1px solid #eceff5}
-        html[data-theme=dark] .ult-chat-header{border-bottom-color:#1c1c22}
         .ult-chat-title{gap:6px;flex:1;min-width:0}
         .ult-chat-title a{display:inline-flex}
         .ult-chat-title img{max-height:24px;max-width:120px}
@@ -442,7 +460,6 @@ class UltralyticsChat {
         .ult-example{padding:8px 11px;font-size:12px}
         .ult-chat-input-container{padding:8px 14px 10px;flex:0 0 auto;border-top:1px solid #eceff5;background:#fff}
         .ult-chat-modal.welcome-mode .ult-chat-input-container{margin-top:auto}
-        html[data-theme=dark] .ult-chat-input-container{border-top-color:#1c1c22;background:#0a0a0b}
         .ult-chat-input-wrapper{padding:5px 7px;border-radius:10px}
         .ult-chat-input{font-size:16px;max-height:100px}
         .ult-message-editing{padding:9px 11px;font-size:16px;border-radius:10px;max-height:100px}
@@ -462,8 +479,50 @@ class UltralyticsChat {
         .ultralytics-chat-pill{right:14px;bottom:28px;padding:12px 18px;font-size:16px}
         .ultralytics-chat-pill img{width:28px;height:28px}
       }
-    `,
-    );
+      @media (prefers-color-scheme: dark){
+        .ultralytics-chat-pill{background:#40434f;color:#fff;box-shadow:0 20px 38px rgba(0,0,0,.5),0 8px 18px rgba(0,0,0,.32)}
+        .ult-chat-modal{background:rgba(10,10,11,.95)}
+        .ult-subtle{color:#a1a1aa}
+        .ult-icon-btn{color:#a1a1aa}
+        .ult-icon-btn:hover{color:#fafafa;background:#17181d}
+        .ult-welcome p{color:#a1a1aa}
+        .ult-example{background:#131318;color:#fafafa}
+        .ult-message-group:hover{background:rgba(19,19,24,.4);border-color:rgba(35,35,39,.6)}
+        .ult-message-label{color:#a1a1aa}
+        .ult-message{color:#f5f5f5}
+        .ult-message strong{color:#fafafa}
+        .ult-global-tooltip{background:#374151}
+        .ult-global-tooltip::after{border-top-color:#374151}
+        .ult-code-copy{background:#17181d;color:#a1a1aa}
+        .ult-code-copy:hover{color:#fafafa}
+        .ult-code-copy.success,.ult-icon-btn.success{color:#26C000}
+        .ult-message pre{background:#0d1117;border-color:#30363d}
+        .ult-message code{background:#1e1e22}
+        .ult-message pre code{background:transparent}
+        .ult-search-result{background:#131318;border-color:#232327}
+        .ult-search-result-favicon{background:#1f1f25;box-shadow:0 0 0 1px rgba(255,255,255,.06)}
+        .ult-search-result-snippet{color:#a1a1aa}
+        .ult-search-result-meta{color:#71717a}
+        .ult-chat-input-wrapper{background:#131318}
+        .ult-tool-add,.ult-chat-send{color:#a1a1aa}
+        .ult-tool-add:hover,.ult-chat-send:hover{color:#fafafa;background:#17181d}
+        .ult-tools-dropdown{background:#131318;border-color:#232327}
+        .ult-tool-option{color:#fafafa}
+        .ult-tool-option:hover{background:#17181d}
+        .ult-tool-option.selected{color:#5b9fff}
+        .ult-tool-badge{background:rgba(4,133,255,.15);color:#5b9fff}
+        .ult-tool-badge:hover{background:rgba(4,133,255,.2);color:#7db3ff}
+        .ult-chat-input{color:#fafafa}
+        .ult-message-editing{background:#131318;color:#fafafa;border-color:#1c1c22}
+        .ult-chat-footer{color:#71717a}
+        .ult-chat-modal[data-mode="search"] .ult-chat-input-container{border-color:#1c1c22;background:#0e0e13}
+      }`;
+    const darkMobileStyles = `
+      @media (prefers-color-scheme: dark) and (max-width:768px){
+        .ult-chat-header{border-bottom-color:#1c1c22}
+        .ult-chat-input-container{border-top-color:#1c1c22;background:#0a0a0b}
+      }`;
+    this.styleElement = this.el("style", "", `${styleContent}\n${darkMobileStyles}`);
     document.head.appendChild(this.styleElement);
   }
 
@@ -536,11 +595,8 @@ class UltralyticsChat {
   }
 
   createToolsDropdown() {
-    const tools = [
-      { id: "search", name: "Search", icon: "globe" },
-      { id: "github", name: "GitHub", icon: "github" },
-    ];
-    this.refs.toolsDropdown.innerHTML = tools
+    if (!this.refs.toolsDropdown) return;
+    this.refs.toolsDropdown.innerHTML = (this.tools || [])
       .map((t) => `<button class="ult-tool-option" data-tool="${t.id}">${this.icon(t.icon)}${t.name}</button>`)
       .join("");
   }
@@ -556,37 +612,26 @@ class UltralyticsChat {
   }
 
   addTool(toolId) {
-    if (this.selectedTools.has(toolId)) return;
+    if (!this.getTool(toolId) || this.selectedTools.has(toolId)) return;
     this.selectedTools.add(toolId);
     this.updateToolBadges();
     this.toggleToolsDropdown(false);
-    if (this.refs.input) {
-      this.refs.input.focus();
-      const len = this.refs.input.value.length;
-      this.refs.input.setSelectionRange(len, len);
-    }
+    this.focusInput();
   }
 
   removeTool(toolId) {
+    if (!this.selectedTools.has(toolId)) return;
     this.selectedTools.delete(toolId);
     this.updateToolBadges();
-    if (this.refs.input) {
-      this.refs.input.focus();
-      const len = this.refs.input.value.length;
-      this.refs.input.setSelectionRange(len, len);
-    }
+    this.focusInput();
   }
 
   updateToolBadges() {
-    const toolNames = { search: "Search", github: "GitHub" };
-    const toolIcons = { search: "globe", github: "github" };
-    
-    // Clear any pending timeout to prevent race condition
+    if (!this.refs.toolBadges) return;
     if (this._badgesClearTimeout) {
       clearTimeout(this._badgesClearTimeout);
       this._badgesClearTimeout = null;
     }
-    
     if (this.selectedTools.size === 0) {
       this.refs.toolBadges.classList.add("hidden");
       this._badgesClearTimeout = setTimeout(() => {
@@ -595,12 +640,15 @@ class UltralyticsChat {
       }, 250);
       return;
     }
-    this.refs.toolBadges.innerHTML = [...this.selectedTools]
-      .map(
-        (id) =>
-          `<button type="button" class="ult-tool-badge" data-tool="${id}" aria-label="Remove ${toolNames[id]}" tabindex="0"><div class="ult-tool-badge-icon"><span class="ult-icon-main">${this.icon(toolIcons[id])}</span><span class="ult-icon-remove">${this.icon("x")}</span></div>${toolNames[id]}</button>`,
-      )
+    const badgeHtml = [...this.selectedTools]
+      .map((id) => {
+        const tool = this.getTool(id);
+        if (!tool) return "";
+        return `<button type="button" class="ult-tool-badge" data-tool="${tool.id}" aria-label="Remove ${tool.name}" tabindex="0"><div class="ult-tool-badge-icon"><span class="ult-icon-main">${this.icon(tool.icon)}</span><span class="ult-icon-remove">${this.icon("x")}</span></div>${tool.name}</button>`;
+      })
+      .filter(Boolean)
       .join("");
+    this.refs.toolBadges.innerHTML = badgeHtml;
     this.refs.toolBadges.classList.remove("hidden");
   }
 
@@ -645,22 +693,11 @@ class UltralyticsChat {
       "mouseenter",
       (e) => {
         const badge = e.target.closest(".ult-tool-badge");
-        if (badge) {
-          const tooltip = this.refs.tooltip;
-          if (tooltip) {
-            const rect = badge.getBoundingClientRect();
-            tooltip.textContent = "Remove";
-            tooltip.style.left = `${rect.left + rect.width / 2}px`;
-            tooltip.style.top = `${rect.top - 8}px`;
-            tooltip.classList.add("show");
-          }
-        }
+        if (badge) this.positionTooltip(badge, "Remove");
       },
       true,
     );
-    this.on(this.refs.toolBadges, "mouseleave", () => {
-      this.refs.tooltip?.classList.remove("show");
-    });
+    this.on(this.refs.toolBadges, "mouseleave", () => this.hideTooltip());
     this.on(this.refs.messages, "scroll", () => {
       const d = this.refs.messages,
         st = d.scrollTop;
@@ -669,9 +706,7 @@ class UltralyticsChat {
     });
     this.on(this.refs.input, "input", (e) => {
       const t = e.target;
-      t.style.height = "auto";
-      const h = Math.min(t.scrollHeight, 140);
-      t.style.height = `${h}px`;
+      this.resizeInput();
       if (t.value.length === this.config.maxMessageLength) this.flashTooltip(t, "⚠️ Message shortened to fit");
       if (this.inputDebounceTimer) clearTimeout(this.inputDebounceTimer);
       this.inputDebounceTimer = setTimeout(() => this.updateComposerState(), 50);
@@ -699,18 +734,14 @@ class UltralyticsChat {
       const btn = e.target.closest("[data-tooltip]");
       if (btn && this.refs.tooltip && !btn.dataset.tooltipActive) {
         btn.dataset.tooltipActive = "true";
-        const r = btn.getBoundingClientRect();
-        this.refs.tooltip.textContent = btn.dataset.tooltip;
-        this.refs.tooltip.style.left = `${r.left + r.width / 2}px`;
-        this.refs.tooltip.style.top = `${r.top - 8}px`;
-        this.refs.tooltip.classList.add("show");
+        this.positionTooltip(btn, btn.dataset.tooltip);
       }
     });
     this.on(this.refs.messages, "mouseout", (e) => {
       const btn = e.target.closest("[data-tooltip]");
       if (btn && (!e.relatedTarget || !btn.contains(e.relatedTarget))) {
         delete btn.dataset.tooltipActive;
-        this.refs.tooltip?.classList.remove("show");
+        this.hideTooltip();
       }
     });
 
@@ -840,7 +871,7 @@ class UltralyticsChat {
       if (!this.messages.length) this.showWelcome(true);
       this.updateComposerState();
       setTimeout(() => {
-        this.refs.input?.focus();
+        this.focusInput();
         this.refs.input?.click();
       }, 100);
     } else {
@@ -900,16 +931,8 @@ class UltralyticsChat {
 
   setupTooltips() {
     this.qsa("[data-tooltip]", this.refs.modal).forEach((btn) => {
-      this.on(btn, "mouseenter", (e) => {
-        const t = this.refs.tooltip;
-        if (!t) return;
-        const r = e.currentTarget.getBoundingClientRect();
-        t.textContent = e.currentTarget.dataset.tooltip;
-        t.style.left = `${r.left + r.width / 2}px`;
-        t.style.top = `${r.top - 8}px`;
-        t.classList.add("show");
-      });
-      this.on(btn, "mouseleave", () => this.refs.tooltip?.classList.remove("show"));
+      this.on(btn, "mouseenter", (e) => this.positionTooltip(e.currentTarget, e.currentTarget.dataset.tooltip));
+      this.on(btn, "mouseleave", () => this.hideTooltip());
     });
   }
 
@@ -924,6 +947,7 @@ class UltralyticsChat {
   }
 
   updateComposerState() {
+    if (!this.refs.send) return;
     const hasText = !!this.refs.input?.value.trim().length;
     if (this.isStreaming) {
       this.swapSendIcon("square");
@@ -1012,7 +1036,7 @@ class UltralyticsChat {
       const idx = this.getGroupIndex(g);
       if (idx === null || idx > messageIndex) g.remove();
     });
-    if (this.refs.tooltip) this.refs.tooltip.classList.remove("show");
+    this.hideTooltip();
     await this.sendMessage(newContent, false, messageIndex);
     return true;
   }
@@ -1039,7 +1063,7 @@ class UltralyticsChat {
     if (this.refs.messages) this.refs.messages.innerHTML = "";
     this.showWelcome(true);
     this.updateComposerState();
-    this.refs.input?.focus();
+    this.focusInput();
   }
 
   stopStreaming() {
@@ -1047,7 +1071,7 @@ class UltralyticsChat {
     this.isStreaming = false;
     this.abortController = null;
     this.updateComposerState();
-    this.refs.input?.focus();
+    this.focusInput();
   }
 
   createThinking(label = "Thinking") {
@@ -1120,24 +1144,19 @@ class UltralyticsChat {
     this.showWelcome(false);
     this.autoScroll = true;
     if (this.mode === "search") {
-      this.refs.input.value = text;
-      this.refs.input.style.height = "auto";
-      this.refs.input.style.height = `${Math.min(this.refs.input.scrollHeight, 140)}px`;
+      this.setInputValue(text);
       await this.performSearch(text);
-      this.refs.input.focus();
+      this.focusInput();
       return;
     }
     if (isNew) {
       this.messages.push({ role: "user", content: text });
       this.addMessageToUI("user", text, this.messages.length - 1);
     }
-    this.refs.input.value = "";
-    this.refs.input.style.height = "auto";
+    this.setInputValue("");
     this.isStreaming = true;
     this.updateComposerState();
-    for (const el of this.qsa(".ult-message[contenteditable='true']", this.refs.messages)) {
-      el.contentEditable = "false";
-    }
+    this.setUserMessagesEditable(false);
     const group = this.createMessageGroup("assistant", this.messages.length);
     const { el: thinking, clear } = this.createThinking();
     group.appendChild(thinking);
@@ -1221,10 +1240,8 @@ class UltralyticsChat {
       this.isStreaming = false;
       this.abortController = null;
       this.updateComposerState();
-      for (const el of this.qsa(".ult-message[contenteditable]", this.refs.messages)) {
-        el.contentEditable = "true";
-      }
-      this.refs.input?.focus();
+      this.setUserMessagesEditable(true);
+      this.focusInput();
     }
   }
 
