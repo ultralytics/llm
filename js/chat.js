@@ -288,7 +288,7 @@ class UltralyticsChat {
     const observer = new MutationObserver(() =>
       elements.forEach(({ element, parent }) => {
         const el = element();
-        if (el?.parentNode !== parent) parent.appendChild(el);
+        if (el && !el.parentNode) parent.appendChild(el);
       }),
     );
     observer.observe(document.head, { childList: true });
