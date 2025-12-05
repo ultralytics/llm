@@ -441,8 +441,7 @@ class UltralyticsChat {
         .ult-chat-modal{transition:opacity .15s ease-out,visibility .15s}
         .ult-backdrop{pointer-events:none}
         .ult-chat-modal{position:fixed;left:0;top:0;width:100vw;height:100svh;max-width:100vw;max-height:100svh;border-radius:0;margin:0;padding:0;transform:none!important}
-        .ult-chat-modal.open{transform:none!important;opacity:1}
-        .ult-chat-modal.open{display:flex;flex-direction:column;overflow:hidden}
+        .ult-chat-modal.open{transform:none!important;opacity:1;display:flex;flex-direction:column;overflow:hidden}
         body.ult-modal-open{position:fixed!important;width:100%!important;overflow:hidden!important;-webkit-overflow-scrolling:touch}
         .ult-subtle{display:none!important}
         .ult-message-actions{margin-top:4px}
@@ -1195,12 +1194,12 @@ class UltralyticsChat {
       let renderTimer = null;
       const scheduleRender = () => {
         if (renderTimer) return;
-        renderTimer = setTimeout(() => {
+        renderTimer = requestAnimationFrame(() => {
           div.innerHTML = this.renderMarkdown(content, true);
           this.highlight(div);
           this.scrollToBottom();
           renderTimer = null;
-        }, 30);
+        });
       };
       while (true) {
         const { done, value } = await reader.read();
@@ -1221,7 +1220,7 @@ class UltralyticsChat {
           }
         }
       }
-      if (renderTimer) clearTimeout(renderTimer);
+      if (renderTimer) cancelAnimationFrame(renderTimer);
       div.innerHTML = this.renderMarkdown(content, false);
       this.finalizeAssistantMessage(group);
       this.scrollToBottom();
