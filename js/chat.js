@@ -56,15 +56,7 @@ class UltralyticsChat {
       },
     };
     this.apiUrl = this.config.apiUrl;
-    this.feedbackUrl = d(
-      config,
-      "feedbackUrl",
-      (() => {
-        if (this.apiUrl.endsWith("/chat")) return this.apiUrl.replace(/\/chat$/, "/feedback");
-        const trimmed = this.apiUrl.replace(/\/$/, "");
-        return `${trimmed}/feedback`;
-      })(),
-    );
+    this.feedbackUrl = config.feedbackUrl ?? this.apiUrl.replace(/\/chat\/?$/, "/feedback");
     this.messages = [];
     this.isOpen = false;
     this.isStreaming = false;
@@ -88,7 +80,6 @@ class UltralyticsChat {
 
   qs = (sel, root = document) => root.querySelector(sel);
   qsa = (sel, root = document) => [...root.querySelectorAll(sel)];
-  esc = (s) => this.escapeHtml(s);
   getGroupIndex(group) {
     if (!group) return null;
     const idx = Number.parseInt(group.dataset?.messageIndex ?? "", 10);
@@ -109,10 +100,8 @@ class UltralyticsChat {
     const tip = this.refs.tooltip;
     if (!tip) return;
     tip.classList.remove("show");
-    if (tip.__timer) {
-      clearTimeout(tip.__timer);
-      tip.__timer = null;
-    }
+    clearTimeout(tip.__timer);
+    tip.__timer = null;
   }
 
   focusInput(placeCursorEnd = true) {
@@ -148,7 +137,7 @@ class UltralyticsChat {
   }
 
   getTool(toolId) {
-    return (this.tools || []).find((t) => t.id === toolId);
+    return this.tools.find((t) => t.id === toolId);
   }
 
   on(el, ev, fn) {
@@ -191,11 +180,10 @@ class UltralyticsChat {
   }
 
   getPageContext() {
-    const meta = (name) => document.querySelector(`meta[name="${name}"]`)?.content || "";
     return {
       url: window.location.href,
       title: document.title,
-      description: meta("description"),
+      description: document.querySelector('meta[name="description"]')?.content || "",
       path: window.location.pathname,
     };
   }
@@ -495,7 +483,6 @@ class UltralyticsChat {
         .ult-global-tooltip::after{border-top-color:#374151}
         .ult-code-copy{background:#17181d;color:#a1a1aa}
         .ult-code-copy:hover{color:#fafafa}
-        .ult-code-copy.success,.ult-icon-btn.success{color:#26C000}
         .ult-message pre{background:#0d1117;border-color:#30363d}
         .ult-message code{background:#1e1e22}
         .ult-message pre code{background:transparent}
@@ -563,7 +550,7 @@ class UltralyticsChat {
     this.refs.pill = this.el(
       "button",
       "ultralytics-chat-pill",
-      `<span>${this.esc(pillText)}</span><img src="${this.esc(logomark)}" alt="${this.esc(name)}" />`,
+      `<span>${this.escapeHtml(pillText)}</span><img src="${this.escapeHtml(logomark)}" alt="${this.escapeHtml(name)}" />`,
     );
     this.refs.pill.setAttribute("aria-label", pillText);
     this.refs.pill.title = pillText;
@@ -572,7 +559,7 @@ class UltralyticsChat {
     this.refs.modal = this.el(
       "div",
       "ult-chat-modal",
-      `<div class="ult-chat-header"><div class="ult-chat-title"><a href="${this.esc(logoUrl)}" target="_blank" rel="noopener"><img src="${this.esc(logo)}" alt="${this.esc(name)}" /></a><div class="ult-subtle">${this.esc(tagline)}</div></div><div class="ult-header-actions"><button class="ult-icon-btn ult-chat-copy" aria-label="${this.esc(copyText)}" data-tooltip="${this.esc(copyText)}">${this.icon("copy")}</button><button class="ult-icon-btn ult-chat-download" aria-label="${this.esc(downloadText)}" data-tooltip="${this.esc(downloadText)}">${this.icon("download")}</button><button class="ult-icon-btn ult-chat-clear" aria-label="${this.esc(clearText)}" data-tooltip="${this.esc(clearText)}">${this.icon("refresh")}</button><button class="ult-icon-btn ult-chat-close" aria-label="Close" data-tooltip="Close">${this.icon("close")}</button></div></div><div id="ult-welcome" class="ult-welcome" style="display:none"><h1>${this.esc(title)}</h1><p>${message}</p></div><div id="ult-examples" class="ult-examples" style="display:none"></div><div class="ult-chat-messages" id="ult-messages" aria-live="polite"></div><div class="ult-chat-input-container"><div class="ult-chat-input-wrapper"><div class="ult-chat-input-row"><button class="ult-tool-add" aria-label="Add tools" data-tooltip="Add tools">${this.icon("plus")}</button><textarea name="message" class="ult-chat-input" placeholder="${this.esc(placeholder)}" rows="1" maxlength="${this.config.maxMessageLength}" autocomplete="off"></textarea><button class="ult-chat-send" aria-label="Ready" data-tooltip="Ready" style="display:none"><span class="ult-icon-swap" data-icon="square">${this.icon("square")}</span></button></div><div class="ult-tool-badges hidden"></div><div class="ult-tools-dropdown"></div></div></div><div class="ult-chat-footer">Powered by <a href="https://github.com/ultralytics/llm" target="_blank" rel="noopener">Ultralytics Chat</a> · open source</div>`,
+      `<div class="ult-chat-header"><div class="ult-chat-title"><a href="${this.escapeHtml(logoUrl)}" target="_blank" rel="noopener"><img src="${this.escapeHtml(logo)}" alt="${this.escapeHtml(name)}" /></a><div class="ult-subtle">${this.escapeHtml(tagline)}</div></div><div class="ult-header-actions"><button class="ult-icon-btn ult-chat-copy" aria-label="${this.escapeHtml(copyText)}" data-tooltip="${this.escapeHtml(copyText)}">${this.icon("copy")}</button><button class="ult-icon-btn ult-chat-download" aria-label="${this.escapeHtml(downloadText)}" data-tooltip="${this.escapeHtml(downloadText)}">${this.icon("download")}</button><button class="ult-icon-btn ult-chat-clear" aria-label="${this.escapeHtml(clearText)}" data-tooltip="${this.escapeHtml(clearText)}">${this.icon("refresh")}</button><button class="ult-icon-btn ult-chat-close" aria-label="Close" data-tooltip="Close">${this.icon("close")}</button></div></div><div id="ult-welcome" class="ult-welcome" style="display:none"><h1>${this.escapeHtml(title)}</h1><p>${message}</p></div><div id="ult-examples" class="ult-examples" style="display:none"></div><div class="ult-chat-messages" id="ult-messages" aria-live="polite"></div><div class="ult-chat-input-container"><div class="ult-chat-input-wrapper"><div class="ult-chat-input-row"><button class="ult-tool-add" aria-label="Add tools" data-tooltip="Add tools">${this.icon("plus")}</button><textarea name="message" class="ult-chat-input" placeholder="${this.escapeHtml(placeholder)}" rows="1" maxlength="${this.config.maxMessageLength}" autocomplete="off"></textarea><button class="ult-chat-send" aria-label="Ready" data-tooltip="Ready" style="display:none"><span class="ult-icon-swap" data-icon="square">${this.icon("square")}</span></button></div><div class="ult-tool-badges hidden"></div><div class="ult-tools-dropdown"></div></div></div><div class="ult-chat-footer">Powered by <a href="https://github.com/ultralytics/llm" target="_blank" rel="noopener">Ultralytics Chat</a> · open source</div>`,
     );
     this.refs.modal.setAttribute("role", "dialog");
     this.refs.modal.setAttribute("aria-modal", "true");
@@ -596,7 +583,7 @@ class UltralyticsChat {
 
   createToolsDropdown() {
     if (!this.refs.toolsDropdown) return;
-    this.refs.toolsDropdown.innerHTML = (this.tools || [])
+    this.refs.toolsDropdown.innerHTML = this.tools
       .map((t) => `<button class="ult-tool-option" data-tool="${t.id}">${this.icon(t.icon)}${t.name}</button>`)
       .join("");
   }
@@ -628,16 +615,9 @@ class UltralyticsChat {
 
   updateToolBadges() {
     if (!this.refs.toolBadges) return;
-    if (this._badgesClearTimeout) {
-      clearTimeout(this._badgesClearTimeout);
-      this._badgesClearTimeout = null;
-    }
     if (this.selectedTools.size === 0) {
       this.refs.toolBadges.classList.add("hidden");
-      this._badgesClearTimeout = setTimeout(() => {
-        this.refs.toolBadges.innerHTML = "";
-        this._badgesClearTimeout = null;
-      }, 250);
+      this.refs.toolBadges.innerHTML = "";
       return;
     }
     const badgeHtml = [...this.selectedTools]
@@ -655,7 +635,7 @@ class UltralyticsChat {
   setExamples(list) {
     if (!this.refs.examples) return;
     this.refs.examples.innerHTML = list
-      .map((q) => `<button class="ult-example" data-q="${this.esc(q)}">${this.esc(q)}</button>`)
+      .map((q) => `<button class="ult-example" data-q="${this.escapeHtml(q)}">${this.escapeHtml(q)}</button>`)
       .join("");
     for (const b of this.qsa(".ult-example", this.refs.examples)) {
       this.on(b, "click", () => void this.sendMessage(b.dataset.q));
@@ -688,15 +668,10 @@ class UltralyticsChat {
       const badge = e.target.closest(".ult-tool-badge");
       if (badge) this.removeTool(badge.dataset.tool);
     });
-    this.on(
-      this.refs.toolBadges,
-      "mouseenter",
-      (e) => {
-        const badge = e.target.closest(".ult-tool-badge");
-        if (badge) this.positionTooltip(badge, "Remove");
-      },
-      true,
-    );
+    this.on(this.refs.toolBadges, "mouseenter", (e) => {
+      const badge = e.target.closest(".ult-tool-badge");
+      if (badge) this.positionTooltip(badge, "Remove");
+    });
     this.on(this.refs.toolBadges, "mouseleave", () => this.hideTooltip());
     this.on(this.refs.messages, "scroll", () => {
       const d = this.refs.messages,
@@ -899,7 +874,7 @@ class UltralyticsChat {
       if (this.refs.input) this.refs.input.placeholder = this.config.ui.placeholder;
       if (tagline) tagline.textContent = this.config.branding.tagline;
       const { title, message, chatExamples } = this.config.welcome;
-      if (this.refs.welcome) this.refs.welcome.innerHTML = `<h1>${this.esc(title)}</h1><p>${message}</p>`;
+      if (this.refs.welcome) this.refs.welcome.innerHTML = `<h1>${this.escapeHtml(title)}</h1><p>${message}</p>`;
       this.setExamples(chatExamples || []);
       this.renderChatHistory();
     }
@@ -1124,15 +1099,15 @@ class UltralyticsChat {
           const favicon = faviconUrl
             ? `<img class="ult-search-result-favicon" src="${faviconUrl}" alt="" loading="lazy" />`
             : "";
-          const metaHost = host ? `<span>${this.esc(host)}</span>` : "";
-          return `<div class="ult-search-result"><div class="ult-search-result-title">${favicon}<a href="${this.esc(r.url)}" target="_blank" rel="noopener">${this.esc(r.title || "")}</a></div><div class="ult-search-result-snippet">${this.esc(snippet)}</div><div class="ult-search-result-meta"><span class="ult-search-result-score">Match: ${((r.score || 0) * 100).toFixed(0)}%</span>${metaHost}</div></div>`;
+          const metaHost = host ? `<span>${this.escapeHtml(host)}</span>` : "";
+          return `<div class="ult-search-result"><div class="ult-search-result-title">${favicon}<a href="${this.escapeHtml(r.url)}" target="_blank" rel="noopener">${this.escapeHtml(r.title || "")}</a></div><div class="ult-search-result-snippet">${this.escapeHtml(snippet)}</div><div class="ult-search-result-meta"><span class="ult-search-result-score">Match: ${((r.score || 0) * 100).toFixed(0)}%</span>${metaHost}</div></div>`;
         })
         .join("");
     } catch (e) {
       clear();
       thinking.remove();
       if (this.refs.messages)
-        this.refs.messages.innerHTML = `<div class="ult-message">Search error: ${this.esc(e.message)}</div>`;
+        this.refs.messages.innerHTML = `<div class="ult-message">Search error: ${this.escapeHtml(e.message)}</div>`;
       console.error("Search error:", e);
     }
   }
@@ -1255,7 +1230,7 @@ class UltralyticsChat {
       "div",
       "ult-message-label",
       role === "assistant"
-        ? `<img src="${this.esc(logomark)}" alt="${this.esc(name)}" /><span>${this.esc(name)}</span>`
+        ? `<img src="${this.escapeHtml(logomark)}" alt="${this.escapeHtml(name)}" /><span>${this.escapeHtml(name)}</span>`
         : `<span class="ult-user-icon"><svg width="29" height="29" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg></span><span>You</span>`,
     );
     group.appendChild(label);
