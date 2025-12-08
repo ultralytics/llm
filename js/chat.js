@@ -415,13 +415,10 @@ class UltralyticsChat {
 
       .ult-icon-swap{display:flex;align-items:center;justify-content:center}
       @media (max-width:768px){
-        .ult-backdrop{transition:opacity .15s ease-out,visibility .15s}
+        .ult-backdrop{transition:opacity .15s ease-out,visibility .15s;pointer-events:none}
         .ultralytics-chat-pill{transition:opacity .15s ease-out,transform .12s ease-out}
-        .ult-chat-modal{transition:opacity .15s ease-out,visibility .15s}
-        .ult-backdrop{pointer-events:none}
-        .ult-chat-modal{position:fixed;left:0;top:0;width:100vw;height:100svh;max-width:100vw;max-height:100svh;border-radius:0;margin:0;padding:0;transform:none!important}
-        .ult-chat-modal.open{transform:none!important;opacity:1}
-        .ult-chat-modal.open{display:flex;flex-direction:column;overflow:hidden}
+        .ult-chat-modal{transition:opacity .15s ease-out,visibility .15s;position:fixed;left:0;top:0;width:100vw;height:100svh;max-width:100vw;max-height:100svh;border-radius:0;margin:0;padding:0;transform:none!important}
+        .ult-chat-modal.open{transform:none!important;opacity:1;display:flex;flex-direction:column;overflow:hidden}
         body.ult-modal-open{position:fixed!important;width:100%!important;overflow:hidden!important;-webkit-overflow-scrolling:touch}
         .ult-subtle{display:none!important}
         .ult-message-actions{margin-top:4px}
@@ -889,10 +886,7 @@ class UltralyticsChat {
     this.showWelcome(false);
     const prevAutoScroll = this.autoScroll;
     this.autoScroll = false;
-    for (let i = 0; i < this.messages.length; i += 1) {
-      const m = this.messages[i];
-      this.addMessageToUI(m.role, m.content, i);
-    }
+    this.messages.forEach((m, i) => this.addMessageToUI(m.role, m.content, i));
     this.autoScroll = prevAutoScroll;
     this.refs.messages.scrollTop = this.refs.messages.scrollHeight;
   }
@@ -1426,13 +1420,14 @@ class UltralyticsChat {
       codeBlocks.push(code);
       return `@@ULTCODE${codeBlocks.length - 1}@@`;
     });
+    const escUrl = (u) => u.replace(/"/g, "&quot;");
     text = text.replace(
       /\[([^\]]+)]\((https?:\/\/[^\s)]+)\)/g,
-      (_, label, url) => `<a href="${url}" target="_blank" rel="noopener noreferrer">${label}</a>`,
+      (_, label, url) => `<a href="${escUrl(url)}" target="_blank" rel="noopener noreferrer">${label}</a>`,
     );
     text = text.replace(
       /(?<!href=")(?<!src=")(?<!>)\b(https?:\/\/[^\s<>'")\]]+?)(?=[.,;:!?]*(?:\s|<|'|"|\)|]|$))/g,
-      (url) => `<a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>`,
+      (url) => `<a href="${escUrl(url)}" target="_blank" rel="noopener noreferrer">${url}</a>`,
     );
     text = text.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
     text = text.replace(/__(.+?)__/g, "<strong>$1</strong>");
