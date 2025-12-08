@@ -56,7 +56,11 @@ class UltralyticsChat {
       },
     };
     this.apiUrl = this.config.apiUrl;
-    this.feedbackUrl = config.feedbackUrl ?? this.apiUrl.replace(/\/chat\/?$/, "/feedback");
+    this.feedbackUrl =
+      config.feedbackUrl ??
+      (this.apiUrl.endsWith("/chat")
+        ? this.apiUrl.replace(/\/chat$/, "/feedback")
+        : `${this.apiUrl.replace(/\/$/, "")}/feedback`);
     this.messages = [];
     this.isOpen = false;
     this.isStreaming = false;
@@ -657,11 +661,14 @@ class UltralyticsChat {
       const badge = e.target.closest(".ult-tool-badge");
       if (badge) this.removeTool(badge.dataset.tool);
     });
-    this.on(this.refs.toolBadges, "mouseenter", (e) => {
+    this.on(this.refs.toolBadges, "mouseover", (e) => {
       const badge = e.target.closest(".ult-tool-badge");
       if (badge) this.positionTooltip(badge, "Remove");
     });
-    this.on(this.refs.toolBadges, "mouseleave", () => this.hideTooltip());
+    this.on(this.refs.toolBadges, "mouseout", (e) => {
+      const badge = e.target.closest(".ult-tool-badge");
+      if (!badge || !badge.contains(e.relatedTarget)) this.hideTooltip();
+    });
     this.on(
       this.refs.messages,
       "scroll",
