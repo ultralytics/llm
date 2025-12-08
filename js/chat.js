@@ -106,12 +106,8 @@ class UltralyticsChat {
 
   focusInput(placeCursorEnd = true) {
     if (!this.refs.input) return;
-    try {
-      this.refs.input.focus({ preventScroll: true });
-    } catch {
-      this.refs.input.focus();
-    }
-    if (placeCursorEnd && this.refs.input.setSelectionRange) {
+    this.refs.input.focus({ preventScroll: true });
+    if (placeCursorEnd) {
       const len = this.refs.input.value.length;
       this.refs.input.setSelectionRange(len, len);
     }
@@ -140,11 +136,11 @@ class UltralyticsChat {
     return this.tools.find((t) => t.id === toolId);
   }
 
-  on(el, ev, fn) {
+  on(el, ev, fn, opts) {
     if (!el) return;
-    el.addEventListener(ev, fn);
+    el.addEventListener(ev, fn, opts);
     if (!this.listeners.has(el)) this.listeners.set(el, []);
-    this.listeners.get(el).push({ ev, fn });
+    this.listeners.get(el).push({ ev, fn, opts });
   }
   el(tag, cls = "", html = "") {
     const e = document.createElement(tag);
@@ -155,17 +151,14 @@ class UltralyticsChat {
 
   showCopySuccess(btn) {
     if (!btn) return;
-    if (btn.__successTimeout) clearTimeout(btn.__successTimeout);
-    if (!btn.dataset.successOriginal) btn.dataset.successOriginal = btn.innerHTML;
+    clearTimeout(btn.__successTimeout);
+    btn.dataset.successOriginal ??= btn.innerHTML;
     btn.innerHTML = this.icon("check");
     btn.classList.add("success");
     btn.__successTimeout = setTimeout(() => {
-      if (btn.dataset.successOriginal) {
-        btn.innerHTML = btn.dataset.successOriginal;
-        delete btn.dataset.successOriginal;
-      }
+      btn.innerHTML = btn.dataset.successOriginal;
+      delete btn.dataset.successOriginal;
       btn.classList.remove("success");
-      btn.__successTimeout = null;
     }, 1500);
   }
 
@@ -173,10 +166,8 @@ class UltralyticsChat {
     const tip = this.refs.tooltip;
     if (!target || !tip) return;
     this.positionTooltip(target, message);
-    if (tip.__timer) clearTimeout(tip.__timer);
-    tip.__timer = setTimeout(() => {
-      this.hideTooltip();
-    }, 1600);
+    clearTimeout(tip.__timer);
+    tip.__timer = setTimeout(() => this.hideTooltip(), 1600);
   }
 
   getPageContext() {
@@ -286,11 +277,11 @@ class UltralyticsChat {
 
   destroy() {
     this.toggle(false);
-    if (this.inputDebounceTimer) clearTimeout(this.inputDebounceTimer);
+    clearTimeout(this.inputDebounceTimer);
     this.domObserver?.disconnect();
     for (const [el, eventList] of this.listeners) {
-      for (const { ev, fn } of eventList) {
-        el.removeEventListener(ev, fn);
+      for (const { ev, fn, opts } of eventList) {
+        el.removeEventListener(ev, fn, opts);
       }
     }
     this.listeners.clear();
@@ -523,19 +514,17 @@ class UltralyticsChat {
       like: '<path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/>',
       dislike:
         '<path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"/>',
-      share:
-        '<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.59 13.51l6.83 3.98"/><path d="M15.41 6.51L8.59 10.49"/>',
       arrowUp: '<line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/>',
       square: '<rect x="4.8" y="4.8" width="14.4" height="14.4" rx="2" ry="2"/>',
       check: '<polyline points="20 6 9 17 4 12"/>',
       plus: '<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>',
-      x: '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>',
       globe:
         '<circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>',
       github:
         '<path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/>',
     };
-    return `<svg width="18" height="18" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" fill="none">${paths[name] || ""}</svg>`;
+    const path = paths[name] ?? (name === "x" ? paths.close : "");
+    return `<svg width="18" height="18" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" fill="none">${path}</svg>`;
   }
 
   createUI() {
@@ -673,17 +662,22 @@ class UltralyticsChat {
       if (badge) this.positionTooltip(badge, "Remove");
     });
     this.on(this.refs.toolBadges, "mouseleave", () => this.hideTooltip());
-    this.on(this.refs.messages, "scroll", () => {
-      const d = this.refs.messages,
-        st = d.scrollTop;
-      this.autoScroll = st >= (this.lastScrollTop || 0) && d.scrollHeight - st - d.clientHeight < 100;
-      this.lastScrollTop = st;
-    });
+    this.on(
+      this.refs.messages,
+      "scroll",
+      () => {
+        const d = this.refs.messages,
+          st = d.scrollTop;
+        this.autoScroll = st >= this.lastScrollTop && d.scrollHeight - st - d.clientHeight < 100;
+        this.lastScrollTop = st;
+      },
+      { passive: true },
+    );
     this.on(this.refs.input, "input", (e) => {
-      const t = e.target;
       this.resizeInput();
-      if (t.value.length === this.config.maxMessageLength) this.flashTooltip(t, "⚠️ Message shortened to fit");
-      if (this.inputDebounceTimer) clearTimeout(this.inputDebounceTimer);
+      if (e.target.value.length === this.config.maxMessageLength)
+        this.flashTooltip(e.target, "⚠️ Message shortened to fit");
+      clearTimeout(this.inputDebounceTimer);
       this.inputDebounceTimer = setTimeout(() => this.updateComposerState(), 50);
     });
     this.on(this.refs.send, "click", () => {
@@ -987,12 +981,9 @@ class UltralyticsChat {
   }
 
   retryLast() {
-    const lastAssistantIdx = [...this.messages].reverse().findIndex((m) => m.role === "assistant");
-    if (lastAssistantIdx === -1) return;
-    const actualIdx = this.messages.length - 1 - lastAssistantIdx;
-    const lastUserMsg = this.messages[actualIdx - 1];
-    if (!lastUserMsg || lastUserMsg.role !== "user") return;
-    void this.editAndRestart(actualIdx - 1, lastUserMsg.content);
+    const idx = this.messages.findLastIndex((m) => m.role === "assistant");
+    if (idx < 1 || this.messages[idx - 1]?.role !== "user") return;
+    void this.editAndRestart(idx - 1, this.messages[idx - 1].content);
   }
 
   async editAndRestart(messageIndex, newContent) {
