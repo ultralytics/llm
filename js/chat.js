@@ -494,13 +494,12 @@ class UltralyticsChat {
         .ult-message-editing{background:#131318;color:#fafafa;border-color:#1c1c22}
         .ult-chat-footer{color:#71717a}
         .ult-chat-modal[data-mode="search"] .ult-chat-input-container{border-color:#1c1c22;background:#0e0e13}
-      }`;
-    const darkMobileStyles = `
+      }
       @media (prefers-color-scheme: dark) and (max-width:768px){
         .ult-chat-header{border-bottom-color:#1c1c22}
         .ult-chat-input-container{border-top-color:#1c1c22;background:#0a0a0b}
       }`;
-    this.styleElement = this.el("style", "", `${styleContent}\n${darkMobileStyles}`);
+    this.styleElement = this.el("style", "", styleContent);
     document.head.appendChild(this.styleElement);
   }
 
