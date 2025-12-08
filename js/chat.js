@@ -893,7 +893,8 @@ class UltralyticsChat {
     this.showWelcome(false);
     const prevAutoScroll = this.autoScroll;
     this.autoScroll = false;
-    this.messages.forEach((m, i) => this.addMessageToUI(m.role, m.content, i));
+    for (let i = 0; i < this.messages.length; i++)
+      this.addMessageToUI(this.messages[i].role, this.messages[i].content, i);
     this.autoScroll = prevAutoScroll;
     this.refs.messages.scrollTop = this.refs.messages.scrollHeight;
   }
