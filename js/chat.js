@@ -332,7 +332,7 @@ class UltralyticsChat {
       .ult-subtle{font-size:12px;color:#6b7280}
       .ult-header-actions{display:flex;gap:6px;align-items:center}
       .ult-icon-btn{background:transparent;border:0;width:32px;height:32px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#6b7280;transition:.15s;touch-action:manipulation;position:relative;outline:none}
-      .ult-icon-btn:hover{transform:translateY(-1px);color:var(--ult-text);background:#f7f7f9}
+      .ult-icon-btn:hover{transform:translateY(-1px);color:var(--ult-text);background:#e9eaec}
       .ult-icon-btn:focus-visible{box-shadow:0 0 0 2px var(--ult-primary)}
 
       .ult-welcome{padding:18px}.ult-welcome h1{font-size:16px;margin:0 0 6px}.ult-welcome p{margin:0;color:#4b5563}
@@ -386,7 +386,7 @@ class UltralyticsChat {
       .ult-chat-input-wrapper:has(.ult-tool-badges:not(.hidden)){gap:6px}
       .ult-chat-input-row{display:flex;gap:6px;align-items:center}
       .ult-tool-add,.ult-chat-send{background:transparent;border:0;width:32px;height:32px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#6b7280;transition:.15s;touch-action:manipulation;position:relative;flex-shrink:0}
-      .ult-tool-add:hover,.ult-chat-send:hover{transform:translateY(-1px);color:var(--ult-text);background:#f7f7f9}
+      .ult-tool-add:hover,.ult-chat-send:hover{transform:translateY(-1px);color:var(--ult-text);background:#e9eaec}
       .ult-chat-send{margin-left:auto}
       .ult-chat-send svg{width:16px;height:16px}
       .ult-tools-dropdown{position:absolute;bottom:100%;left:0;margin-bottom:8px;background:#fff;border:1px solid #e5e7eb;border-radius:10px;box-shadow:0 8px 20px rgba(2,6,23,.12);padding:6px;min-width:180px;display:none;z-index:10}
@@ -407,7 +407,6 @@ class UltralyticsChat {
       .ult-tool-badge:hover .ult-tool-badge-icon .ult-icon-remove{opacity:1}
       .ult-chat-input{flex:1;border:0;font-size:14px;resize:none;max-height:140px;background:transparent;color:#0b0b0f;padding:0;outline:none}
       .ult-chat-input::placeholder{color:#9ca3af}
-      .ult-chat-input-wrapper:focus-within{box-shadow:0 0 0 2px var(--ult-primary)}
       .ult-message[contenteditable]{cursor:text;outline:0;background:transparent;padding:0 2px;border:1px solid transparent;border-radius:0;transition:background .15s ease,border-color .15s ease}
       .ult-message-editing{background:#f7f7f9;color:#0b0b0f;border-radius:12px;padding:10px 12px;margin:6px 0;border:1px solid #eceff5;font-size:14px;line-height:1.45;min-height:42px;max-height:140px;overflow:auto}
 
@@ -468,7 +467,7 @@ class UltralyticsChat {
         .ult-chat-modal{background:rgba(10,10,11,.95)}
         .ult-subtle{color:#a1a1aa}
         .ult-icon-btn{color:#a1a1aa}
-        .ult-icon-btn:hover{color:#fafafa;background:#17181d}
+        .ult-icon-btn:hover{color:#fafafa;background:#2a2b30}
         .ult-welcome p{color:#a1a1aa}
         .ult-example{background:#131318;color:#fafafa}
         .ult-message-group:hover{background:rgba(19,19,24,.4);border-color:rgba(35,35,39,.6)}
@@ -488,7 +487,7 @@ class UltralyticsChat {
         .ult-search-result-meta{color:#71717a}
         .ult-chat-input-wrapper{background:#131318}
         .ult-tool-add,.ult-chat-send{color:#a1a1aa}
-        .ult-tool-add:hover,.ult-chat-send:hover{color:#fafafa;background:#17181d}
+        .ult-tool-add:hover,.ult-chat-send:hover{color:#fafafa;background:#2a2b30}
         .ult-tools-dropdown{background:#131318;border-color:#232327}
         .ult-tool-option{color:#fafafa}
         .ult-tool-option:hover{background:#17181d}
