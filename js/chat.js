@@ -65,7 +65,7 @@ class UltralyticsChat {
     this.isOpen = false;
     this.isStreaming = false;
     this.abortController = null;
-    this.sessionId = this.loadSessionId();
+    this.sessionId = null; // New session on each page load; persists across same-domain navigation
     this.autoScroll = true;
     this.lastScrollTop = 0;
     this.mode = "chat";
@@ -79,7 +79,7 @@ class UltralyticsChat {
       { id: "github", name: "GitHub", icon: "github" },
     ]);
     this.toolsOpen = false;
-    this.serverMessageCount = 0;
+    this.serverMessageCount = null;
     this.contextOptimized = false;
     this.init();
   }
@@ -185,21 +185,6 @@ class UltralyticsChat {
     };
   }
 
-  loadSessionId() {
-    try {
-      return localStorage.getItem("ult-chat-session");
-    } catch {
-      return null;
-    }
-  }
-
-  saveSessionId(id) {
-    try {
-      localStorage.setItem("ult-chat-session", id);
-    } catch {
-      console.warn("Failed to save session ID");
-    }
-  }
 
   init() {
     this.ensureViewport();
@@ -1057,13 +1042,8 @@ class UltralyticsChat {
   clearSession() {
     this.messages = [];
     this.sessionId = null;
-    this.serverMessageCount = 0;
+    this.serverMessageCount = null;
     this.contextOptimized = false;
-    try {
-      localStorage.removeItem("ult-chat-session");
-    } catch {
-      console.warn("Failed to clear session");
-    }
     if (this.refs.messages) this.refs.messages.innerHTML = "";
     this.showWelcome(true);
     this.updateComposerState();
@@ -1198,10 +1178,7 @@ class UltralyticsChat {
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const sid = res.headers.get("X-Session-ID");
-      if (sid && !this.sessionId) {
-        this.sessionId = sid;
-        this.saveSessionId(sid);
-      }
+      if (sid && !this.sessionId) this.sessionId = sid;
       // Track server-side message count and optimization status
       const msgCount = res.headers.get("X-Message-Count");
       if (msgCount) this.serverMessageCount = parseInt(msgCount, 10) || 0;
