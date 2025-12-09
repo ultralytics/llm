@@ -1075,8 +1075,11 @@ class UltralyticsChat {
     const footer = this.qs(".ult-chat-footer", this.refs.modal);
     if (!footer) return;
     const count = this.serverMessageCount ?? this.messages.length;
-    const countText = count > 0 ? `<span class="ult-footer-count">${count} message${count !== 1 ? "s" : ""}</span>` : "";
-    const optimizedText = this.contextOptimized ? '<span class="ult-footer-optimized" title="Older messages summarized for efficiency">· optimized</span>' : "";
+    const countText =
+      count > 0 ? `<span class="ult-footer-count">${count} message${count !== 1 ? "s" : ""}</span>` : "";
+    const optimizedText = this.contextOptimized
+      ? '<span class="ult-footer-optimized" title="Older messages summarized for efficiency">· optimized</span>'
+      : "";
     const statsHtml = count > 0 ? `<span class="ult-footer-stats">${countText}${optimizedText}</span> · ` : "";
     footer.innerHTML = `${statsHtml}Powered by <a href="https://github.com/ultralytics/llm" target="_blank" rel="noopener">Ultralytics Chat</a>`;
   }
