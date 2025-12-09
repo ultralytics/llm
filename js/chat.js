@@ -81,7 +81,6 @@ class UltralyticsChat {
     this.toolsOpen = false;
     this.totalUserMessages = null;
     this.activeUserMessages = null;
-    this.contextOptimized = false;
     this.init();
   }
 
@@ -1044,7 +1043,6 @@ class UltralyticsChat {
     this.sessionId = null;
     this.totalUserMessages = null;
     this.activeUserMessages = null;
-    this.contextOptimized = false;
     if (this.refs.messages) this.refs.messages.innerHTML = "";
     this.showWelcome(true);
     this.updateComposerState();
@@ -1057,10 +1055,9 @@ class UltralyticsChat {
     if (!footer) return;
     const total = this.totalUserMessages ?? this.messages.filter((m) => m.role === "user").length;
     const active = this.activeUserMessages ?? total;
-    const isPruned = this.contextOptimized && active < total;
     // Show "51 messages (11 active)" when pruned, otherwise just "11 messages"
     const countText = total > 0
-      ? `<span class="ult-footer-count">${total} message${total !== 1 ? "s" : ""}${isPruned ? ` (${active} active)` : ""}</span>`
+      ? `<span class="ult-footer-count">${total} message${total !== 1 ? "s" : ""}${active < total ? ` (${active} active)` : ""}</span>`
       : "";
     const statsHtml = total > 0 ? `<span class="ult-footer-stats">${countText}</span> · ` : "";
     footer.innerHTML = `${statsHtml}Powered by <a href="https://github.com/ultralytics/llm" target="_blank" rel="noopener">Ultralytics Chat</a>`;
@@ -1181,12 +1178,11 @@ class UltralyticsChat {
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const sid = res.headers.get("X-Session-ID");
       if (sid && !this.sessionId) this.sessionId = sid;
-      // Track server-side message counts and optimization status
+      // Track server-side message counts
       const totalCount = res.headers.get("X-Total-User-Messages");
       const activeCount = res.headers.get("X-Active-User-Messages");
       if (totalCount) this.totalUserMessages = parseInt(totalCount, 10) || 0;
       if (activeCount) this.activeUserMessages = parseInt(activeCount, 10) || 0;
-      this.contextOptimized = res.headers.get("X-Context-Optimized") === "true";
       this.updateFooter();
       thinking.remove();
       clear();
