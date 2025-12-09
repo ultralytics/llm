@@ -351,6 +351,7 @@ class UltralyticsChat {
           --ult-pill-bg:#40434f;
           --ult-pill-text:#fff;
           --ult-pill-shadow:0 20px 38px rgba(0,0,0,.5),0 8px 18px rgba(0,0,0,.32);
+          --ult-modal-shadow:0 24px 60px rgba(0,0,0,.5),0 8px 24px rgba(0,0,0,.4);
           --ult-msg-hover:rgba(19,19,24,.4);
           --ult-msg-border:rgba(35,35,39,.6);
           --ult-code-border:#30363d;
@@ -521,6 +522,10 @@ class UltralyticsChat {
         .ult-search-result-meta{font-size:11px}
         .ultralytics-chat-pill{right:14px;bottom:28px;padding:12px 18px;font-size:16px}
         .ultralytics-chat-pill img{width:28px;height:28px}
+      }
+      @media (prefers-color-scheme:dark){
+        .ult-global-tooltip{background:#374151}
+        .ult-global-tooltip::after{border-top-color:#374151}
       }`;
     this.styleElement = this.el("style", "", styleContent);
     document.head.appendChild(this.styleElement);
