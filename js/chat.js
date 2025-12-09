@@ -65,7 +65,7 @@ class UltralyticsChat {
     this.isOpen = false;
     this.isStreaming = false;
     this.abortController = null;
-    this.sessionId = this.loadSessionId();
+    this.sessionId = null; // New session on each page load; persists across same-domain navigation
     this.autoScroll = true;
     this.lastScrollTop = 0;
     this.mode = "chat";
@@ -79,8 +79,8 @@ class UltralyticsChat {
       { id: "github", name: "GitHub", icon: "github" },
     ]);
     this.toolsOpen = false;
-    this.serverMessageCount = 0;
-    this.contextOptimized = false;
+    this.totalUserMessages = null;
+    this.activeUserMessages = null;
     this.init();
   }
 
@@ -185,21 +185,6 @@ class UltralyticsChat {
     };
   }
 
-  loadSessionId() {
-    try {
-      return localStorage.getItem("ult-chat-session");
-    } catch {
-      return null;
-    }
-  }
-
-  saveSessionId(id) {
-    try {
-      localStorage.setItem("ult-chat-session", id);
-    } catch {
-      console.warn("Failed to save session ID");
-    }
-  }
 
   init() {
     this.ensureViewport();
@@ -478,7 +463,6 @@ class UltralyticsChat {
       .ult-chat-footer a:hover{text-decoration:underline}
       .ult-footer-stats{color:var(--ult-text-secondary)}
       .ult-footer-count{font-weight:500}
-      .ult-footer-optimized{color:var(--ult-success);cursor:help}
 
       .ult-chat-modal[data-mode="search"] .ult-chat-header{order:0}
       .ult-chat-modal[data-mode="search"] .ult-chat-input-container{order:1;padding:16px 18px;border-top:1px solid var(--ult-border-light);border-bottom:1px solid var(--ult-border-light);background:var(--ult-bg);align-items:center}
@@ -1057,13 +1041,8 @@ class UltralyticsChat {
   clearSession() {
     this.messages = [];
     this.sessionId = null;
-    this.serverMessageCount = 0;
-    this.contextOptimized = false;
-    try {
-      localStorage.removeItem("ult-chat-session");
-    } catch {
-      console.warn("Failed to clear session");
-    }
+    this.totalUserMessages = null;
+    this.activeUserMessages = null;
     if (this.refs.messages) this.refs.messages.innerHTML = "";
     this.showWelcome(true);
     this.updateComposerState();
@@ -1074,13 +1053,13 @@ class UltralyticsChat {
   updateFooter() {
     const footer = this.qs(".ult-chat-footer", this.refs.modal);
     if (!footer) return;
-    const count = this.serverMessageCount ?? this.messages.length;
-    const countText =
-      count > 0 ? `<span class="ult-footer-count">${count} message${count !== 1 ? "s" : ""}</span>` : "";
-    const optimizedText = this.contextOptimized
-      ? '<span class="ult-footer-optimized" title="Older messages summarized for efficiency">· optimized</span>'
+    const total = this.totalUserMessages ?? this.messages.filter((m) => m.role === "user").length;
+    const active = this.activeUserMessages ?? total;
+    // Show "51 messages (11 active)" when pruned, otherwise just "11 messages"
+    const countText = total > 0
+      ? `<span class="ult-footer-count">${total} message${total !== 1 ? "s" : ""}${active < total ? ` (${active} active)` : ""}</span>`
       : "";
-    const statsHtml = count > 0 ? `<span class="ult-footer-stats">${countText}${optimizedText}</span> · ` : "";
+    const statsHtml = total > 0 ? `<span class="ult-footer-stats">${countText}</span> · ` : "";
     footer.innerHTML = `${statsHtml}Powered by <a href="https://github.com/ultralytics/llm" target="_blank" rel="noopener">Ultralytics Chat</a>`;
   }
 
@@ -1198,14 +1177,12 @@ class UltralyticsChat {
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const sid = res.headers.get("X-Session-ID");
-      if (sid && !this.sessionId) {
-        this.sessionId = sid;
-        this.saveSessionId(sid);
-      }
-      // Track server-side message count and optimization status
-      const msgCount = res.headers.get("X-Message-Count");
-      if (msgCount) this.serverMessageCount = parseInt(msgCount, 10) || 0;
-      this.contextOptimized = res.headers.get("X-Context-Optimized") === "true";
+      if (sid && !this.sessionId) this.sessionId = sid;
+      // Track server-side message counts
+      const totalCount = res.headers.get("X-Total-User-Messages");
+      const activeCount = res.headers.get("X-Active-User-Messages");
+      if (totalCount) this.totalUserMessages = parseInt(totalCount, 10) || 0;
+      if (activeCount) this.activeUserMessages = parseInt(activeCount, 10) || 0;
       this.updateFooter();
       thinking.remove();
       clear();
