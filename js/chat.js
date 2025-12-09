@@ -476,9 +476,9 @@ class UltralyticsChat {
       .ult-chat-footer{padding:8px 18px;text-align:left;font-size:11px;color:var(--ult-text-tertiary)}
       .ult-chat-footer a{color:var(--ult-primary)}
       .ult-chat-footer a:hover{text-decoration:underline}
-      .ult-footer-stats{color:#6b7280}
+      .ult-footer-stats{color:var(--ult-text-secondary)}
       .ult-footer-count{font-weight:500}
-      .ult-footer-optimized{color:#10b981;cursor:help}
+      .ult-footer-optimized{color:var(--ult-success);cursor:help}
 
       .ult-chat-modal[data-mode="search"] .ult-chat-header{order:0}
       .ult-chat-modal[data-mode="search"] .ult-chat-input-container{order:1;padding:16px 18px;border-top:1px solid var(--ult-border-light);border-bottom:1px solid var(--ult-border-light);background:var(--ult-bg);align-items:center}
@@ -531,8 +531,6 @@ class UltralyticsChat {
       @media (prefers-color-scheme:dark){
         .ult-global-tooltip{background:#374151}
         .ult-global-tooltip::after{border-top-color:#374151}
-        .ult-footer-stats{color:#a1a1aa}
-        .ult-footer-optimized{color:#34d399}
       }`;
     this.styleElement = this.el("style", "", styleContent);
     document.head.appendChild(this.styleElement);
