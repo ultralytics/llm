@@ -79,6 +79,8 @@ class UltralyticsChat {
       { id: "github", name: "GitHub", icon: "github" },
     ]);
     this.toolsOpen = false;
+    this.serverMessageCount = 0;
+    this.contextOptimized = false;
     this.init();
   }
 
@@ -474,6 +476,9 @@ class UltralyticsChat {
       .ult-chat-footer{padding:8px 18px;text-align:left;font-size:11px;color:var(--ult-text-tertiary)}
       .ult-chat-footer a{color:var(--ult-primary)}
       .ult-chat-footer a:hover{text-decoration:underline}
+      .ult-footer-stats{color:var(--ult-text-secondary)}
+      .ult-footer-count{font-weight:500}
+      .ult-footer-optimized{color:var(--ult-success);cursor:help}
 
       .ult-chat-modal[data-mode="search"] .ult-chat-header{order:0}
       .ult-chat-modal[data-mode="search"] .ult-chat-input-container{order:1;padding:16px 18px;border-top:1px solid var(--ult-border-light);border-bottom:1px solid var(--ult-border-light);background:var(--ult-bg);align-items:center}
@@ -1052,6 +1057,8 @@ class UltralyticsChat {
   clearSession() {
     this.messages = [];
     this.sessionId = null;
+    this.serverMessageCount = 0;
+    this.contextOptimized = false;
     try {
       localStorage.removeItem("ult-chat-session");
     } catch {
@@ -1060,7 +1067,21 @@ class UltralyticsChat {
     if (this.refs.messages) this.refs.messages.innerHTML = "";
     this.showWelcome(true);
     this.updateComposerState();
+    this.updateFooter();
     this.focusInput();
+  }
+
+  updateFooter() {
+    const footer = this.qs(".ult-chat-footer", this.refs.modal);
+    if (!footer) return;
+    const count = this.serverMessageCount ?? this.messages.length;
+    const countText =
+      count > 0 ? `<span class="ult-footer-count">${count} message${count !== 1 ? "s" : ""}</span>` : "";
+    const optimizedText = this.contextOptimized
+      ? '<span class="ult-footer-optimized" title="Older messages summarized for efficiency">· optimized</span>'
+      : "";
+    const statsHtml = count > 0 ? `<span class="ult-footer-stats">${countText}${optimizedText}</span> · ` : "";
+    footer.innerHTML = `${statsHtml}Powered by <a href="https://github.com/ultralytics/llm" target="_blank" rel="noopener">Ultralytics Chat</a>`;
   }
 
   stopStreaming() {
@@ -1181,6 +1202,11 @@ class UltralyticsChat {
         this.sessionId = sid;
         this.saveSessionId(sid);
       }
+      // Track server-side message count and optimization status
+      const msgCount = res.headers.get("X-Message-Count");
+      if (msgCount) this.serverMessageCount = parseInt(msgCount, 10) || 0;
+      this.contextOptimized = res.headers.get("X-Context-Optimized") === "true";
+      this.updateFooter();
       thinking.remove();
       clear();
       const div = this.el("div", "ult-message assistant");
@@ -1223,6 +1249,7 @@ class UltralyticsChat {
       this.finalizeAssistantMessage(group);
       this.scrollToBottom();
       this.messages.push({ role: "assistant", content });
+      this.updateFooter();
     } catch (e) {
       thinking.remove();
       clear();
