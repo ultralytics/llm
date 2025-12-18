@@ -185,7 +185,6 @@ class UltralyticsChat {
     };
   }
 
-
   init() {
     this.ensureViewport();
     this.loadHighlightJS();
@@ -1061,9 +1060,10 @@ class UltralyticsChat {
     const total = this.totalUserMessages ?? this.messages.filter((m) => m.role === "user").length;
     const active = this.activeUserMessages ?? total;
     // Show "51 messages (11 active)" when pruned, otherwise just "11 messages"
-    const countText = total > 0
-      ? `<span class="ult-footer-count">${total} message${total !== 1 ? "s" : ""}${active < total ? ` (${active} active)` : ""}</span>`
-      : "";
+    const countText =
+      total > 0
+        ? `<span class="ult-footer-count">${total} message${total !== 1 ? "s" : ""}${active < total ? ` (${active} active)` : ""}</span>`
+        : "";
     const statsHtml = total > 0 ? `<span class="ult-footer-stats">${countText}</span> · ` : "";
     footer.innerHTML = `${statsHtml}Powered by <a href="https://github.com/ultralytics/llm" target="_blank" rel="noopener">Ultralytics Chat</a>`;
   }
