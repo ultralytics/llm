@@ -407,6 +407,13 @@ class UltralyticsChat {
       .ult-message h2{font-size:16px;font-weight:700;margin:10px 0 5px;line-height:1.4;color:var(--ult-text)}
       .ult-message h3{font-size:15px;font-weight:600;margin:8px 0 4px;line-height:1.4;color:var(--ult-text)}
       .ult-message h1:first-child,.ult-message h2:first-child,.ult-message h3:first-child{margin-top:0}
+      .ult-message ul,.ult-message ol{margin:8px 0 !important;padding-left:20px !important}
+      .ult-message li{margin:2px 0 !important;padding:0 !important}
+      .ult-table-wrap{overflow-x:auto;margin:8px 0}
+      .ult-message table,.ult-message thead,.ult-message tbody,.ult-message tr,.ult-message th,.ult-message td{all:revert}
+      .ult-message table{border-collapse:collapse;font-size:13px;border:1px solid var(--ult-border)}
+      .ult-message th,.ult-message td{border:1px solid var(--ult-border);padding:6px 10px;text-align:left}
+      .ult-message th{font-weight:600}
       .ult-code-block{position:relative;margin:6px 0}
       .ult-global-tooltip{position:fixed;background:#1f2937;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:500;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .1s;z-index:10003;transform:translate(-50%,-100%)}
       .ult-global-tooltip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:4px solid transparent;border-top-color:#1f2937}
@@ -1336,7 +1343,8 @@ class UltralyticsChat {
       listType = null,
       listOpen = false,
       inQuote = false,
-      paraOpen = false;
+      paraOpen = false,
+      inTable = false;
     const closePara = () => {
       if (paraOpen) {
         html += "</p>";
@@ -1360,6 +1368,12 @@ class UltralyticsChat {
       if (inQuote) {
         html += "</blockquote>";
         inQuote = false;
+      }
+    };
+    const closeTable = () => {
+      if (inTable) {
+        html += "</tbody></table></div>";
+        inTable = false;
       }
     };
     for (let raw of lines) {
@@ -1420,6 +1434,24 @@ class UltralyticsChat {
         html += `<li>${this.renderInline(orderedListMatch[2])}</li>`;
         continue;
       }
+      // Table row: | cell | cell |
+      const tableMatch = raw.match(/^\|(.+)\|$/);
+      if (tableMatch) {
+        const cells = tableMatch[1].split("|").map((c) => c.trim());
+        // Skip separator rows like |---|---|
+        if (cells.every((c) => /^:?-+:?$/.test(c))) continue;
+        if (!inTable) {
+          closePara();
+          closeList();
+          closeQuote();
+          html += `<div class="ult-table-wrap"><table><thead><tr>${cells.map((c) => `<th>${this.renderInline(c)}</th>`).join("")}</tr></thead><tbody>`;
+          inTable = true;
+        } else {
+          html += `<tr>${cells.map((c) => `<td>${this.renderInline(c)}</td>`).join("")}</tr>`;
+        }
+        continue;
+      }
+      closeTable();
       if (/^\s*$/.test(raw)) {
         closePara();
         closeList();
@@ -1456,6 +1488,7 @@ class UltralyticsChat {
     closePara();
     closeList();
     closeQuote();
+    closeTable();
     return html;
   }
 
