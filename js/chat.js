@@ -365,7 +365,7 @@ class UltralyticsChat {
       .ultralytics-chat-pill.hidden{opacity:0;pointer-events:none}
       .ultralytics-chat-pill img{width:30px;height:30px;border-radius:3px}
 
-      .ult-chat-modal{font-family:system-ui,sans-serif;
+      .ult-chat-modal{all:initial;font-family:system-ui,sans-serif;
         position:fixed;left:50%;top:50%;width:min(760px,calc(100vw - 40px));height:min(80vh,820px);background:var(--ult-bg);border:0;border-radius:16px;
         box-shadow:var(--ult-modal-shadow);z-index:10001;
         transform:translate(-50%,-50%) translateZ(0);opacity:0;visibility:hidden;
@@ -403,10 +403,10 @@ class UltralyticsChat {
       .ult-message-group:hover .ult-user-message-actions,.ult-message-group:focus-within .ult-user-message-actions{opacity:1;pointer-events:auto}
       .ult-message a{color:var(--ult-primary);text-underline-offset:2px}.ult-message a:hover{text-decoration:underline}
       .ult-message strong{font-weight:700;color:var(--ult-text)}
-      .ult-message h1{font-size:18px !important;font-weight:700 !important;margin:12px 0 6px !important;line-height:1.4 !important;color:var(--ult-text) !important}
-      .ult-message h2{font-size:16px !important;font-weight:700 !important;margin:10px 0 5px !important;line-height:1.4 !important;color:var(--ult-text) !important}
-      .ult-message h3{font-size:15px !important;font-weight:600 !important;margin:8px 0 4px !important;line-height:1.4 !important;color:var(--ult-text) !important}
-      .ult-message h1:first-child,.ult-message h2:first-child,.ult-message h3:first-child{margin-top:0 !important}
+      .ult-message h1{font-size:18px;font-weight:700;margin:12px 0 6px;line-height:1.4;color:var(--ult-text)}
+      .ult-message h2{font-size:16px;font-weight:700;margin:10px 0 5px;line-height:1.4;color:var(--ult-text)}
+      .ult-message h3{font-size:15px;font-weight:600;margin:8px 0 4px;line-height:1.4;color:var(--ult-text)}
+      .ult-message h1:first-child,.ult-message h2:first-child,.ult-message h3:first-child{margin-top:0}
       .ult-code-block{position:relative;margin:6px 0}
       .ult-global-tooltip{position:fixed;background:#1f2937;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:500;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .1s;z-index:10003;transform:translate(-50%,-100%)}
       .ult-global-tooltip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:4px solid transparent;border-top-color:#1f2937}
