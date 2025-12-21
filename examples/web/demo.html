@@ -854,13 +854,34 @@ results[0].show()</code></pre>
         }
         if (res.body?.getReader) {
           const reader = res.body.getReader();
+          const decoder = new TextDecoder();
+          let buffer = "";
           while (true) {
-            const { done } = await reader.read();
+            const { done, value } = await reader.read();
             if (done) break;
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split("\n");
+            buffer = lines.pop() || "";
+            for (const line of lines) {
+              if (!line.startsWith("data: ")) continue;
+              const payloadLine = line.slice(6).trim();
+              if (!payloadLine || payloadLine === "[DONE]") continue;
+              try {
+                const parsed = JSON.parse(payloadLine);
+                if (parsed?.content) {
+                  return performance.now() - start;
+                }
+                if (parsed?.error) {
+                  return performance.now() - start;
+                }
+              } catch (err) {
+                console.warn("Profiling parse error", err);
+              }
+            }
           }
-        } else {
-          await res.text();
+          return performance.now() - start;
         }
+        await res.text();
         return performance.now() - start;
       }
 
@@ -888,7 +909,7 @@ results[0].show()</code></pre>
               console.warn(`Profiling error for ${backend.name}`, err);
             }
             if (i < PROFILE_QUESTIONS.length - 1) {
-              await sleep(3000);
+              await sleep(2000);
             }
           }
           results.push({ name: backend.name, samples, errors });
