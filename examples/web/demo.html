@@ -907,7 +907,7 @@ results[0].show()</code></pre>
               console.warn(`Profiling error for ${backend.name}`, err);
             }
             if (i < PROFILE_QUESTIONS.length - 1) {
-              await sleep(2000);
+              await sleep(1000);
             }
           }
           results.push({ name: backend.name, samples, errors });
