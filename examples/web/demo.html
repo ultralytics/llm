@@ -898,9 +898,7 @@ results[0].show()</code></pre>
           const samples = [];
           let errors = 0;
           for (let i = 0; i < PROFILE_QUESTIONS.length; i += 1) {
-            setProfilingStatus(
-              `Running ${backend.name}: ${i + 1}/${PROFILE_QUESTIONS.length} questions...`,
-            );
+            setProfilingStatus(`Running ${backend.name}: ${i + 1}/${PROFILE_QUESTIONS.length} questions...`);
             try {
               const duration = await timeRequest(backend.url, PROFILE_QUESTIONS[i]);
               samples.push(duration);
