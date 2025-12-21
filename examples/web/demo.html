@@ -360,6 +360,11 @@
         padding: 10px 12px;
         margin: 14px 0;
       }
+      .profiling-status {
+        margin: 10px 0 0;
+        color: var(--muted);
+        font-size: 13px;
+      }
 
       pre {
         background: var(--code-bg);
@@ -498,8 +503,20 @@
           </p>
           <div class="toolbar">
             <button class="btn" onclick="openChat()" aria-label="Open chat">Open Chat</button>
+            <button id="profiling-button" class="btn primary" onclick="runProfiling()" aria-label="Run profiling">
+              Run profiling (30 questions)
+            </button>
             <span class="btn" style="pointer-events: none; opacity: 0.72">Press ⌘ + K to open</span>
           </div>
+        </div>
+
+        <div id="profiling" class="card">
+          <h3>Backend Profiling</h3>
+          <p>
+            This runs 30 YOLO/Ultralytics questions against each backend and reports mean latency, ±1σ, and min/max.
+          </p>
+          <div id="profiling-results" class="callout">Click “Run profiling” to compare endpoints.</div>
+          <p id="profiling-status" class="profiling-status" aria-live="polite"></p>
         </div>
 
         <div class="grid">
@@ -709,6 +726,198 @@ results[0].show()</code></pre>
           },
         });
       });
+
+      const PROFILE_BACKENDS = [
+        { name: "Legacy (Cloud Run)", url: "https://chat-885297101091.us-central1.run.app/api/chat" },
+        { name: "ul.run", url: "https://ul.run/chat/v1/chat" },
+      ];
+
+      const PROFILE_QUESTIONS = [
+        "What are the main differences between YOLOv8 and YOLO11 in terms of speed and accuracy?",
+        "Show a minimal Python snippet to run inference with a YOLO11n model on a single image.",
+        "How do I convert a YOLO dataset into COCO format, and when should I prefer one over the other?",
+        "Explain what the 'conf' and 'iou' thresholds do in YOLO inference.",
+        "What is the best way to speed up YOLO inference on edge devices like Jetson?",
+        "Give me a short explanation of Ultralytics HUB and how it helps with training management.",
+        "How do I fine-tune YOLO on a custom dataset with class imbalance?",
+        "List common training hyperparameters that affect mAP the most for YOLO.",
+        "What is the recommended image size for training YOLO11 models and why?",
+        "How do I export YOLO models to TensorRT for deployment?",
+        "Explain the difference between NMS and Soft-NMS in the context of YOLO.",
+        "Can I train YOLO on video frames directly? What is the suggested pipeline?",
+        "Write a YAML snippet for a custom dataset with train/val/test paths.",
+        "How do I set up multi-GPU training with Ultralytics in PyTorch?",
+        "Describe best practices for labeling datasets for object detection.",
+        "What are typical causes of overfitting in YOLO training and how can I mitigate them?",
+        "Explain how Ultralytics handles mosaic and mixup augmentations.",
+        "Give a concise overview of YOLO tracking modes and when to use them.",
+        "How do I run YOLO in a Docker container with GPU support?",
+        "What is the difference between yolov8n and yolov8x in terms of size and use cases?",
+        "Explain how to evaluate YOLO with mAP@50-95 and why the range matters.",
+        "How do I set seed/reproducibility flags in Ultralytics training?",
+        "What are good strategies for reducing false positives in YOLO detection?",
+        "Can you outline a full training command for YOLO11s with 100 epochs and 640 img size?",
+        "Explain what 'autoanchor' does and when it should be disabled.",
+        "How do I use Ultralytics to segment objects instead of detect them?",
+        "What are the steps to export YOLO to ONNX and validate the outputs?",
+        "Write a short guide to deploying YOLO on a FastAPI server with a REST endpoint.",
+        "How do I benchmark YOLO inference FPS consistently across devices?",
+        "Explain how Ultralytics handles model pruning or quantization options.",
+      ];
+
+      let profilingActive = false;
+
+      function formatSeconds(ms) {
+        return `${(ms / 1000).toFixed(2)}s`;
+      }
+
+      function sleep(ms) {
+        return new Promise((resolve) => setTimeout(resolve, ms));
+      }
+
+      function computeStats(samples) {
+        const count = samples.length;
+        if (!count) return null;
+        const mean = samples.reduce((a, b) => a + b, 0) / count;
+        const variance = samples.reduce((a, b) => a + (b - mean) ** 2, 0) / count;
+        const std = Math.sqrt(variance);
+        const min = Math.min(...samples);
+        const max = Math.max(...samples);
+        return { count, mean, std, min, max };
+      }
+
+      function setProfilingStatus(text) {
+        const statusEl = document.getElementById("profiling-status");
+        if (statusEl) statusEl.textContent = text;
+      }
+
+      function renderProfilingResults(results) {
+        const container = document.getElementById("profiling-results");
+        if (!container) return;
+        const rows = results
+          .map((result) => {
+            const stats = computeStats(result.samples);
+            if (!stats) {
+              return `<tr><td>${result.name}</td><td colspan="5">No successful samples</td></tr>`;
+            }
+            return `
+              <tr>
+                <td>${result.name}</td>
+                <td>${stats.count}</td>
+                <td>${formatSeconds(stats.mean)}</td>
+                <td>±${formatSeconds(stats.std)}</td>
+                <td>${formatSeconds(stats.min)} / ${formatSeconds(stats.max)}</td>
+                <td>${result.errors}</td>
+              </tr>
+            `;
+          })
+          .join("");
+
+        container.innerHTML = `
+          <table>
+            <thead>
+              <tr>
+                <th>Backend</th>
+                <th>Samples</th>
+                <th>Mean</th>
+                <th>1σ</th>
+                <th>Min / Max</th>
+                <th>Errors</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rows}
+            </tbody>
+          </table>
+        `;
+      }
+
+      async function timeRequest(url, question) {
+        const payload = {
+          messages: [{ role: "user", content: question }],
+          session_id: null,
+          context: {
+            url: window.location.href,
+            title: document.title,
+            description: document.querySelector('meta[name="description"]')?.content || "",
+            path: window.location.pathname,
+          },
+        };
+        const start = performance.now();
+        const res = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status}`);
+        }
+        if (res.body?.getReader) {
+          const reader = res.body.getReader();
+          const decoder = new TextDecoder();
+          let buffer = "";
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split("\n");
+            buffer = lines.pop() || "";
+            for (const line of lines) {
+              if (!line.startsWith("data: ")) continue;
+              const payloadLine = line.slice(6).trim();
+              if (!payloadLine || payloadLine === "[DONE]") continue;
+              try {
+                const parsed = JSON.parse(payloadLine);
+                if (parsed?.content) {
+                  return performance.now() - start;
+                }
+                if (parsed?.error) {
+                  return performance.now() - start;
+                }
+              } catch (err) {
+                console.warn("Profiling parse error", err);
+              }
+            }
+          }
+          return performance.now() - start;
+        }
+        await res.text();
+        return performance.now() - start;
+      }
+
+      async function runProfiling() {
+        if (profilingActive) return;
+        profilingActive = true;
+        const btn = document.getElementById("profiling-button");
+        if (btn) btn.disabled = true;
+
+        const results = [];
+        setProfilingStatus("Profiling started...");
+
+        for (const backend of PROFILE_BACKENDS) {
+          const samples = [];
+          let errors = 0;
+          for (let i = 0; i < PROFILE_QUESTIONS.length; i += 1) {
+            setProfilingStatus(`Running ${backend.name}: ${i + 1}/${PROFILE_QUESTIONS.length} questions...`);
+            try {
+              const duration = await timeRequest(backend.url, PROFILE_QUESTIONS[i]);
+              samples.push(duration);
+            } catch (err) {
+              errors += 1;
+              console.warn(`Profiling error for ${backend.name}`, err);
+            }
+            if (i < PROFILE_QUESTIONS.length - 1) {
+              await sleep(1000);
+            }
+          }
+          results.push({ name: backend.name, samples, errors });
+        }
+
+        renderProfilingResults(results);
+        setProfilingStatus("Profiling complete.");
+        if (btn) btn.disabled = false;
+        profilingActive = false;
+      }
     </script>
   </body>
 </html>
