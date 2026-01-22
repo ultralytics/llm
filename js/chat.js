@@ -383,7 +383,7 @@ class UltralyticsChat {
       .ult-icon-btn:hover{transform:translateY(-1px);color:var(--ult-text);background:var(--ult-bg-hover)}
       .ult-icon-btn:focus-visible{box-shadow:0 0 0 2px var(--ult-primary)}
 
-      .ult-welcome{padding:18px}.ult-welcome h1{font-size:16px;margin:0 0 6px}.ult-welcome p{margin:0;color:var(--ult-text-muted)}
+      .ult-welcome{padding:18px}.ult-welcome-title{all:unset;display:block;font-size:16px;font-weight:700;margin:0 0 6px;color:var(--ult-text);line-height:1.4}.ult-welcome p{all:unset;display:block;margin:0;color:var(--ult-text-muted);font-size:14px;line-height:1.5}
       .ult-examples{padding:12px 18px 6px;display:flex;flex-wrap:wrap;gap:10px}
       .ult-example{padding:10px 12px;background:var(--ult-bg-secondary);border:0;border-radius:999px;cursor:pointer;font-size:12px;color:var(--ult-text);transition:.12s;touch-action:manipulation;outline:none}
       .ult-example:hover{transform:translateY(-1px);filter:brightness(.98)}
@@ -498,7 +498,7 @@ class UltralyticsChat {
         .ult-chat-messages{flex:1 1 0;min-height:0;padding:0 0 8px 0;overflow-y:auto;overflow-x:hidden;overscroll-behavior-y:contain;-webkit-overflow-scrolling:touch}
         .ult-chat-modal.welcome-mode .ult-chat-messages{display:none}
         .ult-welcome{padding:10px 14px 0}
-        .ult-welcome h1{font-size:15px;margin:0 0 4px}
+        .ult-welcome-title{font-size:15px;margin:0 0 4px}
         .ult-welcome p{font-size:13px;margin:0;line-height:1.35}
         .ult-examples{padding:6px 14px;gap:6px;flex-wrap:wrap}
         .ult-example{padding:8px 11px;font-size:12px}
@@ -575,7 +575,7 @@ class UltralyticsChat {
     this.refs.modal = this.el(
       "div",
       "ult-chat-modal",
-      `<div class="ult-chat-header"><div class="ult-chat-title"><a href="${this.escapeHtml(logoUrl)}" target="_blank" rel="noopener"><img src="${this.escapeHtml(logo)}" alt="${this.escapeHtml(name)}" /></a><div class="ult-subtle">${this.escapeHtml(tagline)}</div></div><div class="ult-header-actions"><button class="ult-icon-btn ult-chat-copy" aria-label="${this.escapeHtml(copyText)}" data-tooltip="${this.escapeHtml(copyText)}">${this.icon("copy")}</button><button class="ult-icon-btn ult-chat-download" aria-label="${this.escapeHtml(downloadText)}" data-tooltip="${this.escapeHtml(downloadText)}">${this.icon("download")}</button><button class="ult-icon-btn ult-chat-clear" aria-label="${this.escapeHtml(clearText)}" data-tooltip="${this.escapeHtml(clearText)}">${this.icon("refresh")}</button><button class="ult-icon-btn ult-chat-close" aria-label="Close" data-tooltip="Close">${this.icon("close")}</button></div></div><div id="ult-welcome" class="ult-welcome" style="display:none"><h1>${this.escapeHtml(title)}</h1><p>${message}</p></div><div id="ult-examples" class="ult-examples" style="display:none"></div><div class="ult-chat-messages" id="ult-messages" aria-live="polite"></div><div class="ult-chat-input-container"><div class="ult-chat-input-wrapper"><div class="ult-chat-input-row"><button class="ult-tool-add" aria-label="Add tools" data-tooltip="Add tools">${this.icon("plus")}</button><textarea name="message" class="ult-chat-input" placeholder="${this.escapeHtml(placeholder)}" rows="1" maxlength="${this.config.maxMessageLength}" autocomplete="off"></textarea><button class="ult-chat-send" aria-label="Ready" data-tooltip="Ready" style="display:none"><span class="ult-icon-swap" data-icon="square">${this.icon("square")}</span></button></div><div class="ult-tool-badges hidden"></div><div class="ult-tools-dropdown"></div></div></div><div class="ult-chat-footer">Powered by <a href="https://github.com/ultralytics/llm" target="_blank" rel="noopener">Ultralytics Chat</a></div>`,
+      `<div class="ult-chat-header"><div class="ult-chat-title"><a href="${this.escapeHtml(logoUrl)}" target="_blank" rel="noopener"><img src="${this.escapeHtml(logo)}" alt="${this.escapeHtml(name)}" /></a><div class="ult-subtle">${this.escapeHtml(tagline)}</div></div><div class="ult-header-actions"><button class="ult-icon-btn ult-chat-copy" aria-label="${this.escapeHtml(copyText)}" data-tooltip="${this.escapeHtml(copyText)}">${this.icon("copy")}</button><button class="ult-icon-btn ult-chat-download" aria-label="${this.escapeHtml(downloadText)}" data-tooltip="${this.escapeHtml(downloadText)}">${this.icon("download")}</button><button class="ult-icon-btn ult-chat-clear" aria-label="${this.escapeHtml(clearText)}" data-tooltip="${this.escapeHtml(clearText)}">${this.icon("refresh")}</button><button class="ult-icon-btn ult-chat-close" aria-label="Close" data-tooltip="Close">${this.icon("close")}</button></div></div><div id="ult-welcome" class="ult-welcome" style="display:none"><div class="ult-welcome-title">${this.escapeHtml(title)}</div><p>${message}</p></div><div id="ult-examples" class="ult-examples" style="display:none"></div><div class="ult-chat-messages" id="ult-messages" aria-live="polite"></div><div class="ult-chat-input-container"><div class="ult-chat-input-wrapper"><div class="ult-chat-input-row"><button class="ult-tool-add" aria-label="Add tools" data-tooltip="Add tools">${this.icon("plus")}</button><textarea name="message" class="ult-chat-input" placeholder="${this.escapeHtml(placeholder)}" rows="1" maxlength="${this.config.maxMessageLength}" autocomplete="off"></textarea><button class="ult-chat-send" aria-label="Ready" data-tooltip="Ready" style="display:none"><span class="ult-icon-swap" data-icon="square">${this.icon("square")}</span></button></div><div class="ult-tool-badges hidden"></div><div class="ult-tools-dropdown"></div></div></div><div class="ult-chat-footer">Powered by <a href="https://github.com/ultralytics/llm" target="_blank" rel="noopener">Ultralytics Chat</a></div>`,
     );
     this.refs.modal.setAttribute("role", "dialog");
     this.refs.modal.setAttribute("aria-modal", "true");
@@ -901,7 +901,7 @@ class UltralyticsChat {
       if (this.refs.input) this.refs.input.placeholder = this.config.ui.placeholder;
       if (tagline) tagline.textContent = this.config.branding.tagline;
       const { title, message, chatExamples } = this.config.welcome;
-      if (this.refs.welcome) this.refs.welcome.innerHTML = `<h1>${this.escapeHtml(title)}</h1><p>${message}</p>`;
+      if (this.refs.welcome) this.refs.welcome.innerHTML = `<div class="ult-welcome-title">${this.escapeHtml(title)}</div><p>${message}</p>`;
       this.setExamples(chatExamples || []);
       this.renderChatHistory();
     }
