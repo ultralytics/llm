@@ -185,8 +185,12 @@ class UltralyticsChat {
       clone
         ?.querySelectorAll("[data-chat-ignore], nav, aside, script, style, svg, noscript, canvas, [aria-hidden='true']")
         .forEach((el) => el.remove());
-      clone?.querySelectorAll("*").forEach((el) => el.before(" "));
-      description = clone?.textContent?.replace(/\s+/g, " ").trim().slice(0, 5000) || "";
+      if (clone) {
+        const walker = document.createTreeWalker(clone, NodeFilter.SHOW_TEXT);
+        const parts = [];
+        while (walker.nextNode()) parts.push(walker.currentNode.textContent.trim());
+        description = parts.filter(Boolean).join(" ").slice(0, 5000);
+      }
     }
     return {
       url: window.location.href,
