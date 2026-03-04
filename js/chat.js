@@ -183,7 +183,7 @@ class UltralyticsChat {
       const main = document.querySelector("main, [role=main]");
       const clone = main?.cloneNode(true);
       clone
-        ?.querySelectorAll("[data-chat-ignore], nav, aside, header, footer, script, style, svg, noscript, canvas, [aria-hidden='true']")
+        ?.querySelectorAll("[data-chat-ignore], nav, aside, script, style, svg, noscript, canvas, [aria-hidden='true']")
         .forEach((el) => el.remove());
       description = clone?.innerText?.replace(/\s+/g, " ").trim().slice(0, 5000) || "";
     }
