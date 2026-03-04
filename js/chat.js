@@ -6,6 +6,7 @@ class UltralyticsChat {
     this.config = {
       apiUrl: d(config, "apiUrl", "https://chat-885297101091.us-central1.run.app/api/chat"),
       maxMessageLength: d(config, "maxMessageLength", 10000),
+      pageContent: d(config, "pageContent", false),
       branding: {
         name: d(config.branding, "name", "Ultralytics AI"),
         tagline: d(config.branding, "tagline", "Ask anything about Ultralytics, YOLO, and more"),
@@ -177,12 +178,19 @@ class UltralyticsChat {
   }
 
   getPageContext() {
-    let description = document.querySelector('meta[name="description"]')?.content || "";
-    if (window.__ultChatContext) description += (description ? "\n" : "") + window.__ultChatContext;
+    let description = "";
+    if (this.config.pageContent) {
+      const main = document.querySelector("main, [role=main]");
+      const clone = main?.cloneNode(true);
+      clone
+        ?.querySelectorAll("[data-chat-ignore], nav, aside, header, footer, script, style, svg, noscript, canvas, [aria-hidden='true']")
+        .forEach((el) => el.remove());
+      description = clone?.innerText?.replace(/\s+/g, " ").trim().slice(0, 5000) || "";
+    }
     return {
       url: window.location.href,
       title: document.title,
-      description,
+      description: description || document.querySelector('meta[name="description"]')?.content || "",
       path: window.location.pathname,
     };
   }
