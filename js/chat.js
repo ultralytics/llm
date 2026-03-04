@@ -209,6 +209,7 @@ class UltralyticsChat {
     this.showWelcome(true);
     this.updateComposerState();
     this.watchForRemoval();
+    this.watchTheme();
   }
 
   loadHighlightJS() {
@@ -280,9 +281,42 @@ class UltralyticsChat {
     this.domObserver = observer;
   }
 
+  /**
+   * Auto-detect host page dark mode by watching <html> for class/attribute changes.
+   * Supports: class="dark", data-theme="dark", data-mode="dark", style="color-scheme: dark".
+   * Sets color-scheme on widget elements so CSS light-dark() responds to the app theme,
+   * not just the OS preference.
+   */
+  watchTheme() {
+    const root = document.documentElement;
+    const isDark = () =>
+      root.classList.contains("dark") ||
+      root.dataset.theme === "dark" ||
+      root.dataset.mode === "dark" ||
+      root.style.colorScheme === "dark";
+
+    const apply = () => {
+      const scheme = isDark() ? "dark" : "light";
+      for (const el of [this.refs.pill, this.refs.modal]) {
+        if (el) el.style.colorScheme = scheme;
+      }
+      // Swap highlight.js themes to match (media queries only follow OS preference)
+      const lightLink = document.getElementById("hljs-theme-light");
+      const darkLink = document.getElementById("hljs-theme-dark");
+      if (lightLink) lightLink.media = scheme === "dark" ? "not all" : "all";
+      if (darkLink) darkLink.media = scheme === "dark" ? "all" : "not all";
+    };
+
+    apply(); // Initial check
+
+    this.themeObserver = new MutationObserver(apply);
+    this.themeObserver.observe(root, { attributes: true, attributeFilter: ["class", "data-theme", "data-mode", "style"] });
+  }
+
   destroy() {
     this.toggle(false);
     clearTimeout(this.inputDebounceTimer);
+    this.themeObserver?.disconnect();
     this.domObserver?.disconnect();
     for (const [el, eventList] of this.listeners) {
       for (const { ev, fn, opts } of eventList) {
