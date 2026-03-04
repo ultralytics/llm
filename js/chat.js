@@ -177,12 +177,14 @@ class UltralyticsChat {
   }
 
   getPageContext() {
-    let description = document.querySelector('meta[name="description"]')?.content || "";
-    if (window.__ultChatContext) description += (description ? "\n" : "") + window.__ultChatContext;
+    const main = document.querySelector("main, [role=main]") || document.body;
+    const clone = main.cloneNode(true);
+    clone.querySelectorAll("[data-chat-ignore], nav, aside, header, footer, script, style, svg").forEach((el) => el.remove());
+    const pageContent = clone.innerText?.replace(/\s+/g, " ").trim().slice(0, 5000) || "";
     return {
       url: window.location.href,
       title: document.title,
-      description,
+      description: pageContent || document.querySelector('meta[name="description"]')?.content || "",
       path: window.location.pathname,
     };
   }
