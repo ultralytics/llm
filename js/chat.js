@@ -305,88 +305,35 @@ class UltralyticsChat {
 
       /* ========== CENTRALIZED COLOR PALETTE ========== */
       .ultralytics-chat-pill,.ult-chat-modal{
+        color-scheme:light dark;
         /* Brand colors (configurable) */
         --ult-primary:${primary};
         --ult-dark:${dark};
         --ult-accent:${accent};
-        --ult-text:${text};
-
-        /* Light theme colors */
-        --ult-bg:rgba(255,255,255,.95);
-        --ult-bg-secondary:#f7f7f9;
-        --ult-bg-tertiary:#f1f2f6;
-        --ult-bg-hover:#e9eaec;
-        --ult-bg-code:#f6f8fa;
-        --ult-border:#e5e7eb;
-        --ult-border-light:#eceff5;
-        --ult-text-secondary:#6b7280;
-        --ult-text-tertiary:#9ca3af;
-        --ult-text-muted:#4b5563;
+        --ult-text:light-dark(${text},#f5f5f5);
+        --ult-bg:light-dark(rgba(255,255,255,.95),rgba(10,10,11,.95));
+        --ult-bg-secondary:light-dark(#f7f7f9,#131318);
+        --ult-bg-tertiary:light-dark(#f1f2f6,#17181d);
+        --ult-bg-hover:light-dark(#e9eaec,#2a2b30);
+        --ult-bg-code:light-dark(#f6f8fa,#0d1117);
+        --ult-border:light-dark(#e5e7eb,#232327);
+        --ult-border-light:light-dark(#eceff5,#1c1c22);
+        --ult-text-secondary:light-dark(#6b7280,#a1a1aa);
+        --ult-text-tertiary:light-dark(#9ca3af,#71717a);
+        --ult-text-muted:light-dark(#4b5563,#a1a1aa);
         --ult-success:#26C000;
-        --ult-pill-bg:var(--ult-accent);
-        --ult-pill-text:var(--ult-dark);
-        --ult-pill-shadow:0 20px 38px rgba(2,6,23,.22),0 8px 18px rgba(2,6,23,.14);
-        --ult-modal-shadow:0 24px 60px rgba(2,6,23,.25),0 8px 24px rgba(2,6,23,.18);
-        --ult-msg-hover:rgba(247,247,249,.4);
-        --ult-msg-border:rgba(229,231,235,.6);
-        --ult-code-border:#e5e7eb;
-        --ult-code-inline:#f4f4f5;
-        --ult-tool-bg:#ebf4ff;
-        --ult-tool-text:#0485ff;
-        --ult-tool-hover-bg:#d9ebff;
-        --ult-tool-hover-text:#0475e6
-      }
-      @media (prefers-color-scheme:dark){
-        .ultralytics-chat-pill,.ult-chat-modal{
-          --ult-bg:rgba(10,10,11,.95);
-          --ult-bg-secondary:#131318;
-          --ult-bg-tertiary:#17181d;
-          --ult-bg-hover:#2a2b30;
-          --ult-bg-code:#0d1117;
-          --ult-border:#232327;
-          --ult-border-light:#1c1c22;
-          --ult-text:#f5f5f5;
-          --ult-text-secondary:#a1a1aa;
-          --ult-text-tertiary:#71717a;
-          --ult-text-muted:#a1a1aa;
-          --ult-pill-bg:#40434f;
-          --ult-pill-text:#fff;
-          --ult-pill-shadow:0 20px 38px rgba(0,0,0,.5),0 8px 18px rgba(0,0,0,.32);
-          --ult-modal-shadow:0 24px 60px rgba(0,0,0,.5),0 8px 24px rgba(0,0,0,.4);
-          --ult-msg-hover:rgba(19,19,24,.4);
-          --ult-msg-border:rgba(35,35,39,.6);
-          --ult-code-border:#30363d;
-          --ult-code-inline:#1e1e22;
-          --ult-tool-bg:rgba(4,133,255,.15);
-          --ult-tool-text:#5b9fff;
-          --ult-tool-hover-bg:rgba(4,133,255,.2);
-          --ult-tool-hover-text:#7db3ff
-        }
-      }
-      html.dark .ultralytics-chat-pill,html.dark .ult-chat-modal{
-          --ult-bg:rgba(10,10,11,.95);
-          --ult-bg-secondary:#131318;
-          --ult-bg-tertiary:#17181d;
-          --ult-bg-hover:#2a2b30;
-          --ult-bg-code:#0d1117;
-          --ult-border:#232327;
-          --ult-border-light:#1c1c22;
-          --ult-text:#f5f5f5;
-          --ult-text-secondary:#a1a1aa;
-          --ult-text-tertiary:#71717a;
-          --ult-text-muted:#a1a1aa;
-          --ult-pill-bg:#40434f;
-          --ult-pill-text:#fff;
-          --ult-pill-shadow:0 20px 38px rgba(0,0,0,.5),0 8px 18px rgba(0,0,0,.32);
-          --ult-modal-shadow:0 24px 60px rgba(0,0,0,.5),0 8px 24px rgba(0,0,0,.4);
-          --ult-msg-hover:rgba(19,19,24,.4);
-          --ult-msg-border:rgba(35,35,39,.6);
-          --ult-code-border:#30363d;
-          --ult-code-inline:#1e1e22;
-          --ult-tool-bg:rgba(4,133,255,.15);
-          --ult-tool-text:#5b9fff;
-          --ult-tool-hover-bg:rgba(4,133,255,.2);
-          --ult-tool-hover-text:#7db3ff
+        --ult-pill-bg:light-dark(var(--ult-accent),#40434f);
+        --ult-pill-text:light-dark(var(--ult-dark),#fff);
+        --ult-pill-shadow:0 20px 38px light-dark(rgba(2,6,23,.22),rgba(0,0,0,.5)),0 8px 18px light-dark(rgba(2,6,23,.14),rgba(0,0,0,.32));
+        --ult-modal-shadow:0 24px 60px light-dark(rgba(2,6,23,.25),rgba(0,0,0,.5)),0 8px 24px light-dark(rgba(2,6,23,.18),rgba(0,0,0,.4));
+        --ult-msg-hover:light-dark(rgba(247,247,249,.4),rgba(19,19,24,.4));
+        --ult-msg-border:light-dark(rgba(229,231,235,.6),rgba(35,35,39,.6));
+        --ult-code-border:light-dark(#e5e7eb,#30363d);
+        --ult-code-inline:light-dark(#f4f4f5,#1e1e22);
+        --ult-tool-bg:light-dark(#ebf4ff,rgba(4,133,255,.15));
+        --ult-tool-text:light-dark(#0485ff,#5b9fff);
+        --ult-tool-hover-bg:light-dark(#d9ebff,rgba(4,133,255,.2));
+        --ult-tool-hover-text:light-dark(#0475e6,#7db3ff)
       }
       /* ========== END COLOR PALETTE ========== */
 
@@ -455,8 +402,8 @@ class UltralyticsChat {
       .ult-message th,.ult-message td{border:1px solid var(--ult-border);padding:6px 10px;text-align:left}
       .ult-message th{font-weight:600}
       .ult-code-block{position:relative;margin:6px 0}
-      .ult-global-tooltip{position:fixed;background:#1f2937;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:500;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .1s;z-index:10003;transform:translate(-50%,-100%)}
-      .ult-global-tooltip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:4px solid transparent;border-top-color:#1f2937}
+      .ult-global-tooltip{position:fixed;background:light-dark(#1f2937,#374151);color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:500;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .1s;z-index:10003;transform:translate(-50%,-100%);color-scheme:light dark}
+      .ult-global-tooltip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:4px solid transparent;border-top-color:light-dark(#1f2937,#374151)}
       .ult-global-tooltip.show{opacity:1}
       .ult-code-copy{position:absolute;top:8px;right:8px;background:var(--ult-bg-tertiary);border:0;border-radius:8px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:0;transition:.12s;color:var(--ult-text-secondary)}
       .ult-code-block:hover .ult-code-copy{opacity:1}
@@ -563,12 +510,7 @@ class UltralyticsChat {
         .ultralytics-chat-pill{right:14px;bottom:28px;padding:12px 18px;font-size:16px}
         .ultralytics-chat-pill img{width:28px;height:28px}
       }
-      @media (prefers-color-scheme:dark){
-        .ult-global-tooltip{background:#374151}
-        .ult-global-tooltip::after{border-top-color:#374151}
-      }
-      html.dark .ult-global-tooltip{background:#374151}
-      html.dark .ult-global-tooltip::after{border-top-color:#374151}`;
+      `;
     this.styleElement = this.el("style", "", styleContent);
     document.head.appendChild(this.styleElement);
   }
