@@ -185,7 +185,8 @@ class UltralyticsChat {
       clone
         ?.querySelectorAll("[data-chat-ignore], nav, aside, script, style, svg, noscript, canvas, [aria-hidden='true']")
         .forEach((el) => el.remove());
-      description = clone?.innerText?.replace(/\s+/g, " ").trim().slice(0, 5000) || "";
+      clone?.querySelectorAll("*").forEach((el) => el.before(" "));
+      description = clone?.textContent?.replace(/\s+/g, " ").trim().slice(0, 5000) || "";
     }
     return {
       url: window.location.href,
