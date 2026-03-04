@@ -177,10 +177,12 @@ class UltralyticsChat {
   }
 
   getPageContext() {
+    let description = document.querySelector('meta[name="description"]')?.content || "";
+    if (window.__ultChatContext) description += (description ? "\n" : "") + window.__ultChatContext;
     return {
       url: window.location.href,
       title: document.title,
-      description: document.querySelector('meta[name="description"]')?.content || "",
+      description,
       path: window.location.pathname,
     };
   }
@@ -200,7 +202,7 @@ class UltralyticsChat {
     const scriptId = "hljs-script";
     if (!window.hljs && !document.getElementById(scriptId)) {
       const script = this.el("script");
-      script.src = "https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js";
+      script.src = "https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.11.1/build/highlight.min.js";
       script.id = scriptId;
       script.onload = () => window.hljs?.configure({ ignoreUnescapedHTML: true });
       document.head.appendChild(script);
@@ -211,7 +213,7 @@ class UltralyticsChat {
       const light = this.el("link");
       light.rel = "stylesheet";
       light.id = lightThemeId;
-      light.href = "https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github.min.css";
+      light.href = "https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.11.1/build/styles/github.min.css";
       light.media = "(prefers-color-scheme: light)";
       document.head.appendChild(light);
     }
@@ -219,7 +221,7 @@ class UltralyticsChat {
       const dark = this.el("link");
       dark.rel = "stylesheet";
       dark.id = darkThemeId;
-      dark.href = "https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css";
+      dark.href = "https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.11.1/build/styles/github-dark.min.css";
       dark.media = "(prefers-color-scheme: dark)";
       document.head.appendChild(dark);
     }
@@ -901,7 +903,8 @@ class UltralyticsChat {
       if (this.refs.input) this.refs.input.placeholder = this.config.ui.placeholder;
       if (tagline) tagline.textContent = this.config.branding.tagline;
       const { title, message, chatExamples } = this.config.welcome;
-      if (this.refs.welcome) this.refs.welcome.innerHTML = `<div class="ult-welcome-title">${this.escapeHtml(title)}</div><p>${message}</p>`;
+      if (this.refs.welcome)
+        this.refs.welcome.innerHTML = `<div class="ult-welcome-title">${this.escapeHtml(title)}</div><p>${message}</p>`;
       this.setExamples(chatExamples || []);
       this.renderChatHistory();
     }
