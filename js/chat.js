@@ -228,7 +228,6 @@ class UltralyticsChat {
       light.rel = "stylesheet";
       light.id = lightThemeId;
       light.href = "https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.11.1/build/styles/github.min.css";
-      light.media = "(prefers-color-scheme: light)";
       document.head.appendChild(light);
     }
     if (!document.getElementById(darkThemeId)) {
@@ -236,7 +235,6 @@ class UltralyticsChat {
       dark.rel = "stylesheet";
       dark.id = darkThemeId;
       dark.href = "https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.11.1/build/styles/github-dark.min.css";
-      dark.media = "(prefers-color-scheme: dark)";
       document.head.appendChild(dark);
     }
   }
