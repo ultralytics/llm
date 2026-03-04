@@ -281,34 +281,26 @@ class UltralyticsChat {
     this.domObserver = observer;
   }
 
-  /**
-   * Auto-detect host page dark mode by watching <html> for class/attribute changes.
-   * Supports: class="dark", data-theme="dark", data-mode="dark", style="color-scheme: dark".
-   * Sets color-scheme on widget elements so CSS light-dark() responds to the app theme,
-   * not just the OS preference.
-   */
   watchTheme() {
     const root = document.documentElement;
-    const isDark = () =>
-      root.classList.contains("dark") ||
-      root.dataset.theme === "dark" ||
-      root.dataset.mode === "dark" ||
-      root.style.colorScheme === "dark";
-
-    const apply = () => {
-      const scheme = isDark() ? "dark" : "light";
-      for (const el of [this.refs.pill, this.refs.modal]) {
-        if (el) el.style.colorScheme = scheme;
-      }
-      // Swap highlight.js themes to match (media queries only follow OS preference)
-      const lightLink = document.getElementById("hljs-theme-light");
-      const darkLink = document.getElementById("hljs-theme-dark");
-      if (lightLink) lightLink.media = scheme === "dark" ? "not all" : "all";
-      if (darkLink) darkLink.media = scheme === "dark" ? "all" : "not all";
+    const getTheme = () => {
+      if (root.classList.contains("dark") || root.dataset.theme === "dark" || root.dataset.mode === "dark" || root.style.colorScheme === "dark") return "dark";
+      if (root.classList.contains("light") || root.dataset.theme === "light" || root.dataset.mode === "light" || root.style.colorScheme === "light") return "light";
+      return null; // No explicit theme — let OS preference drive light-dark()
     };
 
-    apply(); // Initial check
+    const apply = () => {
+      const theme = getTheme();
+      for (const el of [this.refs.pill, this.refs.modal]) {
+        if (el) el.style.colorScheme = theme || "";
+      }
+      const lightLink = document.getElementById("hljs-theme-light");
+      const darkLink = document.getElementById("hljs-theme-dark");
+      if (lightLink) lightLink.media = theme ? (theme === "dark" ? "not all" : "all") : "(prefers-color-scheme: light)";
+      if (darkLink) darkLink.media = theme ? (theme === "dark" ? "all" : "not all") : "(prefers-color-scheme: dark)";
+    };
 
+    apply();
     this.themeObserver = new MutationObserver(apply);
     this.themeObserver.observe(root, { attributes: true, attributeFilter: ["class", "data-theme", "data-mode", "style"] });
   }
