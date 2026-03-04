@@ -304,9 +304,6 @@ class UltralyticsChat {
       *{box-sizing:border-box}
 
       /* ========== CENTRALIZED COLOR PALETTE ========== */
-      @media (prefers-color-scheme:dark){
-        .ultralytics-chat-pill,.ult-chat-modal,.ult-global-tooltip{color-scheme:dark}
-      }
       .ultralytics-chat-pill,.ult-chat-modal{
         /* Brand colors (configurable) */
         --ult-primary:${primary};
