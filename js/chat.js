@@ -206,6 +206,7 @@ class UltralyticsChat {
     this.createStyles();
     this.createUI();
     this.attachEvents();
+    this.syncDarkMode();
     this.showWelcome(true);
     this.updateComposerState();
     this.watchForRemoval();
@@ -238,6 +239,22 @@ class UltralyticsChat {
       dark.media = "(prefers-color-scheme: dark)";
       document.head.appendChild(dark);
     }
+  }
+
+  syncDarkMode() {
+    const sync = () => {
+      const isDark =
+        document.documentElement.classList.contains("dark") || matchMedia("(prefers-color-scheme:dark)").matches;
+      const targets = [this.refs.pill, this.refs.modal, this.refs.tooltip].filter(Boolean);
+      for (const el of targets) el.classList.toggle("ult-dark", isDark);
+      const l = document.getElementById("hljs-theme-light");
+      const d = document.getElementById("hljs-theme-dark");
+      if (l) l.media = isDark ? "not all" : "all";
+      if (d) d.media = isDark ? "all" : "not all";
+    };
+    sync();
+    matchMedia("(prefers-color-scheme:dark)").addEventListener("change", sync);
+    new MutationObserver(sync).observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
   }
 
   highlight(el) {
@@ -336,8 +353,7 @@ class UltralyticsChat {
         --ult-tool-hover-bg:#d9ebff;
         --ult-tool-hover-text:#0475e6
       }
-      @media (prefers-color-scheme:dark){
-        .ultralytics-chat-pill,.ult-chat-modal{
+      .ultralytics-chat-pill.ult-dark,.ult-chat-modal.ult-dark{
           --ult-bg:rgba(10,10,11,.95);
           --ult-bg-secondary:#131318;
           --ult-bg-tertiary:#17181d;
@@ -361,7 +377,6 @@ class UltralyticsChat {
           --ult-tool-text:#5b9fff;
           --ult-tool-hover-bg:rgba(4,133,255,.2);
           --ult-tool-hover-text:#7db3ff
-        }
       }
       /* ========== END COLOR PALETTE ========== */
 
@@ -538,10 +553,8 @@ class UltralyticsChat {
         .ultralytics-chat-pill{right:14px;bottom:28px;padding:12px 18px;font-size:16px}
         .ultralytics-chat-pill img{width:28px;height:28px}
       }
-      @media (prefers-color-scheme:dark){
-        .ult-global-tooltip{background:#374151}
-        .ult-global-tooltip::after{border-top-color:#374151}
-      }`;
+      .ult-global-tooltip.ult-dark{background:#374151}
+      .ult-global-tooltip.ult-dark::after{border-top-color:#374151}`;
     this.styleElement = this.el("style", "", styleContent);
     document.head.appendChild(this.styleElement);
   }
