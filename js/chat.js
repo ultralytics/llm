@@ -177,10 +177,12 @@ class UltralyticsChat {
   }
 
   getPageContext() {
-    const main = document.querySelector("main, [role=main]") || document.body;
-    const clone = main.cloneNode(true);
-    clone.querySelectorAll("[data-chat-ignore], nav, aside, header, footer, script, style, svg").forEach((el) => el.remove());
-    const pageContent = clone.innerText?.replace(/\s+/g, " ").trim().slice(0, 5000) || "";
+    const main = document.querySelector("main, [role=main]");
+    const clone = main?.cloneNode(true);
+    clone
+      ?.querySelectorAll("[data-chat-ignore], nav, aside, header, footer, script, style, svg, noscript, canvas, [aria-hidden='true']")
+      .forEach((el) => el.remove());
+    const pageContent = clone?.innerText?.replace(/\s+/g, " ").trim().slice(0, 5000) || "";
     return {
       url: window.location.href,
       title: document.title,
