@@ -903,7 +903,8 @@ class UltralyticsChat {
       if (this.refs.input) this.refs.input.placeholder = this.config.ui.placeholder;
       if (tagline) tagline.textContent = this.config.branding.tagline;
       const { title, message, chatExamples } = this.config.welcome;
-      if (this.refs.welcome) this.refs.welcome.innerHTML = `<div class="ult-welcome-title">${this.escapeHtml(title)}</div><p>${message}</p>`;
+      if (this.refs.welcome)
+        this.refs.welcome.innerHTML = `<div class="ult-welcome-title">${this.escapeHtml(title)}</div><p>${message}</p>`;
       this.setExamples(chatExamples || []);
       this.renderChatHistory();
     }
