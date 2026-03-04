@@ -33,7 +33,7 @@ Load the chat widget via [jsDelivr CDN](https://www.jsdelivr.com/package/gh/ultr
 <script src="https://cdn.jsdelivr.net/gh/ultralytics/llm@latest/js/chat.min.js"></script>
 
 <!-- Specific version (guaranteed stability) -->
-<script src="https://cdn.jsdelivr.net/gh/ultralytics/llm@v0.0.2/js/chat.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/ultralytics/llm@v0.2.1/js/chat.min.js"></script>
 
 <!-- Main branch (experimental, for testing) -->
 <script src="https://cdn.jsdelivr.net/gh/ultralytics/llm@main/js/chat.min.js"></script>
@@ -98,6 +98,7 @@ Load the chat widget via [jsDelivr CDN](https://www.jsdelivr.com/package/gh/ultr
 - **💾 Session Management**: Persistent conversation history via localStorage
 - **♿ Accessible**: WCAG compliant with ARIA labels and keyboard navigation
 - **🎨 Customizable**: Full theme and branding control
+- **📄 Page Context**: Opt-in DOM scraping sends visible page content to the AI for context-aware responses
 - **🔒 Security**: XSS protection with HTML escaping, input length limits
 
 ## ⚙️ Configuration Options
@@ -109,6 +110,7 @@ const chat = new UltralyticsChat({
   // API Configuration
   apiUrl: "/api/chat", // Chat endpoint that streams SSE
   maxMessageLength: 10000, // Character limit enforced per user message
+  pageContent: false, // Opt-in DOM scraping for rich page context (default: false)
 
   // Branding
   branding: {
@@ -146,7 +148,7 @@ const chat = new UltralyticsChat({
 });
 ```
 
-`UltralyticsChat` automatically injects document context (title, URL, description, path) into each request so your backend can provide page-aware responses without extra work on the integrator side.
+`UltralyticsChat` automatically injects document context (title, URL, path) into each request so your backend can provide page-aware responses. When `pageContent: true` is set, the widget also scrapes visible text from the page's `<main>` element (up to 5,000 characters), stripping navigation, scripts, SVGs, and elements marked with `data-chat-ignore`. This gives the AI full awareness of what the user is currently viewing. When disabled (default), the widget falls back to the page's `<meta name="description">` tag.
 
 ### API Requirements
 
@@ -162,7 +164,7 @@ Content-Type: application/json
   "context": {
     "url": "https://example.com/docs/widget",
     "title": "Docs page title",
-    "description": "Meta description text",
+    "description": "Visible page text or meta description",
     "path": "/docs/widget"
   },
   "edit_index": 3 // optional when user edits a previous turn
@@ -243,6 +245,7 @@ Tested and working on:
 - [x] Session persistence
 - [x] Production-ready security & performance
 - [x] Full mobile support (iOS & Android)
+- [x] Page content awareness (opt-in DOM scraping)
 - [ ] File upload support
 - [ ] Voice input
 - [ ] Multi-language support
