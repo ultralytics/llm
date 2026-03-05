@@ -369,7 +369,7 @@ class UltralyticsChat {
       .ult-backdrop.open{display:block;opacity:1;visibility:visible;pointer-events:auto}
 
       .ultralytics-chat-pill{position:fixed;right:16px;bottom:36px;padding:14px 22px;border-radius:9999px;background:var(--ult-pill-bg);
-        color:var(--ult-pill-text);border:0;cursor:pointer;font-size:18px;font-weight:500;box-shadow:var(--ult-pill-shadow);
+        color:var(--ult-pill-text);border:0;cursor:grab;font-size:18px;font-weight:500;box-shadow:var(--ult-pill-shadow);
         z-index:10000;transition:opacity .2s ease-out,transform .15s ease-out;
         display:inline-flex;align-items:center;gap:10px;transform:scale(1) translateZ(0);opacity:1;
         -webkit-user-select:none;user-select:none;touch-action:manipulation;will-change:opacity,transform}
