@@ -285,8 +285,20 @@ class UltralyticsChat {
   watchTheme() {
     const root = document.documentElement;
     const getTheme = () => {
-      if (root.classList.contains("dark") || root.dataset.theme === "dark" || root.dataset.mode === "dark" || root.style.colorScheme === "dark") return "dark";
-      if (root.classList.contains("light") || root.dataset.theme === "light" || root.dataset.mode === "light" || root.style.colorScheme === "light") return "light";
+      if (
+        root.classList.contains("dark") ||
+        root.dataset.theme === "dark" ||
+        root.dataset.mode === "dark" ||
+        root.style.colorScheme === "dark"
+      )
+        return "dark";
+      if (
+        root.classList.contains("light") ||
+        root.dataset.theme === "light" ||
+        root.dataset.mode === "light" ||
+        root.style.colorScheme === "light"
+      )
+        return "light";
       return null; // No explicit theme — let OS preference drive light-dark()
     };
 
@@ -303,7 +315,10 @@ class UltralyticsChat {
 
     apply();
     this.themeObserver = new MutationObserver(apply);
-    this.themeObserver.observe(root, { attributes: true, attributeFilter: ["class", "data-theme", "data-mode", "style"] });
+    this.themeObserver.observe(root, {
+      attributes: true,
+      attributeFilter: ["class", "data-theme", "data-mode", "style"],
+    });
   }
 
   destroy() {
@@ -853,7 +868,8 @@ class UltralyticsChat {
     let ox, oy, rect, moved;
 
     const onMove = (e) => {
-      const dx = e.clientX - ox, dy = e.clientY - oy;
+      const dx = e.clientX - ox,
+        dy = e.clientY - oy;
       if (!moved && Math.abs(dx) < 5 && Math.abs(dy) < 5) return;
       moved = true;
       pill.style.left = Math.max(0, Math.min(window.innerWidth - rect.width, rect.left + dx)) + "px";
@@ -872,7 +888,8 @@ class UltralyticsChat {
     this.on(pill, "pointerdown", (e) => {
       if (e.button !== 0) return;
       rect = pill.getBoundingClientRect();
-      ox = e.clientX; oy = e.clientY;
+      ox = e.clientX;
+      oy = e.clientY;
       moved = false;
       pill.style.cursor = "grabbing";
       Object.assign(pill.style, { right: "auto", bottom: "auto", left: rect.left + "px", top: rect.top + "px" });
