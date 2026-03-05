@@ -861,6 +861,8 @@ class UltralyticsChat {
 
     const onUp = (e) => {
       document.removeEventListener("pointermove", onMove);
+      document.removeEventListener("pointerup", onUp);
+      document.removeEventListener("pointercancel", onUp);
       pill.releasePointerCapture(e.pointerId);
       pill.style.cursor = "";
       if (moved) pill.addEventListener("click", (ev) => ev.stopImmediatePropagation(), { once: true, capture: true });
@@ -876,6 +878,7 @@ class UltralyticsChat {
       pill.setPointerCapture(e.pointerId);
       document.addEventListener("pointermove", onMove);
       document.addEventListener("pointerup", onUp, { once: true });
+      document.addEventListener("pointercancel", onUp, { once: true });
     });
   }
 
