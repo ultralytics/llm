@@ -5,6 +5,7 @@ class UltralyticsChat {
     const d = (o, k, v) => o?.[k] ?? v;
     this.config = {
       apiUrl: d(config, "apiUrl", "https://chat-885297101091.us-central1.run.app/api/chat"),
+      instructions: d(config, "instructions", null),
       maxMessageLength: d(config, "maxMessageLength", 10000),
       pageContent: d(config, "pageContent", false),
       branding: {
@@ -1226,6 +1227,7 @@ class UltralyticsChat {
         session_id: this.sessionId,
         context: this.getPageContext(),
       };
+      if (this.config.instructions) body.instructions = this.config.instructions;
       if (safeEditIndex !== null) body.edit_index = safeEditIndex;
       if (this.selectedTools.size > 0) body.tools = [...this.selectedTools];
       const res = await fetch(this.apiUrl, {
