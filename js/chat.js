@@ -183,7 +183,7 @@ class UltralyticsChat {
       const main = document.querySelector("main, [role=main]");
       const clone = main?.cloneNode(true);
       clone
-        ?.querySelectorAll("[data-chat-ignore], nav, aside, script, style, svg, noscript, canvas, [aria-hidden='true']")
+        ?.querySelectorAll("[data-chat-ignore], script, style, svg, noscript, canvas, [aria-hidden='true']")
         .forEach((el) => el.remove());
       if (clone) {
         const walker = document.createTreeWalker(clone, NodeFilter.SHOW_TEXT);
@@ -843,6 +843,71 @@ class UltralyticsChat {
       if (!messageDiv) return;
       const trimmed = this.trimMessage(messageDiv.textContent || "", messageDiv);
       if (trimmed !== (messageDiv.textContent || "")) messageDiv.textContent = trimmed;
+    });
+    this.setupPillDrag();
+  }
+
+  setupPillDrag() {
+    const pill = this.refs.pill;
+    if (!pill) return;
+
+    // Restore saved position, clamped to current viewport
+    try {
+      const saved = localStorage.getItem("ult-chat-pill-pos");
+      if (saved) {
+        const { left, top } = JSON.parse(saved);
+        const clampedLeft = Math.max(0, Math.min(window.innerWidth - pill.offsetWidth || left, left));
+        const clampedTop = Math.max(0, Math.min(window.innerHeight - pill.offsetHeight || top, top));
+        pill.style.right = "auto";
+        pill.style.bottom = "auto";
+        pill.style.left = clampedLeft + "px";
+        pill.style.top = clampedTop + "px";
+      }
+    } catch {}
+
+    let startX, startY, startLeft, startTop, moved;
+
+    const onMove = (e) => {
+      const cx = e.clientX;
+      const cy = e.clientY;
+      const dx = cx - startX;
+      const dy = cy - startY;
+      if (!moved && Math.abs(dx) < 5 && Math.abs(dy) < 5) return;
+      moved = true;
+      pill.style.cursor = "grabbing";
+      const newLeft = Math.max(0, Math.min(window.innerWidth - pill.offsetWidth, startLeft + dx));
+      const newTop = Math.max(0, Math.min(window.innerHeight - pill.offsetHeight, startTop + dy));
+      pill.style.left = newLeft + "px";
+      pill.style.top = newTop + "px";
+    };
+
+    const onUp = (e) => {
+      document.removeEventListener("pointermove", onMove);
+      pill.releasePointerCapture(e.pointerId);
+      pill.style.cursor = "";
+      if (moved) {
+        pill.addEventListener("click", (ev) => ev.stopImmediatePropagation(), { once: true, capture: true });
+        try {
+          localStorage.setItem("ult-chat-pill-pos", JSON.stringify({ left: parseFloat(pill.style.left), top: parseFloat(pill.style.top) }));
+        } catch {}
+      }
+    };
+
+    this.on(pill, "pointerdown", (e) => {
+      if (e.button !== 0) return;
+      moved = false;
+      const rect = pill.getBoundingClientRect();
+      startX = e.clientX;
+      startY = e.clientY;
+      pill.style.right = "auto";
+      pill.style.bottom = "auto";
+      pill.style.left = rect.left + "px";
+      pill.style.top = rect.top + "px";
+      startLeft = rect.left;
+      startTop = rect.top;
+      pill.setPointerCapture(e.pointerId);
+      document.addEventListener("pointermove", onMove);
+      document.addEventListener("pointerup", onUp, { once: true });
     });
   }
 
