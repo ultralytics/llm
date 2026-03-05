@@ -849,34 +849,19 @@ class UltralyticsChat {
 
   setupPillDrag() {
     const pill = this.refs.pill;
-    if (!pill) return;
-
-    // Restore saved position, clamped to current viewport
     try {
-      const saved = localStorage.getItem("ult-chat-pill-pos");
-      if (saved) {
-        const { left, top } = JSON.parse(saved);
-        const clampedLeft = Math.max(0, Math.min(window.innerWidth - pill.offsetWidth || left, left));
-        const clampedTop = Math.max(0, Math.min(window.innerHeight - pill.offsetHeight || top, top));
-        pill.style.right = "auto";
-        pill.style.bottom = "auto";
-        pill.style.left = clampedLeft + "px";
-        pill.style.top = clampedTop + "px";
-      }
+      const p = JSON.parse(localStorage.getItem("ult-chat-pill-pos"));
+      if (p) Object.assign(pill.style, { right: "auto", bottom: "auto", left: p.left + "px", top: p.top + "px" });
     } catch {}
 
-    let startX, startY, startLeft, startTop, pillW, pillH, moved;
+    let ox, oy, rect, moved;
 
     const onMove = (e) => {
-      const dx = e.clientX - startX;
-      const dy = e.clientY - startY;
+      const dx = e.clientX - ox, dy = e.clientY - oy;
       if (!moved && Math.abs(dx) < 5 && Math.abs(dy) < 5) return;
       moved = true;
-      pill.style.cursor = "grabbing";
-      const newLeft = Math.max(0, Math.min(window.innerWidth - pillW, startLeft + dx));
-      const newTop = Math.max(0, Math.min(window.innerHeight - pillH, startTop + dy));
-      pill.style.left = newLeft + "px";
-      pill.style.top = newTop + "px";
+      pill.style.left = Math.max(0, Math.min(window.innerWidth - rect.width, rect.left + dx)) + "px";
+      pill.style.top = Math.max(0, Math.min(window.innerHeight - rect.height, rect.top + dy)) + "px";
     };
 
     const onUp = (e) => {
@@ -885,26 +870,17 @@ class UltralyticsChat {
       pill.style.cursor = "";
       if (moved) {
         pill.addEventListener("click", (ev) => ev.stopImmediatePropagation(), { once: true, capture: true });
-        try {
-          localStorage.setItem("ult-chat-pill-pos", JSON.stringify({ left: parseFloat(pill.style.left), top: parseFloat(pill.style.top) }));
-        } catch {}
+        try { localStorage.setItem("ult-chat-pill-pos", JSON.stringify({ left: parseFloat(pill.style.left), top: parseFloat(pill.style.top) })); } catch {}
       }
     };
 
     this.on(pill, "pointerdown", (e) => {
       if (e.button !== 0) return;
+      rect = pill.getBoundingClientRect();
+      ox = e.clientX; oy = e.clientY;
       moved = false;
-      const rect = pill.getBoundingClientRect();
-      startX = e.clientX;
-      startY = e.clientY;
-      pillW = rect.width;
-      pillH = rect.height;
-      pill.style.right = "auto";
-      pill.style.bottom = "auto";
-      pill.style.left = rect.left + "px";
-      pill.style.top = rect.top + "px";
-      startLeft = rect.left;
-      startTop = rect.top;
+      pill.style.cursor = "grabbing";
+      Object.assign(pill.style, { right: "auto", bottom: "auto", left: rect.left + "px", top: rect.top + "px" });
       pill.setPointerCapture(e.pointerId);
       document.addEventListener("pointermove", onMove);
       document.addEventListener("pointerup", onUp, { once: true });
