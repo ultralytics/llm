@@ -849,11 +849,6 @@ class UltralyticsChat {
 
   setupPillDrag() {
     const pill = this.refs.pill;
-    try {
-      const p = JSON.parse(localStorage.getItem("ult-chat-pill-pos"));
-      if (p) Object.assign(pill.style, { right: "auto", bottom: "auto", left: p.left + "px", top: p.top + "px" });
-    } catch {}
-
     let ox, oy, rect, moved;
 
     const onMove = (e) => {
@@ -868,10 +863,7 @@ class UltralyticsChat {
       document.removeEventListener("pointermove", onMove);
       pill.releasePointerCapture(e.pointerId);
       pill.style.cursor = "";
-      if (moved) {
-        pill.addEventListener("click", (ev) => ev.stopImmediatePropagation(), { once: true, capture: true });
-        try { localStorage.setItem("ult-chat-pill-pos", JSON.stringify({ left: parseFloat(pill.style.left), top: parseFloat(pill.style.top) })); } catch {}
-      }
+      if (moved) pill.addEventListener("click", (ev) => ev.stopImmediatePropagation(), { once: true, capture: true });
     };
 
     this.on(pill, "pointerdown", (e) => {
