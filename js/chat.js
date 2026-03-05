@@ -369,7 +369,7 @@ class UltralyticsChat {
       .ult-backdrop.open{display:block;opacity:1;visibility:visible;pointer-events:auto}
 
       .ultralytics-chat-pill{position:fixed;right:16px;bottom:36px;padding:14px 22px;border-radius:9999px;background:var(--ult-pill-bg);
-        color:var(--ult-pill-text);border:0;cursor:grab;font-size:18px;font-weight:500;box-shadow:var(--ult-pill-shadow);
+        color:var(--ult-pill-text);border:0;cursor:pointer;font-size:18px;font-weight:500;box-shadow:var(--ult-pill-shadow);
         z-index:10000;transition:opacity .2s ease-out,transform .15s ease-out;
         display:inline-flex;align-items:center;gap:10px;transform:scale(1) translateZ(0);opacity:1;
         -webkit-user-select:none;user-select:none;touch-action:manipulation;will-change:opacity,transform}
@@ -865,18 +865,16 @@ class UltralyticsChat {
       }
     } catch {}
 
-    let startX, startY, startLeft, startTop, moved;
+    let startX, startY, startLeft, startTop, pillW, pillH, moved;
 
     const onMove = (e) => {
-      const cx = e.clientX;
-      const cy = e.clientY;
-      const dx = cx - startX;
-      const dy = cy - startY;
+      const dx = e.clientX - startX;
+      const dy = e.clientY - startY;
       if (!moved && Math.abs(dx) < 5 && Math.abs(dy) < 5) return;
       moved = true;
       pill.style.cursor = "grabbing";
-      const newLeft = Math.max(0, Math.min(window.innerWidth - pill.offsetWidth, startLeft + dx));
-      const newTop = Math.max(0, Math.min(window.innerHeight - pill.offsetHeight, startTop + dy));
+      const newLeft = Math.max(0, Math.min(window.innerWidth - pillW, startLeft + dx));
+      const newTop = Math.max(0, Math.min(window.innerHeight - pillH, startTop + dy));
       pill.style.left = newLeft + "px";
       pill.style.top = newTop + "px";
     };
@@ -899,6 +897,8 @@ class UltralyticsChat {
       const rect = pill.getBoundingClientRect();
       startX = e.clientX;
       startY = e.clientY;
+      pillW = rect.width;
+      pillH = rect.height;
       pill.style.right = "auto";
       pill.style.bottom = "auto";
       pill.style.left = rect.left + "px";
