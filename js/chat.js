@@ -882,7 +882,22 @@ class UltralyticsChat {
       document.removeEventListener("pointercancel", onUp);
       pill.releasePointerCapture(e.pointerId);
       pill.style.cursor = "";
-      if (moved) pill.addEventListener("click", (ev) => ev.stopImmediatePropagation(), { once: true, capture: true });
+      if (moved) {
+        // Convert absolute left/top back to corner-relative offsets so CSS
+        // handles resize natively (pill stays anchored to its nearest corner).
+        const r = pill.getBoundingClientRect();
+        const fromRight = window.innerWidth - r.right;
+        const fromBottom = window.innerHeight - r.bottom;
+        const useLeft = r.left <= fromRight;
+        const useTop = r.top <= fromBottom;
+        Object.assign(pill.style, {
+          left: useLeft ? r.left + "px" : "auto",
+          right: useLeft ? "auto" : fromRight + "px",
+          top: useTop ? r.top + "px" : "auto",
+          bottom: useTop ? "auto" : fromBottom + "px",
+        });
+        pill.addEventListener("click", (ev) => ev.stopImmediatePropagation(), { once: true, capture: true });
+      }
     };
 
     this.on(pill, "pointerdown", (e) => {
@@ -898,14 +913,6 @@ class UltralyticsChat {
       document.addEventListener("pointerup", onUp, { once: true });
       document.addEventListener("pointercancel", onUp, { once: true });
     });
-
-    const onResize = () => {
-      if (!pill.style.left && !pill.style.top) return;
-      const r = pill.getBoundingClientRect();
-      pill.style.left = Math.max(0, Math.min(window.innerWidth - r.width, parseFloat(pill.style.left) || 0)) + "px";
-      pill.style.top = Math.max(0, Math.min(window.innerHeight - r.height, parseFloat(pill.style.top) || 0)) + "px";
-    };
-    this.on(window, "resize", onResize);
   }
 
   toggle(forceOpen = null, mode = null) {
