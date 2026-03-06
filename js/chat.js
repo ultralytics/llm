@@ -898,6 +898,14 @@ class UltralyticsChat {
       document.addEventListener("pointerup", onUp, { once: true });
       document.addEventListener("pointercancel", onUp, { once: true });
     });
+
+    const onResize = () => {
+      if (!pill.style.left && !pill.style.top) return;
+      const r = pill.getBoundingClientRect();
+      pill.style.left = Math.max(0, Math.min(window.innerWidth - r.width, parseFloat(pill.style.left) || 0)) + "px";
+      pill.style.top = Math.max(0, Math.min(window.innerHeight - r.height, parseFloat(pill.style.top) || 0)) + "px";
+    };
+    this.on(window, "resize", onResize);
   }
 
   toggle(forceOpen = null, mode = null) {
