@@ -5,6 +5,7 @@ class UltralyticsChat {
     const d = (o, k, v) => o?.[k] ?? v;
     this.config = {
       apiUrl: d(config, "apiUrl", "https://chat-885297101091.us-central1.run.app/api/chat"),
+      instructions: d(config, "instructions", null),
       maxMessageLength: d(config, "maxMessageLength", 10000),
       pageContent: d(config, "pageContent", false),
       branding: {
@@ -183,7 +184,7 @@ class UltralyticsChat {
       const main = document.querySelector("main, [role=main]");
       const clone = main?.cloneNode(true);
       clone
-        ?.querySelectorAll("[data-chat-ignore], nav, aside, script, style, svg, noscript, canvas, [aria-hidden='true']")
+        ?.querySelectorAll("[data-chat-ignore], script, style, svg, noscript, canvas, [aria-hidden='true']")
         .forEach((el) => el.remove());
       if (clone) {
         const walker = document.createTreeWalker(clone, NodeFilter.SHOW_TEXT);
@@ -284,8 +285,20 @@ class UltralyticsChat {
   watchTheme() {
     const root = document.documentElement;
     const getTheme = () => {
-      if (root.classList.contains("dark") || root.dataset.theme === "dark" || root.dataset.mode === "dark" || root.style.colorScheme === "dark") return "dark";
-      if (root.classList.contains("light") || root.dataset.theme === "light" || root.dataset.mode === "light" || root.style.colorScheme === "light") return "light";
+      if (
+        root.classList.contains("dark") ||
+        root.dataset.theme === "dark" ||
+        root.dataset.mode === "dark" ||
+        root.style.colorScheme === "dark"
+      )
+        return "dark";
+      if (
+        root.classList.contains("light") ||
+        root.dataset.theme === "light" ||
+        root.dataset.mode === "light" ||
+        root.style.colorScheme === "light"
+      )
+        return "light";
       return null; // No explicit theme — let OS preference drive light-dark()
     };
 
@@ -302,7 +315,10 @@ class UltralyticsChat {
 
     apply();
     this.themeObserver = new MutationObserver(apply);
-    this.themeObserver.observe(root, { attributes: true, attributeFilter: ["class", "data-theme", "data-mode", "style"] });
+    this.themeObserver.observe(root, {
+      attributes: true,
+      attributeFilter: ["class", "data-theme", "data-mode", "style"],
+    });
   }
 
   destroy() {
@@ -844,6 +860,44 @@ class UltralyticsChat {
       const trimmed = this.trimMessage(messageDiv.textContent || "", messageDiv);
       if (trimmed !== (messageDiv.textContent || "")) messageDiv.textContent = trimmed;
     });
+    this.setupPillDrag();
+  }
+
+  setupPillDrag() {
+    const pill = this.refs.pill;
+    let ox, oy, rect, moved;
+
+    const onMove = (e) => {
+      const dx = e.clientX - ox,
+        dy = e.clientY - oy;
+      if (!moved && Math.abs(dx) < 5 && Math.abs(dy) < 5) return;
+      moved = true;
+      pill.style.left = Math.max(0, Math.min(window.innerWidth - rect.width, rect.left + dx)) + "px";
+      pill.style.top = Math.max(0, Math.min(window.innerHeight - rect.height, rect.top + dy)) + "px";
+    };
+
+    const onUp = (e) => {
+      document.removeEventListener("pointermove", onMove);
+      document.removeEventListener("pointerup", onUp);
+      document.removeEventListener("pointercancel", onUp);
+      pill.releasePointerCapture(e.pointerId);
+      pill.style.cursor = "";
+      if (moved) pill.addEventListener("click", (ev) => ev.stopImmediatePropagation(), { once: true, capture: true });
+    };
+
+    this.on(pill, "pointerdown", (e) => {
+      if (e.button !== 0) return;
+      rect = pill.getBoundingClientRect();
+      ox = e.clientX;
+      oy = e.clientY;
+      moved = false;
+      pill.style.cursor = "grabbing";
+      Object.assign(pill.style, { right: "auto", bottom: "auto", left: rect.left + "px", top: rect.top + "px" });
+      pill.setPointerCapture(e.pointerId);
+      document.addEventListener("pointermove", onMove);
+      document.addEventListener("pointerup", onUp, { once: true });
+      document.addEventListener("pointercancel", onUp, { once: true });
+    });
   }
 
   toggle(forceOpen = null, mode = null) {
@@ -1190,6 +1244,7 @@ class UltralyticsChat {
         session_id: this.sessionId,
         context: this.getPageContext(),
       };
+      if (this.config.instructions) body.instructions = this.config.instructions;
       if (safeEditIndex !== null) body.edit_index = safeEditIndex;
       if (this.selectedTools.size > 0) body.tools = [...this.selectedTools];
       const res = await fetch(this.apiUrl, {
