@@ -392,7 +392,7 @@ class UltralyticsChat {
       .ultralytics-chat-pill:hover{transform:scale(1.05) translateZ(0)}
       .ultralytics-chat-pill:focus-visible{outline:none;box-shadow:0 0 0 3px var(--ult-primary)}
       .ultralytics-chat-pill.hidden{opacity:0;pointer-events:none}
-      .ultralytics-chat-pill img{width:30px;height:30px;border-radius:3px}
+      .ultralytics-chat-pill img{width:30px;height:30px;border-radius:3px;pointer-events:none}
 
       .ult-chat-modal{all:initial;font-family:system-ui,sans-serif;
         position:fixed;left:50%;top:50%;width:min(760px,calc(100vw - 40px));height:min(80vh,820px);background:var(--ult-bg);border:0;border-radius:16px;
