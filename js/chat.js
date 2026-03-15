@@ -5,7 +5,9 @@ class UltralyticsChat {
     const d = (o, k, v) => o?.[k] ?? v;
     this.config = {
       apiUrl: d(config, "apiUrl", "https://ul.run/chat/v1/chat"),
+      instructions: d(config, "instructions", null),
       maxMessageLength: d(config, "maxMessageLength", 10000),
+      pageContent: d(config, "pageContent", false),
       branding: {
         name: d(config.branding, "name", "Ultralytics AI"),
         tagline: d(config.branding, "tagline", "Ask anything about Ultralytics, YOLO, and more"),
@@ -177,10 +179,24 @@ class UltralyticsChat {
   }
 
   getPageContext() {
+    let description = "";
+    if (this.config.pageContent) {
+      const main = document.querySelector("main, [role=main]");
+      const clone = main?.cloneNode(true);
+      clone
+        ?.querySelectorAll("[data-chat-ignore], script, style, svg, noscript, canvas, [aria-hidden='true']")
+        .forEach((el) => el.remove());
+      if (clone) {
+        const walker = document.createTreeWalker(clone, NodeFilter.SHOW_TEXT);
+        const parts = [];
+        while (walker.nextNode()) parts.push(walker.currentNode.textContent.trim());
+        description = parts.filter(Boolean).join(" ").slice(0, 5000);
+      }
+    }
     return {
       url: window.location.href,
       title: document.title,
-      description: document.querySelector('meta[name="description"]')?.content || "",
+      description: description || document.querySelector('meta[name="description"]')?.content || "",
       path: window.location.pathname,
     };
   }
@@ -194,13 +210,14 @@ class UltralyticsChat {
     this.showWelcome(true);
     this.updateComposerState();
     this.watchForRemoval();
+    this.watchTheme();
   }
 
   loadHighlightJS() {
     const scriptId = "hljs-script";
     if (!window.hljs && !document.getElementById(scriptId)) {
       const script = this.el("script");
-      script.src = "https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js";
+      script.src = "https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.11.1/build/highlight.min.js";
       script.id = scriptId;
       script.onload = () => window.hljs?.configure({ ignoreUnescapedHTML: true });
       document.head.appendChild(script);
@@ -211,7 +228,7 @@ class UltralyticsChat {
       const light = this.el("link");
       light.rel = "stylesheet";
       light.id = lightThemeId;
-      light.href = "https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github.min.css";
+      light.href = "https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.11.1/build/styles/github.min.css";
       light.media = "(prefers-color-scheme: light)";
       document.head.appendChild(light);
     }
@@ -219,7 +236,7 @@ class UltralyticsChat {
       const dark = this.el("link");
       dark.rel = "stylesheet";
       dark.id = darkThemeId;
-      dark.href = "https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css";
+      dark.href = "https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.11.1/build/styles/github-dark.min.css";
       dark.media = "(prefers-color-scheme: dark)";
       document.head.appendChild(dark);
     }
@@ -265,9 +282,49 @@ class UltralyticsChat {
     this.domObserver = observer;
   }
 
+  watchTheme() {
+    const root = document.documentElement;
+    const getTheme = () => {
+      if (
+        root.classList.contains("dark") ||
+        root.dataset.theme === "dark" ||
+        root.dataset.mode === "dark" ||
+        root.style.colorScheme === "dark"
+      )
+        return "dark";
+      if (
+        root.classList.contains("light") ||
+        root.dataset.theme === "light" ||
+        root.dataset.mode === "light" ||
+        root.style.colorScheme === "light"
+      )
+        return "light";
+      return null; // No explicit theme — let OS preference drive light-dark()
+    };
+
+    const apply = () => {
+      const theme = getTheme();
+      for (const el of [this.refs.pill, this.refs.modal]) {
+        if (el) el.style.colorScheme = theme || "";
+      }
+      const lightLink = document.getElementById("hljs-theme-light");
+      const darkLink = document.getElementById("hljs-theme-dark");
+      if (lightLink) lightLink.media = theme ? (theme === "dark" ? "not all" : "all") : "(prefers-color-scheme: light)";
+      if (darkLink) darkLink.media = theme ? (theme === "dark" ? "all" : "not all") : "(prefers-color-scheme: dark)";
+    };
+
+    apply();
+    this.themeObserver = new MutationObserver(apply);
+    this.themeObserver.observe(root, {
+      attributes: true,
+      attributeFilter: ["class", "data-theme", "data-mode", "style"],
+    });
+  }
+
   destroy() {
     this.toggle(false);
     clearTimeout(this.inputDebounceTimer);
+    this.themeObserver?.disconnect();
     this.domObserver?.disconnect();
     for (const [el, eventList] of this.listeners) {
       for (const { ev, fn, opts } of eventList) {
@@ -294,59 +351,31 @@ class UltralyticsChat {
         --ult-primary:${primary};
         --ult-dark:${dark};
         --ult-accent:${accent};
-        --ult-text:${text};
-
-        /* Light theme colors */
-        --ult-bg:rgba(255,255,255,.95);
-        --ult-bg-secondary:#f7f7f9;
-        --ult-bg-tertiary:#f1f2f6;
-        --ult-bg-hover:#e9eaec;
-        --ult-bg-code:#f6f8fa;
-        --ult-border:#e5e7eb;
-        --ult-border-light:#eceff5;
-        --ult-text-secondary:#6b7280;
-        --ult-text-tertiary:#9ca3af;
-        --ult-text-muted:#4b5563;
+        /* Light defaults (fallback for browsers without light-dark() support) */
+        --ult-text:${text};--ult-text:light-dark(${text},#f5f5f5);
+        --ult-bg:rgba(255,255,255,.95);--ult-bg:light-dark(rgba(255,255,255,.95),rgba(10,10,11,.95));
+        --ult-bg-secondary:#f7f7f9;--ult-bg-secondary:light-dark(#f7f7f9,#131318);
+        --ult-bg-tertiary:#f1f2f6;--ult-bg-tertiary:light-dark(#f1f2f6,#17181d);
+        --ult-bg-hover:#e9eaec;--ult-bg-hover:light-dark(#e9eaec,#2a2b30);
+        --ult-bg-code:#f6f8fa;--ult-bg-code:light-dark(#f6f8fa,#0d1117);
+        --ult-border:#e5e7eb;--ult-border:light-dark(#e5e7eb,#232327);
+        --ult-border-light:#eceff5;--ult-border-light:light-dark(#eceff5,#1c1c22);
+        --ult-text-secondary:#6b7280;--ult-text-secondary:light-dark(#6b7280,#a1a1aa);
+        --ult-text-tertiary:#9ca3af;--ult-text-tertiary:light-dark(#9ca3af,#71717a);
+        --ult-text-muted:#4b5563;--ult-text-muted:light-dark(#4b5563,#a1a1aa);
         --ult-success:#26C000;
-        --ult-pill-bg:var(--ult-accent);
-        --ult-pill-text:var(--ult-dark);
-        --ult-pill-shadow:0 20px 38px rgba(2,6,23,.22),0 8px 18px rgba(2,6,23,.14);
-        --ult-modal-shadow:0 24px 60px rgba(2,6,23,.25),0 8px 24px rgba(2,6,23,.18);
-        --ult-msg-hover:rgba(247,247,249,.4);
-        --ult-msg-border:rgba(229,231,235,.6);
-        --ult-code-border:#e5e7eb;
-        --ult-code-inline:#f4f4f5;
-        --ult-tool-bg:#ebf4ff;
-        --ult-tool-text:#0485ff;
-        --ult-tool-hover-bg:#d9ebff;
-        --ult-tool-hover-text:#0475e6
-      }
-      @media (prefers-color-scheme:dark){
-        .ultralytics-chat-pill,.ult-chat-modal{
-          --ult-bg:rgba(10,10,11,.95);
-          --ult-bg-secondary:#131318;
-          --ult-bg-tertiary:#17181d;
-          --ult-bg-hover:#2a2b30;
-          --ult-bg-code:#0d1117;
-          --ult-border:#232327;
-          --ult-border-light:#1c1c22;
-          --ult-text:#f5f5f5;
-          --ult-text-secondary:#a1a1aa;
-          --ult-text-tertiary:#71717a;
-          --ult-text-muted:#a1a1aa;
-          --ult-pill-bg:#40434f;
-          --ult-pill-text:#fff;
-          --ult-pill-shadow:0 20px 38px rgba(0,0,0,.5),0 8px 18px rgba(0,0,0,.32);
-          --ult-modal-shadow:0 24px 60px rgba(0,0,0,.5),0 8px 24px rgba(0,0,0,.4);
-          --ult-msg-hover:rgba(19,19,24,.4);
-          --ult-msg-border:rgba(35,35,39,.6);
-          --ult-code-border:#30363d;
-          --ult-code-inline:#1e1e22;
-          --ult-tool-bg:rgba(4,133,255,.15);
-          --ult-tool-text:#5b9fff;
-          --ult-tool-hover-bg:rgba(4,133,255,.2);
-          --ult-tool-hover-text:#7db3ff
-        }
+        --ult-pill-bg:var(--ult-accent);--ult-pill-bg:light-dark(var(--ult-accent),#40434f);
+        --ult-pill-text:var(--ult-dark);--ult-pill-text:light-dark(var(--ult-dark),#fff);
+        --ult-pill-shadow:0 20px 38px rgba(2,6,23,.22),0 8px 18px rgba(2,6,23,.14);--ult-pill-shadow:0 20px 38px light-dark(rgba(2,6,23,.22),rgba(0,0,0,.5)),0 8px 18px light-dark(rgba(2,6,23,.14),rgba(0,0,0,.32));
+        --ult-modal-shadow:0 24px 60px rgba(2,6,23,.25),0 8px 24px rgba(2,6,23,.18);--ult-modal-shadow:0 24px 60px light-dark(rgba(2,6,23,.25),rgba(0,0,0,.5)),0 8px 24px light-dark(rgba(2,6,23,.18),rgba(0,0,0,.4));
+        --ult-msg-hover:rgba(247,247,249,.4);--ult-msg-hover:light-dark(rgba(247,247,249,.4),rgba(19,19,24,.4));
+        --ult-msg-border:rgba(229,231,235,.6);--ult-msg-border:light-dark(rgba(229,231,235,.6),rgba(35,35,39,.6));
+        --ult-code-border:#e5e7eb;--ult-code-border:light-dark(#e5e7eb,#30363d);
+        --ult-code-inline:#f4f4f5;--ult-code-inline:light-dark(#f4f4f5,#1e1e22);
+        --ult-tool-bg:#ebf4ff;--ult-tool-bg:light-dark(#ebf4ff,rgba(4,133,255,.15));
+        --ult-tool-text:#0485ff;--ult-tool-text:light-dark(#0485ff,#5b9fff);
+        --ult-tool-hover-bg:#d9ebff;--ult-tool-hover-bg:light-dark(#d9ebff,rgba(4,133,255,.2));
+        --ult-tool-hover-text:#0475e6;--ult-tool-hover-text:light-dark(#0475e6,#7db3ff)
       }
       /* ========== END COLOR PALETTE ========== */
 
@@ -363,7 +392,7 @@ class UltralyticsChat {
       .ultralytics-chat-pill:hover{transform:scale(1.05) translateZ(0)}
       .ultralytics-chat-pill:focus-visible{outline:none;box-shadow:0 0 0 3px var(--ult-primary)}
       .ultralytics-chat-pill.hidden{opacity:0;pointer-events:none}
-      .ultralytics-chat-pill img{width:30px;height:30px;border-radius:3px}
+      .ultralytics-chat-pill img{width:30px;height:30px;border-radius:3px;pointer-events:none}
 
       .ult-chat-modal{all:initial;font-family:system-ui,sans-serif;
         position:fixed;left:50%;top:50%;width:min(760px,calc(100vw - 40px));height:min(80vh,820px);background:var(--ult-bg);border:0;border-radius:16px;
@@ -383,7 +412,7 @@ class UltralyticsChat {
       .ult-icon-btn:hover{transform:translateY(-1px);color:var(--ult-text);background:var(--ult-bg-hover)}
       .ult-icon-btn:focus-visible{box-shadow:0 0 0 2px var(--ult-primary)}
 
-      .ult-welcome{padding:18px}.ult-welcome h1{font-size:16px;margin:0 0 6px}.ult-welcome p{margin:0;color:var(--ult-text-muted)}
+      .ult-welcome{padding:18px}.ult-welcome-title{all:unset;display:block;font-size:16px;font-weight:700;margin:0 0 6px;color:var(--ult-text);line-height:1.4}.ult-welcome p{all:unset;display:block;margin:0;color:var(--ult-text-muted);font-size:14px;line-height:1.5}
       .ult-examples{padding:12px 18px 6px;display:flex;flex-wrap:wrap;gap:10px}
       .ult-example{padding:10px 12px;background:var(--ult-bg-secondary);border:0;border-radius:999px;cursor:pointer;font-size:12px;color:var(--ult-text);transition:.12s;touch-action:manipulation;outline:none}
       .ult-example:hover{transform:translateY(-1px);filter:brightness(.98)}
@@ -415,8 +444,8 @@ class UltralyticsChat {
       .ult-message th,.ult-message td{border:1px solid var(--ult-border);padding:6px 10px;text-align:left}
       .ult-message th{font-weight:600}
       .ult-code-block{position:relative;margin:6px 0}
-      .ult-global-tooltip{position:fixed;background:#1f2937;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:500;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .1s;z-index:10003;transform:translate(-50%,-100%)}
-      .ult-global-tooltip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:4px solid transparent;border-top-color:#1f2937}
+      .ult-global-tooltip{position:fixed;background:#1f2937;background:light-dark(#1f2937,#374151);color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:500;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .1s;z-index:10003;transform:translate(-50%,-100%)}
+      .ult-global-tooltip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:4px solid transparent;border-top-color:#1f2937;border-top-color:light-dark(#1f2937,#374151)}
       .ult-global-tooltip.show{opacity:1}
       .ult-code-copy{position:absolute;top:8px;right:8px;background:var(--ult-bg-tertiary);border:0;border-radius:8px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:0;transition:.12s;color:var(--ult-text-secondary)}
       .ult-code-block:hover .ult-code-copy{opacity:1}
@@ -498,7 +527,7 @@ class UltralyticsChat {
         .ult-chat-messages{flex:1 1 0;min-height:0;padding:0 0 8px 0;overflow-y:auto;overflow-x:hidden;overscroll-behavior-y:contain;-webkit-overflow-scrolling:touch}
         .ult-chat-modal.welcome-mode .ult-chat-messages{display:none}
         .ult-welcome{padding:10px 14px 0}
-        .ult-welcome h1{font-size:15px;margin:0 0 4px}
+        .ult-welcome-title{font-size:15px;margin:0 0 4px}
         .ult-welcome p{font-size:13px;margin:0;line-height:1.35}
         .ult-examples{padding:6px 14px;gap:6px;flex-wrap:wrap}
         .ult-example{padding:8px 11px;font-size:12px}
@@ -523,10 +552,7 @@ class UltralyticsChat {
         .ultralytics-chat-pill{right:14px;bottom:28px;padding:12px 18px;font-size:16px}
         .ultralytics-chat-pill img{width:28px;height:28px}
       }
-      @media (prefers-color-scheme:dark){
-        .ult-global-tooltip{background:#374151}
-        .ult-global-tooltip::after{border-top-color:#374151}
-      }`;
+      `;
     this.styleElement = this.el("style", "", styleContent);
     document.head.appendChild(this.styleElement);
   }
@@ -575,7 +601,7 @@ class UltralyticsChat {
     this.refs.modal = this.el(
       "div",
       "ult-chat-modal",
-      `<div class="ult-chat-header"><div class="ult-chat-title"><a href="${this.escapeHtml(logoUrl)}" target="_blank" rel="noopener"><img src="${this.escapeHtml(logo)}" alt="${this.escapeHtml(name)}" /></a><div class="ult-subtle">${this.escapeHtml(tagline)}</div></div><div class="ult-header-actions"><button class="ult-icon-btn ult-chat-copy" aria-label="${this.escapeHtml(copyText)}" data-tooltip="${this.escapeHtml(copyText)}">${this.icon("copy")}</button><button class="ult-icon-btn ult-chat-download" aria-label="${this.escapeHtml(downloadText)}" data-tooltip="${this.escapeHtml(downloadText)}">${this.icon("download")}</button><button class="ult-icon-btn ult-chat-clear" aria-label="${this.escapeHtml(clearText)}" data-tooltip="${this.escapeHtml(clearText)}">${this.icon("refresh")}</button><button class="ult-icon-btn ult-chat-close" aria-label="Close" data-tooltip="Close">${this.icon("close")}</button></div></div><div id="ult-welcome" class="ult-welcome" style="display:none"><h1>${this.escapeHtml(title)}</h1><p>${message}</p></div><div id="ult-examples" class="ult-examples" style="display:none"></div><div class="ult-chat-messages" id="ult-messages" aria-live="polite"></div><div class="ult-chat-input-container"><div class="ult-chat-input-wrapper"><div class="ult-chat-input-row"><button class="ult-tool-add" aria-label="Add tools" data-tooltip="Add tools">${this.icon("plus")}</button><textarea name="message" class="ult-chat-input" placeholder="${this.escapeHtml(placeholder)}" rows="1" maxlength="${this.config.maxMessageLength}" autocomplete="off"></textarea><button class="ult-chat-send" aria-label="Ready" data-tooltip="Ready" style="display:none"><span class="ult-icon-swap" data-icon="square">${this.icon("square")}</span></button></div><div class="ult-tool-badges hidden"></div><div class="ult-tools-dropdown"></div></div></div><div class="ult-chat-footer">Powered by <a href="https://github.com/ultralytics/llm" target="_blank" rel="noopener">Ultralytics Chat</a></div>`,
+      `<div class="ult-chat-header"><div class="ult-chat-title"><a href="${this.escapeHtml(logoUrl)}" target="_blank" rel="noopener"><img src="${this.escapeHtml(logo)}" alt="${this.escapeHtml(name)}" /></a><div class="ult-subtle">${this.escapeHtml(tagline)}</div></div><div class="ult-header-actions"><button class="ult-icon-btn ult-chat-copy" aria-label="${this.escapeHtml(copyText)}" data-tooltip="${this.escapeHtml(copyText)}">${this.icon("copy")}</button><button class="ult-icon-btn ult-chat-download" aria-label="${this.escapeHtml(downloadText)}" data-tooltip="${this.escapeHtml(downloadText)}">${this.icon("download")}</button><button class="ult-icon-btn ult-chat-clear" aria-label="${this.escapeHtml(clearText)}" data-tooltip="${this.escapeHtml(clearText)}">${this.icon("refresh")}</button><button class="ult-icon-btn ult-chat-close" aria-label="Close" data-tooltip="Close">${this.icon("close")}</button></div></div><div id="ult-welcome" class="ult-welcome" style="display:none"><div class="ult-welcome-title">${this.escapeHtml(title)}</div><p>${message}</p></div><div id="ult-examples" class="ult-examples" style="display:none"></div><div class="ult-chat-messages" id="ult-messages" aria-live="polite"></div><div class="ult-chat-input-container"><div class="ult-chat-input-wrapper"><div class="ult-chat-input-row"><button class="ult-tool-add" aria-label="Add tools" data-tooltip="Add tools">${this.icon("plus")}</button><textarea name="message" class="ult-chat-input" placeholder="${this.escapeHtml(placeholder)}" rows="1" maxlength="${this.config.maxMessageLength}" autocomplete="off"></textarea><button class="ult-chat-send" aria-label="Ready" data-tooltip="Ready" style="display:none"><span class="ult-icon-swap" data-icon="square">${this.icon("square")}</span></button></div><div class="ult-tool-badges hidden"></div><div class="ult-tools-dropdown"></div></div></div><div class="ult-chat-footer">Powered by <a href="https://github.com/ultralytics/llm" target="_blank" rel="noopener">Ultralytics Chat</a></div>`,
     );
     this.refs.modal.setAttribute("role", "dialog");
     this.refs.modal.setAttribute("aria-modal", "true");
@@ -834,6 +860,59 @@ class UltralyticsChat {
       const trimmed = this.trimMessage(messageDiv.textContent || "", messageDiv);
       if (trimmed !== (messageDiv.textContent || "")) messageDiv.textContent = trimmed;
     });
+    this.setupPillDrag();
+  }
+
+  setupPillDrag() {
+    const pill = this.refs.pill;
+    let ox, oy, rect, moved;
+
+    const onMove = (e) => {
+      const dx = e.clientX - ox,
+        dy = e.clientY - oy;
+      if (!moved && Math.abs(dx) < 5 && Math.abs(dy) < 5) return;
+      moved = true;
+      pill.style.left = Math.max(0, Math.min(window.innerWidth - rect.width, rect.left + dx)) + "px";
+      pill.style.top = Math.max(0, Math.min(window.innerHeight - rect.height, rect.top + dy)) + "px";
+    };
+
+    const onUp = (e) => {
+      document.removeEventListener("pointermove", onMove);
+      document.removeEventListener("pointerup", onUp);
+      document.removeEventListener("pointercancel", onUp);
+      pill.releasePointerCapture(e.pointerId);
+      pill.style.cursor = "";
+      if (moved) {
+        // Convert absolute left/top back to corner-relative offsets so CSS
+        // handles resize natively (pill stays anchored to its nearest corner).
+        const r = pill.getBoundingClientRect();
+        const fromRight = window.innerWidth - r.right;
+        const fromBottom = window.innerHeight - r.bottom;
+        const useLeft = r.left <= fromRight;
+        const useTop = r.top <= fromBottom;
+        Object.assign(pill.style, {
+          left: useLeft ? r.left + "px" : "auto",
+          right: useLeft ? "auto" : fromRight + "px",
+          top: useTop ? r.top + "px" : "auto",
+          bottom: useTop ? "auto" : fromBottom + "px",
+        });
+        pill.addEventListener("click", (ev) => ev.stopImmediatePropagation(), { once: true, capture: true });
+      }
+    };
+
+    this.on(pill, "pointerdown", (e) => {
+      if (e.button !== 0) return;
+      rect = pill.getBoundingClientRect();
+      ox = e.clientX;
+      oy = e.clientY;
+      moved = false;
+      pill.style.cursor = "grabbing";
+      Object.assign(pill.style, { right: "auto", bottom: "auto", left: rect.left + "px", top: rect.top + "px" });
+      pill.setPointerCapture(e.pointerId);
+      document.addEventListener("pointermove", onMove);
+      document.addEventListener("pointerup", onUp, { once: true });
+      document.addEventListener("pointercancel", onUp, { once: true });
+    });
   }
 
   toggle(forceOpen = null, mode = null) {
@@ -901,7 +980,8 @@ class UltralyticsChat {
       if (this.refs.input) this.refs.input.placeholder = this.config.ui.placeholder;
       if (tagline) tagline.textContent = this.config.branding.tagline;
       const { title, message, chatExamples } = this.config.welcome;
-      if (this.refs.welcome) this.refs.welcome.innerHTML = `<h1>${this.escapeHtml(title)}</h1><p>${message}</p>`;
+      if (this.refs.welcome)
+        this.refs.welcome.innerHTML = `<div class="ult-welcome-title">${this.escapeHtml(title)}</div><p>${message}</p>`;
       this.setExamples(chatExamples || []);
       this.renderChatHistory();
     }
@@ -1179,6 +1259,7 @@ class UltralyticsChat {
         session_id: this.sessionId,
         context: this.getPageContext(),
       };
+      if (this.config.instructions) body.instructions = this.config.instructions;
       if (safeEditIndex !== null) body.edit_index = safeEditIndex;
       if (this.selectedTools.size > 0) body.tools = [...this.selectedTools];
       const res = await fetch(this.apiUrl, {
