@@ -4,7 +4,7 @@ class UltralyticsChat {
   constructor(config = {}) {
     const d = (o, k, v) => o?.[k] ?? v;
     this.config = {
-      apiUrl: d(config, "apiUrl", "https://chat-885297101091.us-central1.run.app/api/chat"),
+      apiUrl: d(config, "apiUrl", "https://ul.run/chat/v1/chat"),
       instructions: d(config, "instructions", null),
       maxMessageLength: d(config, "maxMessageLength", 10000),
       pageContent: d(config, "pageContent", false),
