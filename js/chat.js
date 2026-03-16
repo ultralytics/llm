@@ -906,7 +906,8 @@ class UltralyticsChat {
         });
         const blocker = (ev) => ev.stopImmediatePropagation();
         pill.addEventListener("click", blocker, { once: true, capture: true });
-        setTimeout(() => pill.removeEventListener("click", blocker, { capture: true }), 500);
+        // 300ms: maximum possible delay between pointerup and click (mobile tap delay)
+        setTimeout(() => pill.removeEventListener("click", blocker, { capture: true }), 300);
       }
     };
 
