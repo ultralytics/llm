@@ -388,7 +388,7 @@ class UltralyticsChat {
         color:var(--ult-pill-text);border:0;cursor:pointer;font-size:18px;font-weight:500;box-shadow:var(--ult-pill-shadow);
         z-index:10000;transition:opacity .2s ease-out,transform .15s ease-out;
         display:inline-flex;align-items:center;gap:10px;transform:scale(1) translateZ(0);opacity:1;
-        -webkit-user-select:none;user-select:none;touch-action:manipulation;will-change:opacity,transform}
+        -webkit-user-select:none;user-select:none;touch-action:none;will-change:opacity,transform}
       .ultralytics-chat-pill:hover{transform:scale(1.05) translateZ(0)}
       .ultralytics-chat-pill:focus-visible{outline:none;box-shadow:0 0 0 3px var(--ult-primary)}
       .ultralytics-chat-pill.hidden{opacity:0;pointer-events:none}
@@ -871,7 +871,11 @@ class UltralyticsChat {
       const dx = e.clientX - ox,
         dy = e.clientY - oy;
       if (!moved && Math.abs(dx) < 5 && Math.abs(dy) < 5) return;
-      moved = true;
+      if (!moved) {
+        moved = true;
+        pill.style.cursor = "grabbing";
+        Object.assign(pill.style, { right: "auto", bottom: "auto", left: rect.left + "px", top: rect.top + "px" });
+      }
       pill.style.left = Math.max(0, Math.min(window.innerWidth - rect.width, rect.left + dx)) + "px";
       pill.style.top = Math.max(0, Math.min(window.innerHeight - rect.height, rect.top + dy)) + "px";
     };
@@ -896,7 +900,9 @@ class UltralyticsChat {
           top: useTop ? r.top + "px" : "auto",
           bottom: useTop ? "auto" : fromBottom + "px",
         });
-        pill.addEventListener("click", (ev) => ev.stopImmediatePropagation(), { once: true, capture: true });
+        const blocker = (ev) => ev.stopImmediatePropagation();
+        pill.addEventListener("click", blocker, { once: true, capture: true });
+        setTimeout(() => pill.removeEventListener("click", blocker, { capture: true }), 500);
       }
     };
 
@@ -906,8 +912,6 @@ class UltralyticsChat {
       ox = e.clientX;
       oy = e.clientY;
       moved = false;
-      pill.style.cursor = "grabbing";
-      Object.assign(pill.style, { right: "auto", bottom: "auto", left: rect.left + "px", top: rect.top + "px" });
       pill.setPointerCapture(e.pointerId);
       document.addEventListener("pointermove", onMove);
       document.addEventListener("pointerup", onUp, { once: true });
