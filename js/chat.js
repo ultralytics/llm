@@ -865,7 +865,7 @@ class UltralyticsChat {
 
   setupPillDrag() {
     const pill = this.refs.pill;
-    let ox, oy, rect, moved;
+    let ox, oy, rect, moved, lastLeft, lastTop;
 
     const onMove = (e) => {
       const dx = e.clientX - ox,
@@ -876,8 +876,10 @@ class UltralyticsChat {
         pill.style.cursor = "grabbing";
         Object.assign(pill.style, { right: "auto", bottom: "auto", left: rect.left + "px", top: rect.top + "px" });
       }
-      pill.style.left = Math.max(0, Math.min(window.innerWidth - rect.width, rect.left + dx)) + "px";
-      pill.style.top = Math.max(0, Math.min(window.innerHeight - rect.height, rect.top + dy)) + "px";
+      lastLeft = Math.max(0, Math.min(window.innerWidth - rect.width, rect.left + dx));
+      lastTop = Math.max(0, Math.min(window.innerHeight - rect.height, rect.top + dy));
+      pill.style.left = lastLeft + "px";
+      pill.style.top = lastTop + "px";
     };
 
     const onUp = (e) => {
@@ -889,15 +891,17 @@ class UltralyticsChat {
       if (moved) {
         // Convert absolute left/top back to corner-relative offsets so CSS
         // handles resize natively (pill stays anchored to its nearest corner).
-        const r = pill.getBoundingClientRect();
-        const fromRight = window.innerWidth - r.right;
-        const fromBottom = window.innerHeight - r.bottom;
-        const useLeft = r.left <= fromRight;
-        const useTop = r.top <= fromBottom;
+        // Use tracked CSS values + offsetWidth/Height (unaffected by transforms)
+        // instead of getBoundingClientRect() which includes :hover scale.
+        const pw = pill.offsetWidth, ph = pill.offsetHeight;
+        const fromRight = window.innerWidth - lastLeft - pw;
+        const fromBottom = window.innerHeight - lastTop - ph;
+        const useLeft = lastLeft <= fromRight;
+        const useTop = lastTop <= fromBottom;
         Object.assign(pill.style, {
-          left: useLeft ? r.left + "px" : "auto",
+          left: useLeft ? lastLeft + "px" : "auto",
           right: useLeft ? "auto" : fromRight + "px",
-          top: useTop ? r.top + "px" : "auto",
+          top: useTop ? lastTop + "px" : "auto",
           bottom: useTop ? "auto" : fromBottom + "px",
         });
         const blocker = (ev) => ev.stopImmediatePropagation();
