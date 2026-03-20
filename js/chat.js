@@ -2,6 +2,8 @@
 
 class UltralyticsChat {
   constructor(config = {}) {
+    if (UltralyticsChat._instance) return UltralyticsChat._instance;
+    UltralyticsChat._instance = this;
     const d = (o, k, v) => o?.[k] ?? v;
     this.config = {
       apiUrl: d(config, "apiUrl", "https://chat-885297101091.us-central1.run.app/api/chat"),
@@ -338,6 +340,7 @@ class UltralyticsChat {
     this.refs.pill?.remove();
     this.refs.tooltip?.remove();
     this.refs = {};
+    UltralyticsChat._instance = null;
   }
 
   createStyles() {
