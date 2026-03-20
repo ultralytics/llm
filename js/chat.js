@@ -3,7 +3,6 @@
 class UltralyticsChat {
   constructor(config = {}) {
     if (UltralyticsChat._instance) return UltralyticsChat._instance;
-    UltralyticsChat._instance = this;
     const d = (o, k, v) => o?.[k] ?? v;
     this.config = {
       apiUrl: d(config, "apiUrl", "https://chat-885297101091.us-central1.run.app/api/chat"),
@@ -86,6 +85,7 @@ class UltralyticsChat {
     this.totalUserMessages = null;
     this.activeUserMessages = null;
     this.init();
+    UltralyticsChat._instance = this;
   }
 
   qs = (sel, root = document) => root.querySelector(sel);
