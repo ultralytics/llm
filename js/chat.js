@@ -393,6 +393,8 @@ class UltralyticsChat {
       .ultralytics-chat-pill:focus-visible{outline:none;box-shadow:0 0 0 3px var(--ult-primary)}
       .ultralytics-chat-pill.hidden{opacity:0;pointer-events:none}
       .ultralytics-chat-pill img{width:30px;height:30px;border-radius:3px;pointer-events:none}
+      @keyframes ult-nudge{0%{transform:translateX(0)}40%{transform:translateX(-25px)}100%{transform:translateX(0)}}
+      .ultralytics-chat-pill.ult-nudge{animation:ult-nudge .6s cubic-bezier(.34,1.56,.64,1)}
 
       .ult-chat-modal{all:initial;font-family:system-ui,sans-serif;
         position:fixed;left:50%;top:50%;width:min(760px,calc(100vw - 40px));height:min(80vh,820px);background:var(--ult-bg);border:0;border-radius:16px;
@@ -866,6 +868,7 @@ class UltralyticsChat {
   setupPillDrag() {
     const pill = this.refs.pill;
     let ox, oy, rect, moved, lastLeft, lastTop;
+    let nudged = false;
 
     const onMove = (e) => {
       const dx = e.clientX - ox,
@@ -912,6 +915,7 @@ class UltralyticsChat {
     };
 
     this.on(pill, "pointerdown", (e) => {
+      nudged = true;
       if (e.button !== 0) return;
       rect = pill.getBoundingClientRect();
       ox = e.clientX;
@@ -922,6 +926,16 @@ class UltralyticsChat {
       document.addEventListener("pointerup", onUp, { once: true });
       document.addEventListener("pointercancel", onUp, { once: true });
     });
+
+    if (!sessionStorage.getItem("ult-pill-nudged")) {
+      setTimeout(() => {
+        if (nudged) return;
+        nudged = true;
+        pill.classList.add("ult-nudge");
+        pill.addEventListener("animationend", () => pill.classList.remove("ult-nudge"), { once: true });
+        sessionStorage.setItem("ult-pill-nudged", "1");
+      }, 1500);
+    }
   }
 
   toggle(forceOpen = null, mode = null) {
