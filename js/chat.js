@@ -1,8 +1,8 @@
 // Ultralytics 🚀 AGPL-3.0 License - https://ultralytics.com/license
 
 class UltralyticsChat {
-  /** Unified glass blur — matches Platform's BLUR constant: `backdrop-blur-md backdrop-saturate-[1.2]` */
-  static BLUR = "blur(12px) saturate(120%)";
+  /** Unified glass blur — matches Platform's BLUR constant: `backdrop-blur backdrop-saturate-[1.2]` */
+  static BLUR = "blur(8px) saturate(120%)";
 
   constructor(config = {}) {
     if (UltralyticsChat._instance) return UltralyticsChat._instance;
