@@ -1,6 +1,9 @@
 // Ultralytics 🚀 AGPL-3.0 License - https://ultralytics.com/license
 
 class UltralyticsChat {
+  /** Unified glass blur — matches Platform's BLUR constant: `backdrop-blur-md backdrop-saturate-[1.2]` */
+  static BLUR = "blur(12px) saturate(120%)";
+
   constructor(config = {}) {
     if (UltralyticsChat._instance) return UltralyticsChat._instance;
     const d = (o, k, v) => o?.[k] ?? v;
@@ -383,7 +386,7 @@ class UltralyticsChat {
       /* ========== END COLOR PALETTE ========== */
 
       .ult-backdrop{display:none;position:fixed;inset:0;background:rgba(255,255,255,.07);
-        backdrop-filter:blur(5px) saturate(120%) brightness(1.025);-webkit-backdrop-filter:blur(5px) saturate(120%) brightness(1.025);
+        backdrop-filter:${UltralyticsChat.BLUR};-webkit-backdrop-filter:${UltralyticsChat.BLUR};
         z-index:9999;opacity:0;visibility:hidden;transition:opacity .2s ease-out,visibility .2s;pointer-events:none}
       .ult-backdrop.open{display:block;opacity:1;visibility:visible;pointer-events:auto}
 
