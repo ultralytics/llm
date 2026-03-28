@@ -406,7 +406,7 @@ class UltralyticsChat {
         opacity:0;transform:scale(.8);transition:opacity .15s,transform .15s,background .15s,color .15s;pointer-events:none;z-index:1}
       .ult-pill-close svg{width:13px;height:13px;stroke-width:2.5}
       .ultralytics-chat-pill:hover .ult-pill-close{opacity:1;transform:scale(1);pointer-events:auto}
-      .ult-pill-close:hover{background:light-dark(#ef4444,#dc2626);color:#fff}
+      .ult-pill-close:hover{background:light-dark(#e4e4e7,#3f3f46);color:light-dark(#18181b,#fafafa)}
       .ultralytics-chat-pill.pill-dismissed{opacity:0;pointer-events:none;transform:scale(.8) translateZ(0)}
 
       .ult-chat-modal{all:initial;font-family:system-ui,sans-serif;
@@ -588,7 +588,6 @@ class UltralyticsChat {
       square: '<rect x="4.8" y="4.8" width="14.4" height="14.4" rx="2" ry="2"/>',
       check: '<polyline points="20 6 9 17 4 12"/>',
       plus: '<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>',
-      circleX: '<circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/>',
       globe:
         '<circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>',
       github:
@@ -610,7 +609,7 @@ class UltralyticsChat {
     this.refs.pill = this.el(
       "button",
       "ultralytics-chat-pill",
-      `<button class="ult-pill-close" aria-label="Hide" data-tooltip="Hide">${this.icon("circleX")}</button><span>${this.escapeHtml(pillText)}</span><img src="${this.escapeHtml(logomark)}" alt="${this.escapeHtml(name)}" />`,
+      `<button class="ult-pill-close" aria-label="Hide" data-tooltip="Hide">${this.icon("close")}</button><span>${this.escapeHtml(pillText)}</span><img src="${this.escapeHtml(logomark)}" alt="${this.escapeHtml(name)}" />`,
     );
     this.refs.pill.setAttribute("aria-label", pillText);
     this.refs.pill.title = pillText;
