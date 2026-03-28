@@ -405,7 +405,7 @@ class UltralyticsChat {
         box-shadow:0 1px 3px rgba(0,0,0,.12),0 0 0 1px light-dark(rgba(0,0,0,.08),rgba(255,255,255,.08));
         opacity:0;transform:scale(.8);transition:opacity .15s,transform .15s,background .15s,color .15s;pointer-events:none;z-index:1}
       .ult-pill-close svg{width:13px;height:13px;stroke-width:2.5}
-      .ultralytics-chat-pill:hover .ult-pill-close{opacity:1;transform:scale(1);pointer-events:auto}
+      .ultralytics-chat-pill:hover .ult-pill-close{opacity:1;transform:scale(1);pointer-events:auto;transition-delay:.3s}
       .ult-pill-close:hover{background:light-dark(#e4e4e7,#3f3f46);color:light-dark(#18181b,#fafafa)}
       .ultralytics-chat-pill.pill-dismissed{opacity:0;pointer-events:none;transform:scale(.8) translateZ(0)}
 
@@ -612,7 +612,7 @@ class UltralyticsChat {
       `<button class="ult-pill-close" aria-label="Hide" data-tooltip="Hide">${this.icon("close")}</button><span>${this.escapeHtml(pillText)}</span><img src="${this.escapeHtml(logomark)}" alt="${this.escapeHtml(name)}" />`,
     );
     this.refs.pill.setAttribute("aria-label", pillText);
-    this.refs.pill.title = pillText;
+    // Note: no native title tooltip to avoid conflict with custom ult-global-tooltip
     document.body.appendChild(this.refs.pill);
 
     this.refs.modal = this.el(
