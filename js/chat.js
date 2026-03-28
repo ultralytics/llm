@@ -943,7 +943,7 @@ class UltralyticsChat {
     };
 
     this.on(pill, "pointerdown", (e) => {
-      if (e.button !== 0) return;
+      if (e.button !== 0 || e.target.closest(".ult-pill-close")) return;
       rect = pill.getBoundingClientRect();
       ox = e.clientX;
       oy = e.clientY;
