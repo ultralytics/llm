@@ -399,6 +399,15 @@ class UltralyticsChat {
       .ultralytics-chat-pill:focus-visible{outline:none;box-shadow:0 0 0 3px var(--ult-primary)}
       .ultralytics-chat-pill.hidden{opacity:0;pointer-events:none}
       .ultralytics-chat-pill img{width:30px;height:30px;border-radius:3px;pointer-events:none}
+      .ult-pill-close{position:absolute;top:-8px;left:-8px;width:22px;height:22px;border-radius:50%;border:0;padding:0;cursor:pointer;
+        display:flex;align-items:center;justify-content:center;
+        background:light-dark(#f4f4f5,#27272a);color:light-dark(#71717a,#a1a1aa);
+        box-shadow:0 1px 3px rgba(0,0,0,.12),0 0 0 1px light-dark(rgba(0,0,0,.08),rgba(255,255,255,.08));
+        opacity:0;transform:scale(.8);transition:opacity .15s,transform .15s,background .15s,color .15s;pointer-events:none;z-index:1}
+      .ult-pill-close svg{width:13px;height:13px;stroke-width:2.5}
+      .ultralytics-chat-pill:hover .ult-pill-close{opacity:1;transform:scale(1);pointer-events:auto}
+      .ult-pill-close:hover{background:light-dark(#ef4444,#dc2626);color:#fff}
+      .ultralytics-chat-pill.pill-dismissed{opacity:0;pointer-events:none;transform:scale(.8) translateZ(0)}
 
       .ult-chat-modal{all:initial;font-family:system-ui,sans-serif;
         position:fixed;left:50%;top:50%;width:min(760px,calc(100vw - 40px));height:min(80vh,820px);background:var(--ult-bg);border:0;border-radius:16px;
@@ -557,6 +566,8 @@ class UltralyticsChat {
         .ult-search-result-meta{font-size:11px}
         .ultralytics-chat-pill{right:14px;bottom:28px;padding:12px 18px;font-size:16px}
         .ultralytics-chat-pill img{width:28px;height:28px}
+        .ult-pill-close{top:-6px;left:-6px;width:20px;height:20px}
+        .ult-pill-close svg{width:12px;height:12px}
       }
       `;
     this.styleElement = this.el("style", "", styleContent);
@@ -577,6 +588,7 @@ class UltralyticsChat {
       square: '<rect x="4.8" y="4.8" width="14.4" height="14.4" rx="2" ry="2"/>',
       check: '<polyline points="20 6 9 17 4 12"/>',
       plus: '<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>',
+      circleX: '<circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/>',
       globe:
         '<circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>',
       github:
@@ -598,11 +610,12 @@ class UltralyticsChat {
     this.refs.pill = this.el(
       "button",
       "ultralytics-chat-pill",
-      `<span>${this.escapeHtml(pillText)}</span><img src="${this.escapeHtml(logomark)}" alt="${this.escapeHtml(name)}" />`,
+      `<button class="ult-pill-close" aria-label="Hide" data-tooltip="Hide">${this.icon("circleX")}</button><span>${this.escapeHtml(pillText)}</span><img src="${this.escapeHtml(logomark)}" alt="${this.escapeHtml(name)}" />`,
     );
     this.refs.pill.setAttribute("aria-label", pillText);
     this.refs.pill.title = pillText;
     document.body.appendChild(this.refs.pill);
+    if (localStorage.getItem("ult-pill-hidden") === "1") this.refs.pill.classList.add("pill-dismissed");
 
     this.refs.modal = this.el(
       "div",
@@ -693,6 +706,17 @@ class UltralyticsChat {
   attachEvents() {
     const m = this.refs.modal;
     this.setupTooltips();
+    const pillClose = this.qs(".ult-pill-close", this.refs.pill);
+    if (pillClose) {
+      this.on(pillClose, "click", (e) => {
+        e.stopPropagation();
+        localStorage.setItem("ult-pill-hidden", "1");
+        this.refs.pill.classList.add("pill-dismissed");
+        this.hideTooltip();
+      });
+      this.on(pillClose, "mouseenter", (e) => this.positionTooltip(e.currentTarget, "Hide"));
+      this.on(pillClose, "mouseleave", () => this.hideTooltip());
+    }
     this.on(this.refs.pill, "click", () => this.toggle(true, "chat"));
     this.on(this.refs.backdrop, "click", () => this.toggle());
     this.on(this.qs(".ult-chat-close", m), "click", () => this.toggle());
@@ -760,6 +784,8 @@ class UltralyticsChat {
       if (this.isOpen && e.key === "Escape") this.toggle(false);
       if (!this.isOpen && (e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
         e.preventDefault();
+        localStorage.removeItem("ult-pill-hidden");
+        this.refs.pill?.classList.remove("pill-dismissed");
         this.toggle(true);
       }
     });
