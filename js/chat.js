@@ -407,6 +407,7 @@ class UltralyticsChat {
       .ult-pill-close svg{width:13px;height:13px;stroke-width:2.5}
       .ultralytics-chat-pill:hover .ult-pill-close{opacity:1;transform:scale(1);pointer-events:auto;transition:opacity .15s .3s,transform .15s .3s,background .15s,color .15s}
       .ult-pill-close:hover{background:light-dark(#e4e4e7,#3f3f46);color:light-dark(#18181b,#fafafa)}
+      @media(pointer:coarse){.ult-pill-close{opacity:1;transform:scale(1);pointer-events:auto}}
       .ultralytics-chat-pill.pill-dismissed{opacity:0;pointer-events:none;transform:scale(.8) translateZ(0)}
 
       .ult-chat-modal{all:initial;font-family:system-ui,sans-serif;
@@ -607,12 +608,14 @@ class UltralyticsChat {
     this.refs.backdrop.style.display = "none";
 
     this.refs.pill = this.el(
-      "button",
+      "div",
       "ultralytics-chat-pill",
       `<button class="ult-pill-close" aria-label="Hide" data-tooltip="Hide">${this.icon("close")}</button><span>${this.escapeHtml(pillText)}</span><img src="${this.escapeHtml(logomark)}" alt="${this.escapeHtml(name)}" />`,
     );
+    this.refs.pill.setAttribute("role", "button");
+    this.refs.pill.setAttribute("tabindex", "0");
     this.refs.pill.setAttribute("aria-label", pillText);
-    // Note: no native title tooltip to avoid conflict with custom ult-global-tooltip
+    if (localStorage.getItem("ult-pill-dismissed")) this.refs.pill.classList.add("pill-dismissed");
     document.body.appendChild(this.refs.pill);
 
     this.refs.modal = this.el(
@@ -710,6 +713,7 @@ class UltralyticsChat {
         e.stopPropagation();
         this.refs.pill.classList.add("pill-dismissed");
         this.hideTooltip();
+        localStorage.setItem("ult-pill-dismissed", "1");
       });
       this.on(pillClose, "mouseenter", (e) => this.positionTooltip(e.currentTarget, "Hide"));
       this.on(pillClose, "mouseleave", () => this.hideTooltip());
