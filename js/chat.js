@@ -921,7 +921,8 @@ class UltralyticsChat {
         // handles resize natively (pill stays anchored to its nearest corner).
         // Use tracked CSS values + offsetWidth/Height (unaffected by transforms)
         // instead of getBoundingClientRect() which includes :hover scale.
-        const pw = pill.offsetWidth, ph = pill.offsetHeight;
+        const pw = pill.offsetWidth,
+          ph = pill.offsetHeight;
         const fromRight = window.innerWidth - lastLeft - pw;
         const fromBottom = window.innerHeight - lastTop - ph;
         const useLeft = lastLeft <= fromRight;
