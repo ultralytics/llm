@@ -614,7 +614,6 @@ class UltralyticsChat {
     this.refs.pill.setAttribute("aria-label", pillText);
     this.refs.pill.title = pillText;
     document.body.appendChild(this.refs.pill);
-    if (localStorage.getItem("ult-pill-hidden") === "1") this.refs.pill.classList.add("pill-dismissed");
 
     this.refs.modal = this.el(
       "div",
@@ -709,7 +708,6 @@ class UltralyticsChat {
     if (pillClose) {
       this.on(pillClose, "click", (e) => {
         e.stopPropagation();
-        localStorage.setItem("ult-pill-hidden", "1");
         this.refs.pill.classList.add("pill-dismissed");
         this.hideTooltip();
       });
@@ -783,7 +781,6 @@ class UltralyticsChat {
       if (this.isOpen && e.key === "Escape") this.toggle(false);
       if (!this.isOpen && (e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
         e.preventDefault();
-        localStorage.removeItem("ult-pill-hidden");
         this.refs.pill?.classList.remove("pill-dismissed");
         this.toggle(true);
       }
