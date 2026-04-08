@@ -399,6 +399,16 @@ class UltralyticsChat {
       .ultralytics-chat-pill:focus-visible{outline:none;box-shadow:0 0 0 3px var(--ult-primary)}
       .ultralytics-chat-pill.hidden{opacity:0;pointer-events:none}
       .ultralytics-chat-pill img{width:30px;height:30px;border-radius:3px;pointer-events:none}
+      .ult-pill-close{position:absolute;top:-8px;left:-8px;width:22px;height:22px;border-radius:50%;border:0;padding:0;cursor:pointer;
+        display:flex;align-items:center;justify-content:center;
+        background:light-dark(#f4f4f5,#27272a);color:light-dark(#71717a,#a1a1aa);
+        box-shadow:0 1px 3px rgba(0,0,0,.12),0 0 0 1px light-dark(rgba(0,0,0,.08),rgba(255,255,255,.08));
+        opacity:0;transform:scale(.8);transition:opacity .15s,transform .15s,background .15s,color .15s;pointer-events:none;z-index:1}
+      .ult-pill-close svg{width:13px;height:13px;stroke-width:2.5}
+      .ultralytics-chat-pill:hover .ult-pill-close{opacity:1;transform:scale(1);pointer-events:auto;transition:opacity .15s .3s,transform .15s .3s,background .15s,color .15s}
+      .ult-pill-close:hover{background:light-dark(#e4e4e7,#3f3f46);color:light-dark(#18181b,#fafafa)}
+      @media(pointer:coarse){.ult-pill-close{opacity:1;transform:scale(1);pointer-events:auto}}
+      .ultralytics-chat-pill.pill-dismissed{opacity:0;pointer-events:none;transform:scale(.8) translateZ(0)}
 
       .ult-chat-modal{all:initial;font-family:system-ui,sans-serif;
         position:fixed;left:50%;top:50%;width:min(760px,calc(100vw - 40px));height:min(80vh,820px);background:var(--ult-bg);border:0;border-radius:16px;
@@ -557,6 +567,8 @@ class UltralyticsChat {
         .ult-search-result-meta{font-size:11px}
         .ultralytics-chat-pill{right:14px;bottom:28px;padding:12px 18px;font-size:16px}
         .ultralytics-chat-pill img{width:28px;height:28px}
+        .ult-pill-close{top:-6px;left:-6px;width:20px;height:20px}
+        .ult-pill-close svg{width:12px;height:12px}
       }
       `;
     this.styleElement = this.el("style", "", styleContent);
@@ -596,12 +608,14 @@ class UltralyticsChat {
     this.refs.backdrop.style.display = "none";
 
     this.refs.pill = this.el(
-      "button",
+      "div",
       "ultralytics-chat-pill",
-      `<span>${this.escapeHtml(pillText)}</span><img src="${this.escapeHtml(logomark)}" alt="${this.escapeHtml(name)}" />`,
+      `<button class="ult-pill-close" aria-label="Hide" data-tooltip="Hide">${this.icon("close")}</button><span>${this.escapeHtml(pillText)}</span><img src="${this.escapeHtml(logomark)}" alt="${this.escapeHtml(name)}" />`,
     );
+    this.refs.pill.setAttribute("role", "button");
+    this.refs.pill.setAttribute("tabindex", "0");
     this.refs.pill.setAttribute("aria-label", pillText);
-    this.refs.pill.title = pillText;
+    if (localStorage.getItem("ult-pill-dismissed")) this.refs.pill.classList.add("pill-dismissed");
     document.body.appendChild(this.refs.pill);
 
     this.refs.modal = this.el(
@@ -693,6 +707,17 @@ class UltralyticsChat {
   attachEvents() {
     const m = this.refs.modal;
     this.setupTooltips();
+    const pillClose = this.qs(".ult-pill-close", this.refs.pill);
+    if (pillClose) {
+      this.on(pillClose, "click", (e) => {
+        e.stopPropagation();
+        this.refs.pill.classList.add("pill-dismissed");
+        this.hideTooltip();
+        localStorage.setItem("ult-pill-dismissed", "1");
+      });
+      this.on(pillClose, "mouseenter", (e) => this.positionTooltip(e.currentTarget, "Hide"));
+      this.on(pillClose, "mouseleave", () => this.hideTooltip());
+    }
     this.on(this.refs.pill, "click", () => this.toggle(true, "chat"));
     this.on(this.refs.backdrop, "click", () => this.toggle());
     this.on(this.qs(".ult-chat-close", m), "click", () => this.toggle());
@@ -760,6 +785,7 @@ class UltralyticsChat {
       if (this.isOpen && e.key === "Escape") this.toggle(false);
       if (!this.isOpen && (e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
         e.preventDefault();
+        this.refs.pill?.classList.remove("pill-dismissed");
         this.toggle(true);
       }
     });
@@ -919,7 +945,7 @@ class UltralyticsChat {
     };
 
     this.on(pill, "pointerdown", (e) => {
-      if (e.button !== 0) return;
+      if (e.button !== 0 || e.target.closest(".ult-pill-close")) return;
       rect = pill.getBoundingClientRect();
       ox = e.clientX;
       oy = e.clientY;
