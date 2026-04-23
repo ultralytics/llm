@@ -22,6 +22,7 @@ All fields are optional—sane defaults are applied whenever a value is omitted.
 const chat = new UltralyticsChat({
     apiUrl: "https://chat-885297101091.us-central1.run.app/api/chat", // SSE endpoint
     maxMessageLength: 10000, // Character cap enforced before sending
+    shortcut: "mod+k", // false | string | object
 
     branding: {
         name: "Ultralytics AI",
@@ -60,6 +61,8 @@ const chat = new UltralyticsChat({
 ```
 
 > `welcome.examples` is still supported as a fallback but the widget now differentiates between `chatExamples` and `searchExamples`.
+>
+> `shortcut` accepts `false`, a string such as `"meta+k"` / `"mod+k"`, or an object like `{ enabled: true, key: "k", meta: true, ctrl: true }`.
 
 The widget automatically snapshots the current page (`title`, `url`, `description`, and `path`) and forwards it to the backend as `context` on every chat request.
 

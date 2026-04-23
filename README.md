@@ -145,6 +145,14 @@ const chat = new UltralyticsChat({
     downloadText: "Download thread",
     clearText: "New chat",
   },
+
+  // Shortcut Configuration
+  shortcut: {
+    enabled: true,
+    key: "k",
+    meta: true,
+    ctrl: true, // either Cmd+K or Ctrl+K will match when both are true
+  },
 });
 ```
 
