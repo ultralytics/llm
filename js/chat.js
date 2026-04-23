@@ -7,8 +7,6 @@ class UltralyticsChat {
   constructor(config = {}) {
     if (UltralyticsChat._instance) return UltralyticsChat._instance;
     const d = (o, k, v) => o?.[k] ?? v;
-    const shouldHandleShortcut =
-      typeof config?.shouldHandleShortcut === "function" ? config.shouldHandleShortcut : null;
     this.config = {
       apiUrl: d(config, "apiUrl", "https://chat-885297101091.us-central1.run.app/api/chat"),
       instructions: d(config, "instructions", null),
@@ -62,8 +60,8 @@ class UltralyticsChat {
         downloadText: d(config.ui, "downloadText", "Download thread"),
         clearText: d(config.ui, "clearText", "New chat"),
       },
-      shortcut: this.normalizeShortcutConfig(d(config, "shortcut", "mod+k")),
-      shouldHandleShortcut,
+      shouldHandleShortcut:
+        typeof config?.shouldHandleShortcut === "function" ? config.shouldHandleShortcut : null,
     };
     this.apiUrl = this.config.apiUrl;
     this.feedbackUrl =
@@ -160,86 +158,10 @@ class UltralyticsChat {
     this.listeners.get(el).push({ ev, fn, opts });
   }
 
-  normalizeShortcutConfig(shortcut) {
-    if (shortcut === false) return { enabled: false };
-    if (shortcut == null || shortcut === true) shortcut = "mod+k";
-    if (typeof shortcut === "string") return this.parseShortcutString(shortcut);
-    if (typeof shortcut === "object") return this.parseShortcutObject(shortcut);
-    return this.parseShortcutString("mod+k");
-  }
-
-  parseShortcutString(shortcut) {
-    const tokens = String(shortcut)
-      .split("+")
-      .map((token) => token.trim().toLowerCase())
-      .filter(Boolean);
-    const config = {
-      enabled: true,
-      key: "",
-      meta: false,
-      ctrl: false,
-      alt: false,
-      shift: false,
-    };
-    for (const token of tokens) {
-      if (token === "cmd" || token === "command" || token === "meta") config.meta = true;
-      else if (token === "ctrl" || token === "control") config.ctrl = true;
-      else if (token === "alt" || token === "option") config.alt = true;
-      else if (token === "shift") config.shift = true;
-      else if (token === "mod") {
-        config.meta = true;
-        config.ctrl = true;
-      } else config.key = token;
-    }
-    return config.key ? config : { enabled: false };
-  }
-
-  parseShortcutObject(shortcut = {}) {
-    const key = typeof shortcut.key === "string" ? shortcut.key.trim().toLowerCase() : "";
-    return {
-      enabled: shortcut.enabled !== false && !!key,
-      key,
-      meta: shortcut.meta === true,
-      ctrl: shortcut.ctrl === true,
-      alt: shortcut.alt === true,
-      shift: shortcut.shift === true,
-    };
-  }
-
-  matchesShortcut(e, shortcut = this.config.shortcut) {
-    if (!shortcut?.enabled || !shortcut.key || e.key.toLowerCase() !== shortcut.key) return false;
-    if (shortcut.meta && shortcut.ctrl) {
-      if (!e.metaKey && !e.ctrlKey) return false;
-    } else {
-      if (!!shortcut.meta !== e.metaKey) return false;
-      if (!!shortcut.ctrl !== e.ctrlKey) return false;
-    }
-    if (!!shortcut.alt !== e.altKey) return false;
-    if (!!shortcut.shift !== e.shiftKey) return false;
-    return true;
-  }
-
   isEditableTarget(target) {
     if (!(target instanceof Element)) return false;
     if (target instanceof HTMLElement && target.isContentEditable) return true;
     return !!target.closest('input, textarea, select, [contenteditable], [role="textbox"]');
-  }
-
-  shouldIgnoreShortcutEvent(e, shortcut = this.config.shortcut) {
-    if (!shortcut?.enabled) return true;
-    if (e.defaultPrevented || e.isComposing || e.repeat) return true;
-    if (this.isEditableTarget(e.target)) return true;
-    return !this.matchesShortcut(e, shortcut);
-  }
-
-  hostAllowsShortcut(e) {
-    if (typeof this.config.shouldHandleShortcut !== "function") return true;
-    try {
-      return this.config.shouldHandleShortcut(e, this) !== false;
-    } catch (error) {
-      console.warn("shouldHandleShortcut failed", error);
-      return false;
-    }
   }
   el(tag, cls = "", html = "") {
     const e = document.createElement(tag);
@@ -844,7 +766,16 @@ class UltralyticsChat {
     });
     this.on(document, "keydown", (e) => {
       if (this.isOpen && e.key === "Escape") this.toggle(false);
-      if (!this.isOpen && !this.shouldIgnoreShortcutEvent(e) && this.hostAllowsShortcut(e)) {
+      if (
+        !this.isOpen &&
+        !e.defaultPrevented &&
+        !e.isComposing &&
+        !e.repeat &&
+        !this.isEditableTarget(e.target) &&
+        (e.metaKey || e.ctrlKey) &&
+        e.key.toLowerCase() === "k" &&
+        this.config.shouldHandleShortcut?.(e, this) !== false
+      ) {
         e.preventDefault();
         this.toggle(true);
       }

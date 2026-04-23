@@ -22,7 +22,6 @@ All fields are optional—sane defaults are applied whenever a value is omitted.
 const chat = new UltralyticsChat({
     apiUrl: "https://chat-885297101091.us-central1.run.app/api/chat", // SSE endpoint
     maxMessageLength: 10000, // Character cap enforced before sending
-    shortcut: "mod+k", // false | string | object
     shouldHandleShortcut: (event, chat) => {
         return !(event.target instanceof Element && event.target.closest("[data-site-search]"));
     },
@@ -64,8 +63,6 @@ const chat = new UltralyticsChat({
 ```
 
 > `welcome.examples` is still supported as a fallback but the widget now differentiates between `chatExamples` and `searchExamples`.
->
-> `shortcut` accepts `false`, a string such as `"meta+k"` / `"mod+k"`, or an object like `{ enabled: true, key: "k", meta: true, ctrl: true }`.
 >
 > `shouldHandleShortcut(event, chat)` lets the host veto the widget shortcut by returning `false`.
 

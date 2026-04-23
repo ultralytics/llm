@@ -146,13 +146,6 @@ const chat = new UltralyticsChat({
     clearText: "New chat",
   },
 
-  // Shortcut Configuration
-  shortcut: {
-    enabled: true,
-    key: "k",
-    meta: true,
-    ctrl: true, // either Cmd+K or Ctrl+K will match when both are true
-  },
   shouldHandleShortcut: (event, chat) => {
     return !(event.target instanceof Element && event.target.closest("[data-site-search]"));
   },
