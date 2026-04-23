@@ -98,6 +98,7 @@ chat.sessionId; // string|null - persisted session identifier
 #### Keyboard & Accessibility
 
 - `Cmd/Ctrl + K` toggles the widget.
+- The widget ignores its shortcut when the event was already prevented, is mid-composition, is auto-repeating, or originates inside editable fields.
 - `Esc` closes it.
 - `Enter` sends a message when not holding `Shift`.
 - `Shift + Enter` inserts a newline.

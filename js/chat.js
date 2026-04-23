@@ -215,6 +215,19 @@ class UltralyticsChat {
     if (!!shortcut.shift !== e.shiftKey) return false;
     return true;
   }
+
+  isEditableTarget(target) {
+    if (!(target instanceof Element)) return false;
+    if (target instanceof HTMLElement && target.isContentEditable) return true;
+    return !!target.closest('input, textarea, select, [contenteditable], [role="textbox"]');
+  }
+
+  shouldIgnoreShortcutEvent(e, shortcut = this.config.shortcut) {
+    if (!shortcut?.enabled) return true;
+    if (e.defaultPrevented || e.isComposing || e.repeat) return true;
+    if (this.isEditableTarget(e.target)) return true;
+    return !this.matchesShortcut(e, shortcut);
+  }
   el(tag, cls = "", html = "") {
     const e = document.createElement(tag);
     if (cls) e.className = cls;
@@ -818,7 +831,7 @@ class UltralyticsChat {
     });
     this.on(document, "keydown", (e) => {
       if (this.isOpen && e.key === "Escape") this.toggle(false);
-      if (!this.isOpen && this.matchesShortcut(e)) {
+      if (!this.isOpen && !this.shouldIgnoreShortcutEvent(e)) {
         e.preventDefault();
         this.toggle(true);
       }
