@@ -60,8 +60,7 @@ class UltralyticsChat {
         downloadText: d(config.ui, "downloadText", "Download thread"),
         clearText: d(config.ui, "clearText", "New chat"),
       },
-      shouldHandleShortcut:
-        typeof config?.shouldHandleShortcut === "function" ? config.shouldHandleShortcut : null,
+      shouldHandleShortcut: typeof config?.shouldHandleShortcut === "function" ? config.shouldHandleShortcut : null,
     };
     this.apiUrl = this.config.apiUrl;
     this.feedbackUrl =
