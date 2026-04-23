@@ -7,6 +7,8 @@ class UltralyticsChat {
   constructor(config = {}) {
     if (UltralyticsChat._instance) return UltralyticsChat._instance;
     const d = (o, k, v) => o?.[k] ?? v;
+    const shouldHandleShortcut =
+      typeof config?.shouldHandleShortcut === "function" ? config.shouldHandleShortcut : null;
     this.config = {
       apiUrl: d(config, "apiUrl", "https://chat-885297101091.us-central1.run.app/api/chat"),
       instructions: d(config, "instructions", null),
@@ -61,6 +63,7 @@ class UltralyticsChat {
         clearText: d(config.ui, "clearText", "New chat"),
       },
       shortcut: this.normalizeShortcutConfig(d(config, "shortcut", "mod+k")),
+      shouldHandleShortcut,
     };
     this.apiUrl = this.config.apiUrl;
     this.feedbackUrl =
@@ -227,6 +230,16 @@ class UltralyticsChat {
     if (e.defaultPrevented || e.isComposing || e.repeat) return true;
     if (this.isEditableTarget(e.target)) return true;
     return !this.matchesShortcut(e, shortcut);
+  }
+
+  hostAllowsShortcut(e) {
+    if (typeof this.config.shouldHandleShortcut !== "function") return true;
+    try {
+      return this.config.shouldHandleShortcut(e, this) !== false;
+    } catch (error) {
+      console.warn("shouldHandleShortcut failed", error);
+      return false;
+    }
   }
   el(tag, cls = "", html = "") {
     const e = document.createElement(tag);
@@ -831,7 +844,7 @@ class UltralyticsChat {
     });
     this.on(document, "keydown", (e) => {
       if (this.isOpen && e.key === "Escape") this.toggle(false);
-      if (!this.isOpen && !this.shouldIgnoreShortcutEvent(e)) {
+      if (!this.isOpen && !this.shouldIgnoreShortcutEvent(e) && this.hostAllowsShortcut(e)) {
         e.preventDefault();
         this.toggle(true);
       }
