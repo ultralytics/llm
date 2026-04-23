@@ -22,6 +22,9 @@ All fields are optional—sane defaults are applied whenever a value is omitted.
 const chat = new UltralyticsChat({
     apiUrl: "https://chat-885297101091.us-central1.run.app/api/chat", // SSE endpoint
     maxMessageLength: 10000, // Character cap enforced before sending
+    shouldHandleShortcut: (event, chat) => {
+        return !(event.target instanceof Element && event.target.closest("[data-site-search]"));
+    },
 
     branding: {
         name: "Ultralytics AI",
@@ -60,6 +63,8 @@ const chat = new UltralyticsChat({
 ```
 
 > `welcome.examples` is still supported as a fallback but the widget now differentiates between `chatExamples` and `searchExamples`.
+>
+> `shouldHandleShortcut(event, chat)` lets the host veto the widget shortcut by returning `false`.
 
 The widget automatically snapshots the current page (`title`, `url`, `description`, and `path`) and forwards it to the backend as `context` on every chat request.
 
@@ -95,6 +100,7 @@ chat.sessionId; // string|null - persisted session identifier
 #### Keyboard & Accessibility
 
 - `Cmd/Ctrl + K` toggles the widget.
+- The widget ignores its shortcut when the event was already prevented, is mid-composition, is auto-repeating, or originates inside editable fields.
 - `Esc` closes it.
 - `Enter` sends a message when not holding `Shift`.
 - `Shift + Enter` inserts a newline.

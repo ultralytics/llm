@@ -60,6 +60,7 @@ class UltralyticsChat {
         downloadText: d(config.ui, "downloadText", "Download thread"),
         clearText: d(config.ui, "clearText", "New chat"),
       },
+      shouldHandleShortcut: typeof config?.shouldHandleShortcut === "function" ? config.shouldHandleShortcut : null,
     };
     this.apiUrl = this.config.apiUrl;
     this.feedbackUrl =
@@ -154,6 +155,12 @@ class UltralyticsChat {
     el.addEventListener(ev, fn, opts);
     if (!this.listeners.has(el)) this.listeners.set(el, []);
     this.listeners.get(el).push({ ev, fn, opts });
+  }
+
+  isEditableTarget(target) {
+    if (!(target instanceof Element)) return false;
+    if (target instanceof HTMLElement && target.isContentEditable) return true;
+    return !!target.closest('input, textarea, select, [contenteditable], [role="textbox"]');
   }
   el(tag, cls = "", html = "") {
     const e = document.createElement(tag);
@@ -758,7 +765,16 @@ class UltralyticsChat {
     });
     this.on(document, "keydown", (e) => {
       if (this.isOpen && e.key === "Escape") this.toggle(false);
-      if (!this.isOpen && (e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+      if (
+        !this.isOpen &&
+        !e.defaultPrevented &&
+        !e.isComposing &&
+        !e.repeat &&
+        !this.isEditableTarget(e.target) &&
+        (e.metaKey || e.ctrlKey) &&
+        e.key.toLowerCase() === "k" &&
+        this.config.shouldHandleShortcut?.(e, this) !== false
+      ) {
         e.preventDefault();
         this.toggle(true);
       }

@@ -145,6 +145,10 @@ const chat = new UltralyticsChat({
     downloadText: "Download thread",
     clearText: "New chat",
   },
+
+  shouldHandleShortcut: (event, chat) => {
+    return !(event.target instanceof Element && event.target.closest("[data-site-search]"));
+  },
 });
 ```
 
