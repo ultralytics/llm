@@ -110,6 +110,7 @@ const chat = new UltralyticsChat({
   // API Configuration
   apiUrl: "/api/chat", // Chat endpoint that streams SSE
   maxMessageLength: 10000, // Character limit enforced per user message
+  analytics: true, // Set false to disable backend chat analytics and feedback logging
   pageContent: false, // Opt-in DOM scraping for rich page context (default: false)
 
   // Branding
@@ -171,6 +172,7 @@ Content-Type: application/json
     "description": "Visible page text or meta description",
     "path": "/docs/widget"
   },
+  "analytics": false,
   "edit_index": 3 // optional when user edits a previous turn
 }
 

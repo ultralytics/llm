@@ -11,6 +11,7 @@ class UltralyticsChat {
       apiUrl: d(config, "apiUrl", "https://chat-885297101091.us-central1.run.app/api/chat"),
       instructions: d(config, "instructions", null),
       maxMessageLength: d(config, "maxMessageLength", 10000),
+      analytics: d(config, "analytics", true),
       pageContent: d(config, "pageContent", false),
       branding: {
         name: d(config.branding, "name", "Ultralytics AI"),
@@ -820,8 +821,9 @@ class UltralyticsChat {
               .catch(console.error);
           }
         } else if (action === "like" || action === "dislike") {
-          this.feedback(action === "like" ? "up" : "down");
-          this.showCopySuccess(actionBtn);
+          void this.feedback(action === "like" ? "up" : "down").then((submitted) => {
+            if (submitted) this.showCopySuccess(actionBtn);
+          });
         } else if (action === "retry") {
           void this.retryLast();
         } else if (action === "edit") {
@@ -1098,11 +1100,13 @@ class UltralyticsChat {
   }
 
   async feedback(type) {
+    if (!this.config.analytics) return false;
+
     const vote = type === "up";
     const userCount = this.messages.filter((m) => m.role === "user").length;
     if (!userCount) {
       console.warn("feedback ignored: no user messages yet");
-      return;
+      return false;
     }
     const queryIndex = userCount - 1;
     try {
@@ -1118,8 +1122,10 @@ class UltralyticsChat {
       if (!response.ok) {
         throw new Error(`feedback failed with status ${response.status}`);
       }
+      return true;
     } catch (err) {
       console.warn("feedback failed", err);
+      return false;
     }
   }
 
@@ -1290,6 +1296,7 @@ class UltralyticsChat {
         messages: [{ role: "user", content: text }],
         session_id: this.sessionId,
         context: this.getPageContext(),
+        analytics: this.config.analytics,
       };
       if (this.config.instructions) body.instructions = this.config.instructions;
       if (safeEditIndex !== null) body.edit_index = safeEditIndex;
@@ -1410,10 +1417,13 @@ class UltralyticsChat {
 
   addMessageActions(group) {
     if (group.querySelector(".ult-message-actions")) return;
+    const feedbackActions = this.config.analytics
+      ? `<button class="ult-icon-btn" data-action="like" aria-label="Good response" data-tooltip="Good response">${this.icon("like")}</button><button class="ult-icon-btn" data-action="dislike" aria-label="Bad response" data-tooltip="Bad response">${this.icon("dislike")}</button>`
+      : "";
     const actions = this.el(
       "div",
       "ult-message-actions",
-      `<button class="ult-icon-btn" data-action="copy" aria-label="Copy response" data-tooltip="Copy response">${this.icon("copy")}</button><button class="ult-icon-btn" data-action="like" aria-label="Good response" data-tooltip="Good response">${this.icon("like")}</button><button class="ult-icon-btn" data-action="dislike" aria-label="Bad response" data-tooltip="Bad response">${this.icon("dislike")}</button><button class="ult-icon-btn" data-action="retry" aria-label="Try again" data-tooltip="Try again">${this.icon("refresh")}</button>`,
+      `<button class="ult-icon-btn" data-action="copy" aria-label="Copy response" data-tooltip="Copy response">${this.icon("copy")}</button>${feedbackActions}<button class="ult-icon-btn" data-action="retry" aria-label="Try again" data-tooltip="Try again">${this.icon("refresh")}</button>`,
     );
     group.appendChild(actions);
   }
