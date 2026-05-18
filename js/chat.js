@@ -11,6 +11,7 @@ class UltralyticsChat {
       apiUrl: d(config, "apiUrl", "https://chat-885297101091.us-central1.run.app/api/chat"),
       instructions: d(config, "instructions", null),
       maxMessageLength: d(config, "maxMessageLength", 10000),
+      analytics: d(config, "analytics", true),
       pageContent: d(config, "pageContent", false),
       branding: {
         name: d(config.branding, "name", "Ultralytics AI"),
@@ -1098,6 +1099,8 @@ class UltralyticsChat {
   }
 
   async feedback(type) {
+    if (!this.config.analytics) return;
+
     const vote = type === "up";
     const userCount = this.messages.filter((m) => m.role === "user").length;
     if (!userCount) {
@@ -1290,6 +1293,7 @@ class UltralyticsChat {
         messages: [{ role: "user", content: text }],
         session_id: this.sessionId,
         context: this.getPageContext(),
+        analytics: this.config.analytics,
       };
       if (this.config.instructions) body.instructions = this.config.instructions;
       if (safeEditIndex !== null) body.edit_index = safeEditIndex;

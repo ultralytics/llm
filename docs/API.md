@@ -66,7 +66,7 @@ const chat = new UltralyticsChat({
 >
 > `shouldHandleShortcut(event, chat)` lets the host veto the widget shortcut by returning `false`.
 
-The widget automatically snapshots the current page (`title`, `url`, `description`, and `path`) and forwards it to the backend as `context` on every chat request.
+The widget automatically snapshots the current page (`title`, `url`, `description`, and `path`) and forwards it to the backend as `context` on every chat request. Set `analytics: false` to keep chat responses enabled while asking the backend not to store chat analytics or feedback.
 
 #### Methods
 
@@ -132,6 +132,7 @@ Request body:
         "description": "Meta description value",
         "path": "/models/yolov9/"
     },
+    "analytics": false,
     "edit_index": 4
 }
 ```
