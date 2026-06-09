@@ -905,7 +905,9 @@ class UltralyticsChat {
       const lOff = Math.max(-l, l + pw - window.innerWidth, 0);
       const tOff = Math.max(-t, t + ph - window.innerHeight, 0);
       if (lOff && tOff) {
-        if (lOff < tOff) l = Math.max(0, Math.min(window.innerWidth - pw, l));
+        // An axis the pill cannot fit overflows unavoidably — re-clamp the other one
+        if (ph > window.innerHeight || (pw <= window.innerWidth && lOff < tOff))
+          l = Math.max(0, Math.min(window.innerWidth - pw, l));
         else t = Math.max(0, Math.min(window.innerHeight - ph, t));
       }
       return [l, t];
