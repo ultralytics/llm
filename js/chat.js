@@ -401,7 +401,7 @@ class UltralyticsChat {
       .ultralytics-chat-pill{position:fixed;right:16px;bottom:36px;padding:14px 22px;border-radius:9999px;background:var(--ult-pill-bg);
         color:var(--ult-pill-text);border:0;cursor:pointer;font-size:18px;font-weight:500;box-shadow:var(--ult-pill-shadow);
         z-index:10000;transition:opacity .2s ease-out,transform .15s ease-out;
-        display:inline-flex;align-items:center;gap:10px;transform:scale(1) translateZ(0);opacity:1;
+        display:inline-flex;align-items:center;gap:10px;transform:scale(1) translateZ(0);opacity:1;white-space:nowrap;
         -webkit-user-select:none;user-select:none;touch-action:none;will-change:opacity,transform}
       .ultralytics-chat-pill:hover{transform:scale(1.05) translateZ(0)}
       .ultralytics-chat-pill:focus-visible{outline:none;box-shadow:0 0 0 3px var(--ult-primary)}
@@ -889,7 +889,39 @@ class UltralyticsChat {
 
   setupPillDrag() {
     const pill = this.refs.pill;
+    const posKey = "ultralytics-chat-pill-position";
     let ox, oy, rect, moved, lastLeft, lastTop;
+    let parked = false;
+
+    // Users can park the pill up to 85% off-screen (the next best thing to
+    // removing it) — clamp drags, restores, and resizes to keep 15% visible.
+    const clamp = (left, top) => {
+      const pw = pill.offsetWidth,
+        ph = pill.offsetHeight;
+      return [
+        Math.max(-0.85 * pw, Math.min(window.innerWidth - 0.15 * pw, left)),
+        Math.max(-0.85 * ph, Math.min(window.innerHeight - 0.15 * ph, top)),
+      ];
+    };
+
+    // Convert absolute left/top to corner-relative offsets so CSS handles
+    // resize natively (pill stays anchored to its nearest corner). Use
+    // offsetWidth/Height (unaffected by transforms) instead of
+    // getBoundingClientRect() which includes :hover scale.
+    const anchor = (left, top) => {
+      const pw = pill.offsetWidth,
+        ph = pill.offsetHeight;
+      const fromRight = window.innerWidth - left - pw;
+      const fromBottom = window.innerHeight - top - ph;
+      const useLeft = left <= fromRight;
+      const useTop = top <= fromBottom;
+      Object.assign(pill.style, {
+        left: useLeft ? left + "px" : "auto",
+        right: useLeft ? "auto" : fromRight + "px",
+        top: useTop ? top + "px" : "auto",
+        bottom: useTop ? "auto" : fromBottom + "px",
+      });
+    };
 
     const onMove = (e) => {
       const dx = e.clientX - ox,
@@ -900,8 +932,7 @@ class UltralyticsChat {
         pill.style.cursor = "grabbing";
         Object.assign(pill.style, { right: "auto", bottom: "auto", left: rect.left + "px", top: rect.top + "px" });
       }
-      lastLeft = Math.max(0, Math.min(window.innerWidth - rect.width, rect.left + dx));
-      lastTop = Math.max(0, Math.min(window.innerHeight - rect.height, rect.top + dy));
+      [lastLeft, lastTop] = clamp(rect.left + dx, rect.top + dy);
       pill.style.left = lastLeft + "px";
       pill.style.top = lastTop + "px";
     };
@@ -913,22 +944,12 @@ class UltralyticsChat {
       pill.releasePointerCapture(e.pointerId);
       pill.style.cursor = "";
       if (moved) {
-        // Convert absolute left/top back to corner-relative offsets so CSS
-        // handles resize natively (pill stays anchored to its nearest corner).
-        // Use tracked CSS values + offsetWidth/Height (unaffected by transforms)
-        // instead of getBoundingClientRect() which includes :hover scale.
-        const pw = pill.offsetWidth,
-          ph = pill.offsetHeight;
-        const fromRight = window.innerWidth - lastLeft - pw;
-        const fromBottom = window.innerHeight - lastTop - ph;
-        const useLeft = lastLeft <= fromRight;
-        const useTop = lastTop <= fromBottom;
-        Object.assign(pill.style, {
-          left: useLeft ? lastLeft + "px" : "auto",
-          right: useLeft ? "auto" : fromRight + "px",
-          top: useTop ? lastTop + "px" : "auto",
-          bottom: useTop ? "auto" : fromBottom + "px",
-        });
+        parked = true;
+        anchor(lastLeft, lastTop);
+        try {
+          const { left, right, top, bottom } = pill.style;
+          localStorage.setItem(posKey, JSON.stringify({ left, right, top, bottom }));
+        } catch {}
         const blocker = (ev) => ev.stopImmediatePropagation();
         pill.addEventListener("click", blocker, { once: true, capture: true });
         // 300ms: maximum possible delay between pointerup and click (mobile tap delay)
@@ -946,6 +967,24 @@ class UltralyticsChat {
       document.addEventListener("pointermove", onMove);
       document.addEventListener("pointerup", onUp, { once: true });
       document.addEventListener("pointercancel", onUp, { once: true });
+    });
+
+    // Restore the parked position across page loads, re-clamped to the current
+    // viewport (offsetLeft/Top are viewport-relative for fixed elements).
+    try {
+      const saved = JSON.parse(localStorage.getItem(posKey));
+      if (saved) {
+        for (const k of ["left", "right", "top", "bottom"]) {
+          if (typeof saved[k] === "string") pill.style[k] = saved[k];
+        }
+        parked = true;
+        anchor(...clamp(pill.offsetLeft, pill.offsetTop));
+      }
+    } catch {}
+
+    // Keep a parked pill reachable when the window shrinks or rotates
+    this.on(window, "resize", () => {
+      if (parked) anchor(...clamp(pill.offsetLeft, pill.offsetTop));
     });
   }
 
