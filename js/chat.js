@@ -895,13 +895,20 @@ class UltralyticsChat {
 
     // Users can park the pill up to 85% off-screen (the next best thing to
     // removing it) — clamp drags, restores, and resizes to keep 15% visible.
+    // Only one axis may go off-screen at a time: a corner park would leave a
+    // tiny rounded sliver that is unusable as a touch target.
     const clamp = (left, top) => {
       const pw = pill.offsetWidth,
         ph = pill.offsetHeight;
-      return [
-        Math.max(-0.85 * pw, Math.min(window.innerWidth - 0.15 * pw, left)),
-        Math.max(-0.85 * ph, Math.min(window.innerHeight - 0.15 * ph, top)),
-      ];
+      let l = Math.max(-0.85 * pw, Math.min(window.innerWidth - 0.15 * pw, left));
+      let t = Math.max(-0.85 * ph, Math.min(window.innerHeight - 0.15 * ph, top));
+      const lOff = Math.max(-l, l + pw - window.innerWidth, 0);
+      const tOff = Math.max(-t, t + ph - window.innerHeight, 0);
+      if (lOff && tOff) {
+        if (lOff < tOff) l = Math.max(0, Math.min(window.innerWidth - pw, l));
+        else t = Math.max(0, Math.min(window.innerHeight - ph, t));
+      }
+      return [l, t];
     };
 
     // Convert absolute left/top to corner-relative offsets so CSS handles
