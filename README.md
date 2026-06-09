@@ -6,7 +6,7 @@
 
 [![CI](https://github.com/ultralytics/llm/actions/workflows/ci.yml/badge.svg)](https://github.com/ultralytics/llm/actions/workflows/ci.yml)
 [![Ultralytics Actions](https://github.com/ultralytics/llm/actions/workflows/format.yml/badge.svg)](https://github.com/ultralytics/llm/actions/workflows/format.yml)
-[![codecov](https://codecov.io/gh/ultralytics/llm/graph/badge.svg?token=CODECOV_TOKEN)](https://codecov.io/gh/ultralytics/llm)
+[![codecov](https://codecov.io/github/ultralytics/llm/branch/main/graph/badge.svg)](https://app.codecov.io/github/ultralytics/llm)
 [![Vercel Deploy](https://deploy-badge.vercel.app/vercel/chatjs-ultralytics?root=examples%2Fweb%2Fdemo)](https://chatjs-ultralytics.vercel.app/examples/web/demo)
 [![jsDelivr hits](https://data.jsdelivr.com/v1/package/gh/ultralytics/llm/badge?style=rounded)](https://www.jsdelivr.com/package/gh/ultralytics/llm)
 
