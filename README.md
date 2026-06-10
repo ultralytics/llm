@@ -18,7 +18,7 @@
 
 ## 🎯 Current Status
 
-> **⚠️ Experimental Development**: The chat widget ships as a CDN-ready `chat.min.js` bundle and as part of the `ultralytics-llm` Python package published on PyPI. Track tagged releases for production deployments and reserve `@main` for testing nightly changes.
+> **⚠️ Experimental Development**: The chat widget ships as a CDN-ready `chat.min.js` bundle. Track tagged releases for production deployments and reserve `@main` for testing nightly changes.
 >
 > **Ecosystem:** This repo hosts both the in-browser chat widget and the Python scaffolding we use for backend workflows. The widget is production ready, while the Python client remains a lightweight placeholder until the managed API is released.
 
@@ -33,7 +33,7 @@ Load the chat widget via [jsDelivr CDN](https://www.jsdelivr.com/package/gh/ultr
 <script src="https://cdn.jsdelivr.net/gh/ultralytics/llm@latest/js/chat.min.js"></script>
 
 <!-- Specific version (guaranteed stability) -->
-<script src="https://cdn.jsdelivr.net/gh/ultralytics/llm@v0.2.1/js/chat.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/ultralytics/llm@v0.2.12/js/chat.min.js"></script>
 
 <!-- Main branch (experimental, for testing) -->
 <script src="https://cdn.jsdelivr.net/gh/ultralytics/llm@main/js/chat.min.js"></script>
@@ -49,7 +49,7 @@ Load the chat widget via [jsDelivr CDN](https://www.jsdelivr.com/package/gh/ultr
 **Versioning Strategy:**
 
 - `@latest` - Always points to the newest tagged release (cache purged on new releases)
-- `@v0.0.1` - Specific version tags (permanent cache, high reliability)
+- `@v0.2.12` - Specific version tags (permanent cache, high reliability)
 - `@main` - Latest development code (12-hour cache, auto-purged on push)
 
 > **Note**: For production, use `@latest` or pin to a specific version tag. The `@main` branch is for testing and may contain breaking changes.
