@@ -2,6 +2,7 @@
 """Tests for Ultralytics LLM package."""
 
 import pytest
+
 from ultralytics_llm import LLMClient, __version__
 
 

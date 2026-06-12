@@ -280,7 +280,7 @@ Ultralytics thrives on community collaboration! While this repo is currently exp
 
 - **Bug Reports**: Found an issue? Report it on [GitHub Issues](https://github.com/ultralytics/llm/issues)
 - **Feature Requests**: Have an idea? Share it via [GitHub Issues](https://github.com/ultralytics/llm/issues)
-- **Pull Requests**: Want to contribute? Please read our [Contributing Guide](https://docs.ultralytics.com/help/contributing/) first
+- **Pull Requests**: Want to contribute? Please read our [Contributing Guide](https://docs.ultralytics.com/help/contributing) first
 - **Feedback**: Share your experience in our [Discord](https://discord.com/invite/ultralytics) or [Community Forums](https://community.ultralytics.com/)
 
 A heartfelt thank you 🙏 to all our contributors!
