@@ -89,13 +89,13 @@ Load the chat widget via [jsDelivr CDN](https://www.jsdelivr.com/package/gh/ultr
 
 ## 🎨 JavaScript Chat Features
 
-- **🎯 Zero Dependencies**: Standalone vanilla JavaScript (~1000 lines), no frameworks required
+- **🎯 Zero Dependencies**: Standalone vanilla JavaScript (~1700 lines), no frameworks required
 - **📱 Mobile Optimized**: Full iOS & Android support with orientation handling, safe area insets, and back button integration
 - **🌗 Dark Mode**: Automatic theme switching based on system preferences
 - **💻 Responsive**: Desktop modal and mobile full-screen layouts (WebKit, Blink, Gecko)
 - **⚡ Streaming**: Real-time SSE response streaming with abort support
 - **🔍 Search Mode**: Built-in documentation search capability
-- **💾 Session Management**: Persistent conversation history via localStorage
+- **💾 Session Management**: Server-issued session ID (`X-Session-ID` header) carried across messages
 - **♿ Accessible**: WCAG compliant with ARIA labels and keyboard navigation
 - **🎨 Customizable**: Full theme and branding control
 - **📄 Page Context**: Opt-in DOM scraping sends visible page content to the AI for context-aware responses
@@ -219,8 +219,10 @@ When the widget is switched to **Search** mode it will call the same base URL wi
 
 ```bash
 npm install -g terser
-terser js/chat.js -o js/chat.min.js -c -m
+terser js/chat.js -o js/chat.min.js -c -m --comments false
 ```
+
+> **Note**: You don't need to commit `chat.min.js` manually — the [Minify workflow](.github/workflows/minify.yml) rebuilds and commits it automatically on PRs that modify `js/chat.js`.
 
 ### Local Testing
 

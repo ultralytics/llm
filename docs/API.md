@@ -77,7 +77,7 @@ The widget automatically snapshots the current page (`title`, `url`, `descriptio
   Sends a prompt to the chat endpoint. While streaming, all editable user bubbles are locked and you can call `abortController.abort()` via the Stop button. When `mode === "search"` this method automatically forwards the query to `/search` instead of the SSE endpoint.
 
 - `clearSession()`  
-  Clears the in-memory conversation, removes `localStorage["ult-chat-session"]`, resets UI state, and focuses the composer.
+  Clears the in-memory conversation and session ID, resets UI state, and focuses the composer.
 
 - `setExamples(list)`  
   Replaces the welcome-example buttons with a new array of strings. Useful when the host site wants to control onboarding hints dynamically.
@@ -180,9 +180,9 @@ Response:
 
 ### Session Lifecycle
 
-1. The first outbound message omits `session_id`.
+1. The first outbound message sends `"session_id": null`.
 2. The backend returns `X-Session-ID`.
-3. The widget caches that value in `localStorage["ult-chat-session"]`.
+3. The widget keeps that value in memory (`chat.sessionId`) — it is not persisted, so each page load starts a new session.
 4. All subsequent chat calls send the cached ID until `clearSession()` or a user-triggered thread reset.
 
 ### Security
