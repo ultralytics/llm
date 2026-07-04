@@ -95,7 +95,7 @@ Load the chat widget via [jsDelivr CDN](https://www.jsdelivr.com/package/gh/ultr
 - **💻 Responsive**: Desktop modal and mobile full-screen layouts (WebKit, Blink, Gecko)
 - **⚡ Streaming**: Real-time SSE response streaming with abort support
 - **🔍 Search Mode**: Built-in documentation search capability
-- **💾 Session Management**: Persistent conversation history via localStorage
+- **💾 Session Management**: Server-issued session ID (`X-Session-ID` header) carried across messages
 - **♿ Accessible**: WCAG compliant with ARIA labels and keyboard navigation
 - **🎨 Customizable**: Full theme and branding control
 - **📄 Page Context**: Opt-in DOM scraping sends visible page content to the AI for context-aware responses

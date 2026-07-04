@@ -56,7 +56,7 @@ CI (`ci.yml`) runs the coverage command above on ubuntu/macos/windows × Python 
 
 ## Architecture
 
-This repo ships the Ultralytics chat widget: `js/chat.js`, a single zero-dependency vanilla JS file (~1700 lines) defining the `UltralyticsChat` class (floating pill → modal with SSE-streamed chat, search mode via the `/chat`→`/search` URL swap, localStorage session persistence). It is delivered via jsDelivr CDN as `js/chat.min.js`. The Python package `ultralytics_llm` is a placeholder: `LLMClient.chat()` raises `NotImplementedError`, and only `__version__` and the constructor are real.
+This repo ships the Ultralytics chat widget: `js/chat.js`, a single zero-dependency vanilla JS file (~1700 lines) defining the `UltralyticsChat` class (floating pill → modal with SSE-streamed chat, search mode via the `/chat`→`/search` URL swap, in-memory session ID from the `X-Session-ID` response header; localStorage stores only the pill position). It is delivered via jsDelivr CDN as `js/chat.min.js`. The Python package `ultralytics_llm` is a placeholder: `LLMClient.chat()` raises `NotImplementedError`, and only `__version__` and the constructor are real.
 
 - `js/chat.min.js` is generated: `minify.yml` re-minifies and commits it on PRs that touch `js/chat.js` — never hand-edit it.
 - `purge-cdn.yml` purges the jsDelivr cache on pushes to main touching `js/**` and after the "Tag and Release" workflow completes.
