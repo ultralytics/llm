@@ -51,10 +51,11 @@ jobs:
           python -m pytest tests -v --cov=./ --cov-report=xml:pytest-coverage.xml
 
       - name: Upload coverage to Codecov
+        continue-on-error: true
         uses: codecov/codecov-action@v7
         with:
           files: ./pytest-coverage.xml
           disable_search: true
-          fail_ci_if_error: true
+          fail_ci_if_error: false
           plugins: noop
           use_oidc: true
