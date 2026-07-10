@@ -867,23 +867,27 @@ results[0].show()</code></pre>
               if (!line.startsWith("data: ")) continue;
               const payloadLine = line.slice(6).trim();
               if (!payloadLine || payloadLine === "[DONE]") continue;
+              let parsed;
               try {
-                const parsed = JSON.parse(payloadLine);
-                if (parsed?.content) {
-                  return performance.now() - start;
-                }
-                if (parsed?.error) {
-                  return performance.now() - start;
-                }
+                parsed = JSON.parse(payloadLine);
               } catch (err) {
                 console.warn("Profiling parse error", err);
+                continue;
+              }
+              if (parsed?.content) {
+                const duration = performance.now() - start;
+                await reader.cancel();
+                return duration;
+              }
+              if (parsed?.error) {
+                await reader.cancel();
+                throw new Error(parsed.error);
               }
             }
           }
-          return performance.now() - start;
+          throw new Error("Stream ended before content");
         }
-        await res.text();
-        return performance.now() - start;
+        throw new Error("Streaming response unavailable");
       }
 
       async function runProfiling() {
