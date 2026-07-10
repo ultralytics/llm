@@ -888,16 +888,17 @@ results[0].show()</code></pre>
           },
         };
         const start = performance.now();
-        const res = await fetch(url, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-          signal: AbortSignal.timeout(60000),
-        });
-        if (!res.ok) {
-          throw new Error(`HTTP ${res.status}`);
-        }
-        if (res.body?.getReader) {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 60000);
+        try {
+          const res = await fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+            signal: controller.signal,
+          });
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          if (!res.body?.getReader) throw new Error("Streaming response unavailable");
           const reader = res.body.getReader();
           const decoder = new TextDecoder();
           let buffer = "";
@@ -912,7 +913,12 @@ results[0].show()</code></pre>
             for (const line of lines) {
               if (!line.startsWith("data: ")) continue;
               const payloadLine = line.slice(6).trim();
-              if (!payloadLine || payloadLine === "[DONE]") continue;
+              if (!payloadLine) continue;
+              if (payloadLine === "[DONE]") {
+                if (firstContent === null) throw new Error("Stream ended before content");
+                await reader.cancel();
+                return { ttfc: firstContent, total: performance.now() - start, characters };
+              }
               let parsed;
               try {
                 parsed = JSON.parse(payloadLine);
@@ -931,8 +937,9 @@ results[0].show()</code></pre>
           }
           if (firstContent === null) throw new Error("Stream ended before content");
           return { ttfc: firstContent, total: performance.now() - start, characters };
+        } finally {
+          clearTimeout(timeout);
         }
-        throw new Error("Streaming response unavailable");
       }
 
       async function runProfiling() {
@@ -944,34 +951,37 @@ results[0].show()</code></pre>
         countSelect.disabled = true;
         const questionCount = Number(countSelect.value);
 
-        const results = PROFILE_BACKENDS.map(({ name }) => ({
-          name,
-          samples: Array(questionCount).fill(null),
-          errors: 0,
-        }));
-        setProfilingStatus("Profiling started...");
+        try {
+          const results = PROFILE_BACKENDS.map(({ name }) => ({
+            name,
+            samples: Array(questionCount).fill(null),
+            errors: 0,
+          }));
+          setProfilingStatus("Profiling started...");
 
-        for (let i = 0; i < questionCount; i += 1) {
-          // Alternate which backend runs first to avoid bias from load or time drift.
-          const order = i % 2 ? [1, 0] : [0, 1];
-          for (const backendIndex of order) {
-            const backend = PROFILE_BACKENDS[backendIndex];
-            setProfilingStatus(`Running question ${i + 1}/${questionCount}: ${backend.name}...`);
-            try {
-              results[backendIndex].samples[i] = await timeRequest(backend.url, PROFILE_QUESTIONS[i]);
-            } catch (err) {
-              results[backendIndex].errors += 1;
-              console.warn(`Profiling error for ${backend.name}`, err);
+          for (let i = 0; i < questionCount; i += 1) {
+            // Alternate which backend runs first to avoid bias from load or time drift.
+            const order = i % 2 ? [1, 0] : [0, 1];
+            for (const backendIndex of order) {
+              const backend = PROFILE_BACKENDS[backendIndex];
+              setProfilingStatus(`Running question ${i + 1}/${questionCount}: ${backend.name}...`);
+              try {
+                results[backendIndex].samples[i] = await timeRequest(backend.url, PROFILE_QUESTIONS[i]);
+              } catch (err) {
+                results[backendIndex].errors += 1;
+                console.warn(`Profiling error for ${backend.name}`, err);
+              }
+              await sleep(1000);
             }
-            await sleep(1000);
           }
-        }
 
-        renderProfilingResults(results, questionCount);
-        setProfilingStatus("Profiling complete.");
-        if (btn) btn.disabled = false;
-        countSelect.disabled = false;
-        profilingActive = false;
+          renderProfilingResults(results, questionCount);
+          setProfilingStatus("Profiling complete.");
+        } finally {
+          if (btn) btn.disabled = false;
+          countSelect.disabled = false;
+          profilingActive = false;
+        }
       }
     </script>
   </body>
