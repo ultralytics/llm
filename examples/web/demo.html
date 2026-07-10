@@ -904,6 +904,27 @@ results[0].show()</code></pre>
           let buffer = "";
           let firstContent = null;
           let characters = 0;
+          const processLine = (line) => {
+            if (!line.startsWith("data: ")) return false;
+            const payloadLine = line.slice(6).trim();
+            if (!payloadLine) return false;
+            if (payloadLine === "[DONE]") return true;
+            try {
+              const parsed = JSON.parse(payloadLine);
+              if (parsed?.content) {
+                firstContent ??= performance.now() - start;
+                characters += parsed.content.length;
+              }
+              if (parsed?.error) throw new Error(parsed.error);
+            } catch (err) {
+              if (err instanceof SyntaxError) {
+                console.warn("Profiling parse error", err);
+                return false;
+              }
+              throw err;
+            }
+            return false;
+          };
           while (true) {
             const { done, value } = await reader.read();
             if (done) break;
@@ -911,30 +932,15 @@ results[0].show()</code></pre>
             const lines = buffer.split("\n");
             buffer = lines.pop() || "";
             for (const line of lines) {
-              if (!line.startsWith("data: ")) continue;
-              const payloadLine = line.slice(6).trim();
-              if (!payloadLine) continue;
-              if (payloadLine === "[DONE]") {
+              if (processLine(line)) {
                 if (firstContent === null) throw new Error("Stream ended before content");
                 await reader.cancel();
                 return { ttfc: firstContent, total: performance.now() - start, characters };
               }
-              let parsed;
-              try {
-                parsed = JSON.parse(payloadLine);
-              } catch (err) {
-                console.warn("Profiling parse error", err);
-                continue;
-              }
-              if (parsed?.content) {
-                firstContent ??= performance.now() - start;
-                characters += parsed.content.length;
-              }
-              if (parsed?.error) {
-                throw new Error(parsed.error);
-              }
             }
           }
+          buffer += decoder.decode();
+          for (const line of buffer.split("\n")) processLine(line);
           if (firstContent === null) throw new Error("Stream ended before content");
           return { ttfc: firstContent, total: performance.now() - start, characters };
         } finally {
@@ -960,19 +966,19 @@ results[0].show()</code></pre>
           setProfilingStatus("Profiling started...");
 
           for (let i = 0; i < questionCount; i += 1) {
-            // Alternate which backend runs first to avoid bias from load or time drift.
-            const order = i % 2 ? [1, 0] : [0, 1];
-            for (const backendIndex of order) {
-              const backend = PROFILE_BACKENDS[backendIndex];
-              setProfilingStatus(`Running question ${i + 1}/${questionCount}: ${backend.name}...`);
-              try {
-                results[backendIndex].samples[i] = await timeRequest(backend.url, PROFILE_QUESTIONS[i]);
-              } catch (err) {
+            setProfilingStatus(`Running question ${i + 1}/${questionCount} on both backends...`);
+            const samples = await Promise.allSettled(
+              PROFILE_BACKENDS.map((backend) => timeRequest(backend.url, PROFILE_QUESTIONS[i])),
+            );
+            samples.forEach((sample, backendIndex) => {
+              if (sample.status === "fulfilled") {
+                results[backendIndex].samples[i] = sample.value;
+              } else {
                 results[backendIndex].errors += 1;
-                console.warn(`Profiling error for ${backend.name}`, err);
+                console.warn(`Profiling error for ${PROFILE_BACKENDS[backendIndex].name}`, sample.reason);
               }
-              await sleep(1000);
-            }
+            });
+            await sleep(1000);
           }
 
           renderProfilingResults(results, questionCount);
