@@ -799,7 +799,7 @@ results[0].show()</code></pre>
           .map((result) => {
             const stats = computeStats(result.samples);
             if (!stats) {
-              return `<tr><td>${result.name}</td><td colspan="5">No successful samples</td></tr>`;
+              return `<tr><td>${result.name}</td><td>0</td><td colspan="3">No successful samples</td><td>${result.errors}</td></tr>`;
             }
             return `
               <tr>
