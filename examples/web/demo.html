@@ -513,8 +513,13 @@
               Backend: Cloudflare/VM
             </button>
             <button id="profiling-button" class="btn primary" onclick="runProfiling()" aria-label="Run profiling">
-              Run profiling (30 questions)
+              Run profiling
             </button>
+            <select id="profiling-count" class="btn" aria-label="Profiling question count">
+              <option value="3">3 questions</option>
+              <option value="10">10 questions</option>
+              <option value="30" selected>30 questions</option>
+            </select>
             <span class="btn" style="pointer-events: none; opacity: 0.72">Press ⌘ + K to open</span>
           </div>
         </div>
@@ -522,8 +527,8 @@
         <div id="profiling" class="card">
           <h3>Backend Profiling</h3>
           <p>
-            This runs 30 YOLO/Ultralytics questions against each backend and reports time to first event (TTFE), ±1σ,
-            and min/max.
+            This runs the selected YOLO/Ultralytics questions against each backend and compares time to first content
+            (TTFC), total response time, response length, and paired wins.
           </p>
           <div id="profiling-results" class="callout">Click “Run profiling” to compare endpoints.</div>
           <p id="profiling-status" class="profiling-status" aria-live="polite"></p>
@@ -751,36 +756,36 @@ results[0].show()</code></pre>
         document.getElementById("backend-button").textContent = `Backend: ${backend.name}`;
       }
       const PROFILE_QUESTIONS = [
-        "What are the main differences between YOLOv8 and YOLO11 in terms of speed and accuracy?",
-        "Show a minimal Python snippet to run inference with a YOLO11n model on a single image.",
-        "How do I convert a YOLO dataset into COCO format, and when should I prefer one over the other?",
-        "Explain what the 'conf' and 'iou' thresholds do in YOLO inference.",
-        "What is the best way to speed up YOLO inference on edge devices like Jetson?",
-        "Give me a short explanation of Ultralytics HUB and how it helps with training management.",
-        "How do I fine-tune YOLO on a custom dataset with class imbalance?",
-        "List common training hyperparameters that affect mAP the most for YOLO.",
-        "What is the recommended image size for training YOLO11 models and why?",
-        "How do I export YOLO models to TensorRT for deployment?",
-        "Explain the difference between NMS and Soft-NMS in the context of YOLO.",
-        "Can I train YOLO on video frames directly? What is the suggested pipeline?",
-        "Write a YAML snippet for a custom dataset with train/val/test paths.",
-        "How do I set up multi-GPU training with Ultralytics in PyTorch?",
-        "Describe best practices for labeling datasets for object detection.",
-        "What are typical causes of overfitting in YOLO training and how can I mitigate them?",
-        "Explain how Ultralytics handles mosaic and mixup augmentations.",
-        "Give a concise overview of YOLO tracking modes and when to use them.",
-        "How do I run YOLO in a Docker container with GPU support?",
-        "What is the difference between yolov8n and yolov8x in terms of size and use cases?",
-        "Explain how to evaluate YOLO with mAP@50-95 and why the range matters.",
-        "How do I set seed/reproducibility flags in Ultralytics training?",
-        "What are good strategies for reducing false positives in YOLO detection?",
-        "Can you outline a full training command for YOLO11s with 100 epochs and 640 img size?",
-        "Explain what 'autoanchor' does and when it should be disabled.",
-        "How do I use Ultralytics to segment objects instead of detect them?",
-        "What are the steps to export YOLO to ONNX and validate the outputs?",
-        "Write a short guide to deploying YOLO on a FastAPI server with a REST endpoint.",
-        "How do I benchmark YOLO inference FPS consistently across devices?",
-        "Explain how Ultralytics handles model pruning or quantization options.",
+        "What is Ultralytics YOLO, and which computer vision tasks does it support?",
+        "Show the shortest Python example for loading a pretrained YOLO model and running inference on an image.",
+        "My custom YOLO model detects nothing after training. What should I check first?",
+        "How do I train a YOLO model on my own dataset, including the dataset YAML format?",
+        "Explain confidence and IoU thresholds and how they affect false positives and missed detections.",
+        "How do I export a trained YOLO model to ONNX or TensorRT and validate the exported model?",
+        "How can I track objects across video frames with Ultralytics YOLO?",
+        "What is Ultralytics HUB, and when should I use it instead of the Python package or CLI?",
+        "What license do I need to use Ultralytics YOLO in a commercial closed-source product?",
+        "How can I improve YOLO inference speed on an NVIDIA Jetson device?",
+        "Compare detection, segmentation, classification, pose, and oriented bounding box models.",
+        "How should I label and split a small custom object-detection dataset?",
+        "What causes overfitting during YOLO training, and how can I reduce it?",
+        "Give me a YOLO training command for 100 epochs at image size 640 and explain the important arguments.",
+        "How do I resume an interrupted training run from the last checkpoint?",
+        "How do I train with multiple GPUs, and what common distributed-training issues should I expect?",
+        "Explain mAP50 and mAP50-95 in plain language and how to interpret validation results.",
+        "How can I reduce false positives without substantially hurting recall?",
+        "How do I run batch inference on a directory of images and save the predictions?",
+        "How do I run real-time YOLO inference on a webcam or video stream?",
+        "Write a minimal FastAPI endpoint that accepts an image and returns YOLO detections as JSON.",
+        "How do I deploy an Ultralytics model in Docker with NVIDIA GPU support?",
+        "When should I choose a nano, small, medium, large, or extra-large YOLO model?",
+        "How do I make YOLO training runs reproducible?",
+        "What augmentations does Ultralytics apply during training, and when should I adjust them?",
+        "How do I train an instance-segmentation model on a custom dataset?",
+        "How do I export a YOLO model for CoreML, TensorFlow Lite, or OpenVINO deployment?",
+        "How should I benchmark latency and throughput fairly across YOLO models and devices?",
+        "Why might an exported model produce different predictions from the original PyTorch model?",
+        "How can I inspect, filter, and use YOLO prediction results in Python?",
       ];
 
       let profilingActive = false;
@@ -794,14 +799,12 @@ results[0].show()</code></pre>
       }
 
       function computeStats(samples) {
-        const count = samples.length;
+        const sorted = samples.filter(Number.isFinite).sort((a, b) => a - b);
+        const count = sorted.length;
         if (!count) return null;
-        const mean = samples.reduce((a, b) => a + b, 0) / count;
-        const variance = samples.reduce((a, b) => a + (b - mean) ** 2, 0) / count;
-        const std = Math.sqrt(variance);
-        const min = Math.min(...samples);
-        const max = Math.max(...samples);
-        return { count, mean, std, min, max };
+        const mean = sorted.reduce((a, b) => a + b, 0) / count;
+        const percentile = (p) => sorted[Math.ceil(p * count) - 1];
+        return { count, mean, median: percentile(0.5), p95: percentile(0.95), min: sorted[0], max: sorted[count - 1] };
       }
 
       function setProfilingStatus(text) {
@@ -809,37 +812,56 @@ results[0].show()</code></pre>
         if (statusEl) statusEl.textContent = text;
       }
 
-      function renderProfilingResults(results) {
+      function renderProfilingResults(results, questionCount) {
         const container = document.getElementById("profiling-results");
         if (!container) return;
         const rows = results
           .map((result) => {
-            const stats = computeStats(result.samples);
-            if (!stats) {
-              return `<tr><td>${result.name}</td><td>0</td><td colspan="3">No successful samples</td><td>${result.errors}</td></tr>`;
+            const ttfc = computeStats(result.samples.map((sample) => sample?.ttfc));
+            const total = computeStats(result.samples.map((sample) => sample?.total));
+            const lengths = computeStats(result.samples.map((sample) => sample?.characters));
+            if (!ttfc) {
+              return `<tr><td>${result.name}</td><td>0/${questionCount}</td><td colspan="7">No successful samples</td><td>${result.errors}</td></tr>`;
             }
             return `
               <tr>
                 <td>${result.name}</td>
-                <td>${stats.count}</td>
-                <td>${formatSeconds(stats.mean)}</td>
-                <td>±${formatSeconds(stats.std)}</td>
-                <td>${formatSeconds(stats.min)} / ${formatSeconds(stats.max)}</td>
+                <td>${ttfc.count}/${questionCount}</td>
+                <td>${formatSeconds(ttfc.median)}</td>
+                <td>${formatSeconds(ttfc.p95)}</td>
+                <td>${formatSeconds(ttfc.mean)}</td>
+                <td>${formatSeconds(ttfc.min)} / ${formatSeconds(ttfc.max)}</td>
+                <td>${formatSeconds(total.median)}</td>
+                <td>${formatSeconds(total.p95)}</td>
+                <td>${Math.round(lengths.mean)}</td>
                 <td>${result.errors}</td>
               </tr>
             `;
           })
           .join("");
 
+        const paired = results[0].samples.flatMap((sample, index) => {
+          const other = results[1].samples[index];
+          return sample && other ? [sample.ttfc - other.ttfc] : [];
+        });
+        const pairedStats = computeStats(paired);
+        const firstWins = paired.filter((delta) => delta < 0).length;
+        const secondWins = paired.filter((delta) => delta > 0).length;
+        const ties = paired.length - firstWins - secondWins;
+
         container.innerHTML = `
           <table>
             <thead>
               <tr>
                 <th>Backend</th>
-                <th>Samples</th>
-                <th>Mean TTFE</th>
-                <th>1σ</th>
-                <th>Min / Max</th>
+                <th>Success</th>
+                <th>Median TTFC</th>
+                <th>p95 TTFC</th>
+                <th>Mean TTFC</th>
+                <th>TTFC Min / Max</th>
+                <th>Median Total</th>
+                <th>p95 Total</th>
+                <th>Mean Chars</th>
                 <th>Errors</th>
               </tr>
             </thead>
@@ -847,6 +869,10 @@ results[0].show()</code></pre>
               ${rows}
             </tbody>
           </table>
+          <p>
+            Paired TTFC (${paired.length} questions): ${results[0].name} won ${firstWins},
+            ${results[1].name} won ${secondWins}, ${ties} tied${pairedStats ? `; median Cloud Run − Cloudflare/VM delta ${formatSeconds(pairedStats.median)}` : ""}.
+          </p>
         `;
       }
 
@@ -875,6 +901,8 @@ results[0].show()</code></pre>
           const reader = res.body.getReader();
           const decoder = new TextDecoder();
           let buffer = "";
+          let firstContent = null;
+          let characters = 0;
           while (true) {
             const { done, value } = await reader.read();
             if (done) break;
@@ -893,17 +921,16 @@ results[0].show()</code></pre>
                 continue;
               }
               if (parsed?.content) {
-                const duration = performance.now() - start;
-                await reader.cancel();
-                return duration;
+                firstContent ??= performance.now() - start;
+                characters += parsed.content.length;
               }
               if (parsed?.error) {
-                await reader.cancel();
                 throw new Error(parsed.error);
               }
             }
           }
-          throw new Error("Stream ended before content");
+          if (firstContent === null) throw new Error("Stream ended before content");
+          return { ttfc: firstContent, total: performance.now() - start, characters };
         }
         throw new Error("Streaming response unavailable");
       }
@@ -912,20 +939,26 @@ results[0].show()</code></pre>
         if (profilingActive) return;
         profilingActive = true;
         const btn = document.getElementById("profiling-button");
+        const countSelect = document.getElementById("profiling-count");
         if (btn) btn.disabled = true;
+        countSelect.disabled = true;
+        const questionCount = Number(countSelect.value);
 
-        const results = PROFILE_BACKENDS.map(({ name }) => ({ name, samples: [], errors: 0 }));
+        const results = PROFILE_BACKENDS.map(({ name }) => ({
+          name,
+          samples: Array(questionCount).fill(null),
+          errors: 0,
+        }));
         setProfilingStatus("Profiling started...");
 
-        for (let i = 0; i < PROFILE_QUESTIONS.length; i += 1) {
+        for (let i = 0; i < questionCount; i += 1) {
           // Alternate which backend runs first to avoid bias from load or time drift.
           const order = i % 2 ? [1, 0] : [0, 1];
           for (const backendIndex of order) {
             const backend = PROFILE_BACKENDS[backendIndex];
-            setProfilingStatus(`Running question ${i + 1}/${PROFILE_QUESTIONS.length}: ${backend.name}...`);
+            setProfilingStatus(`Running question ${i + 1}/${questionCount}: ${backend.name}...`);
             try {
-              const duration = await timeRequest(backend.url, PROFILE_QUESTIONS[i]);
-              results[backendIndex].samples.push(duration);
+              results[backendIndex].samples[i] = await timeRequest(backend.url, PROFILE_QUESTIONS[i]);
             } catch (err) {
               results[backendIndex].errors += 1;
               console.warn(`Profiling error for ${backend.name}`, err);
@@ -934,9 +967,10 @@ results[0].show()</code></pre>
           }
         }
 
-        renderProfilingResults(results);
+        renderProfilingResults(results, questionCount);
         setProfilingStatus("Profiling complete.");
         if (btn) btn.disabled = false;
+        countSelect.disabled = false;
         profilingActive = false;
       }
     </script>
