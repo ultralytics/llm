@@ -503,6 +503,15 @@
           </p>
           <div class="toolbar">
             <button class="btn" onclick="openChat()" aria-label="Open chat">Open Chat</button>
+            <button
+              id="backend-button"
+              type="button"
+              class="btn"
+              onclick="switchBackend()"
+              aria-label="Switch chat backend"
+            >
+              Backend: Cloudflare/VM
+            </button>
             <button id="profiling-button" class="btn primary" onclick="runProfiling()" aria-label="Run profiling">
               Run profiling (30 questions)
             </button>
@@ -730,8 +739,17 @@ results[0].show()</code></pre>
 
       const PROFILE_BACKENDS = [
         { name: "Legacy (Cloud Run)", url: "https://chat-885297101091.us-central1.run.app/api/chat" },
-        { name: "ul.run", url: "https://ul.run/chat/v1/chat" },
+        { name: "Cloudflare/VM", url: "https://ul.run/chat/v1/chat" },
       ];
+
+      function switchBackend() {
+        if (!chatInstance || chatInstance.isStreaming) return;
+        const backend = PROFILE_BACKENDS.find(({ url }) => url !== chatInstance.apiUrl);
+        chatInstance.apiUrl = backend.url;
+        chatInstance.feedbackUrl = backend.url.replace(/\/chat$/, "/feedback");
+        chatInstance.clearSession();
+        document.getElementById("backend-button").textContent = `Backend: ${backend.name}`;
+      }
 
       const PROFILE_QUESTIONS = [
         "What are the main differences between YOLOv8 and YOLO11 in terms of speed and accuracy?",
