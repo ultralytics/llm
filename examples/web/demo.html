@@ -513,7 +513,8 @@
         <div id="profiling" class="card">
           <h3>Backend Profiling</h3>
           <p>
-            This runs 30 YOLO/Ultralytics questions against each backend and reports mean latency, ±1σ, and min/max.
+            This runs 30 YOLO/Ultralytics questions against each backend and reports time to first event (TTFE), ±1σ,
+            and min/max.
           </p>
           <div id="profiling-results" class="callout">Click “Run profiling” to compare endpoints.</div>
           <p id="profiling-status" class="profiling-status" aria-live="polite"></p>
@@ -819,7 +820,7 @@ results[0].show()</code></pre>
               <tr>
                 <th>Backend</th>
                 <th>Samples</th>
-                <th>Mean</th>
+                <th>Mean TTFE</th>
                 <th>1σ</th>
                 <th>Min / Max</th>
                 <th>Errors</th>
@@ -891,26 +892,24 @@ results[0].show()</code></pre>
         const btn = document.getElementById("profiling-button");
         if (btn) btn.disabled = true;
 
-        const results = [];
+        const results = PROFILE_BACKENDS.map(({ name }) => ({ name, samples: [], errors: 0 }));
         setProfilingStatus("Profiling started...");
 
-        for (const backend of PROFILE_BACKENDS) {
-          const samples = [];
-          let errors = 0;
-          for (let i = 0; i < PROFILE_QUESTIONS.length; i += 1) {
-            setProfilingStatus(`Running ${backend.name}: ${i + 1}/${PROFILE_QUESTIONS.length} questions...`);
+        for (let i = 0; i < PROFILE_QUESTIONS.length; i += 1) {
+          // Alternate which backend runs first to avoid bias from load or time drift.
+          const order = i % 2 ? [1, 0] : [0, 1];
+          for (const backendIndex of order) {
+            const backend = PROFILE_BACKENDS[backendIndex];
+            setProfilingStatus(`Running question ${i + 1}/${PROFILE_QUESTIONS.length}: ${backend.name}...`);
             try {
               const duration = await timeRequest(backend.url, PROFILE_QUESTIONS[i]);
-              samples.push(duration);
+              results[backendIndex].samples.push(duration);
             } catch (err) {
-              errors += 1;
+              results[backendIndex].errors += 1;
               console.warn(`Profiling error for ${backend.name}`, err);
             }
-            if (i < PROFILE_QUESTIONS.length - 1) {
-              await sleep(1000);
-            }
+            await sleep(1000);
           }
-          results.push({ name: backend.name, samples, errors });
         }
 
         renderProfilingResults(results);
