@@ -22,6 +22,9 @@ All fields are optional—sane defaults are applied whenever a value is omitted.
 const chat = new UltralyticsChat({
     apiUrl: "https://chat-885297101091.us-central1.run.app/api/chat", // SSE endpoint
     maxMessageLength: 10000, // Character cap enforced before sending
+    shouldHandleShortcut: (event, chat) => {
+        return !(event.target instanceof Element && event.target.closest("[data-site-search]"));
+    },
 
     branding: {
         name: "Ultralytics AI",
@@ -60,8 +63,10 @@ const chat = new UltralyticsChat({
 ```
 
 > `welcome.examples` is still supported as a fallback but the widget now differentiates between `chatExamples` and `searchExamples`.
+>
+> `shouldHandleShortcut(event, chat)` lets the host veto the widget shortcut by returning `false`.
 
-The widget automatically snapshots the current page (`title`, `url`, `description`, and `path`) and forwards it to the backend as `context` on every chat request.
+The widget automatically snapshots the current page (`title`, `url`, `description`, and `path`) and forwards it to the backend as `context` on every chat request. Set `analytics: false` to keep chat responses enabled while asking the backend not to store chat analytics or feedback.
 
 #### Methods
 
@@ -72,7 +77,7 @@ The widget automatically snapshots the current page (`title`, `url`, `descriptio
   Sends a prompt to the chat endpoint. While streaming, all editable user bubbles are locked and you can call `abortController.abort()` via the Stop button. When `mode === "search"` this method automatically forwards the query to `/search` instead of the SSE endpoint.
 
 - `clearSession()`  
-  Clears the in-memory conversation, removes `localStorage["ult-chat-session"]`, resets UI state, and focuses the composer.
+  Clears the in-memory conversation and session ID, resets UI state, and focuses the composer.
 
 - `setExamples(list)`  
   Replaces the welcome-example buttons with a new array of strings. Useful when the host site wants to control onboarding hints dynamically.
@@ -95,6 +100,7 @@ chat.sessionId; // string|null - persisted session identifier
 #### Keyboard & Accessibility
 
 - `Cmd/Ctrl + K` toggles the widget.
+- The widget ignores its shortcut when the event was already prevented, is mid-composition, is auto-repeating, or originates inside editable fields.
 - `Esc` closes it.
 - `Enter` sends a message when not holding `Shift`.
 - `Shift + Enter` inserts a newline.
@@ -126,6 +132,7 @@ Request body:
         "description": "Meta description value",
         "path": "/models/yolov9/"
     },
+    "analytics": false,
     "edit_index": 4
 }
 ```
@@ -173,9 +180,9 @@ Response:
 
 ### Session Lifecycle
 
-1. The first outbound message omits `session_id`.
+1. The first outbound message sends `"session_id": null`.
 2. The backend returns `X-Session-ID`.
-3. The widget caches that value in `localStorage["ult-chat-session"]`.
+3. The widget keeps that value in memory (`chat.sessionId`) — it is not persisted, so each page load starts a new session.
 4. All subsequent chat calls send the cached ID until `clearSession()` or a user-triggered thread reset.
 
 ### Security

@@ -1,12 +1,17 @@
 // Ultralytics 🚀 AGPL-3.0 License - https://ultralytics.com/license
 
 class UltralyticsChat {
+  /** Unified glass blur — matches Platform's BLUR constant: `backdrop-blur backdrop-saturate-[1.2]` */
+  static BLUR = "blur(8px) saturate(120%) brightness(1.01)";
+
   constructor(config = {}) {
+    if (UltralyticsChat._instance) return UltralyticsChat._instance;
     const d = (o, k, v) => o?.[k] ?? v;
     this.config = {
       apiUrl: d(config, "apiUrl", "https://ul.run/chat/v1/chat"),
       instructions: d(config, "instructions", null),
       maxMessageLength: d(config, "maxMessageLength", 10000),
+      analytics: d(config, "analytics", true),
       pageContent: d(config, "pageContent", false),
       branding: {
         name: d(config.branding, "name", "Ultralytics AI"),
@@ -56,6 +61,7 @@ class UltralyticsChat {
         downloadText: d(config.ui, "downloadText", "Download thread"),
         clearText: d(config.ui, "clearText", "New chat"),
       },
+      shouldHandleShortcut: typeof config?.shouldHandleShortcut === "function" ? config.shouldHandleShortcut : null,
     };
     this.apiUrl = this.config.apiUrl;
     this.feedbackUrl =
@@ -84,6 +90,7 @@ class UltralyticsChat {
     this.totalUserMessages = null;
     this.activeUserMessages = null;
     this.init();
+    UltralyticsChat._instance = this;
   }
 
   qs = (sel, root = document) => root.querySelector(sel);
@@ -149,6 +156,12 @@ class UltralyticsChat {
     el.addEventListener(ev, fn, opts);
     if (!this.listeners.has(el)) this.listeners.set(el, []);
     this.listeners.get(el).push({ ev, fn, opts });
+  }
+
+  isEditableTarget(target) {
+    if (!(target instanceof Element)) return false;
+    if (target instanceof HTMLElement && target.isContentEditable) return true;
+    return !!target.closest('input, textarea, select, [contenteditable], [role="textbox"]');
   }
   el(tag, cls = "", html = "") {
     const e = document.createElement(tag);
@@ -338,6 +351,7 @@ class UltralyticsChat {
     this.refs.pill?.remove();
     this.refs.tooltip?.remove();
     this.refs = {};
+    UltralyticsChat._instance = null;
   }
 
   createStyles() {
@@ -380,15 +394,15 @@ class UltralyticsChat {
       /* ========== END COLOR PALETTE ========== */
 
       .ult-backdrop{display:none;position:fixed;inset:0;background:rgba(255,255,255,.07);
-        backdrop-filter:blur(5px) saturate(120%) brightness(1.025);-webkit-backdrop-filter:blur(5px) saturate(120%) brightness(1.025);
+        backdrop-filter:${UltralyticsChat.BLUR};-webkit-backdrop-filter:${UltralyticsChat.BLUR};
         z-index:9999;opacity:0;visibility:hidden;transition:opacity .2s ease-out,visibility .2s;pointer-events:none}
       .ult-backdrop.open{display:block;opacity:1;visibility:visible;pointer-events:auto}
 
       .ultralytics-chat-pill{position:fixed;right:16px;bottom:36px;padding:14px 22px;border-radius:9999px;background:var(--ult-pill-bg);
         color:var(--ult-pill-text);border:0;cursor:pointer;font-size:18px;font-weight:500;box-shadow:var(--ult-pill-shadow);
         z-index:10000;transition:opacity .2s ease-out,transform .15s ease-out;
-        display:inline-flex;align-items:center;gap:10px;transform:scale(1) translateZ(0);opacity:1;
-        -webkit-user-select:none;user-select:none;touch-action:manipulation;will-change:opacity,transform}
+        display:inline-flex;align-items:center;gap:10px;transform:scale(1) translateZ(0);opacity:1;white-space:nowrap;
+        -webkit-user-select:none;user-select:none;touch-action:none;will-change:opacity,transform}
       .ultralytics-chat-pill:hover{transform:scale(1.05) translateZ(0)}
       .ultralytics-chat-pill:focus-visible{outline:none;box-shadow:0 0 0 3px var(--ult-primary)}
       .ultralytics-chat-pill.hidden{opacity:0;pointer-events:none}
@@ -752,7 +766,16 @@ class UltralyticsChat {
     });
     this.on(document, "keydown", (e) => {
       if (this.isOpen && e.key === "Escape") this.toggle(false);
-      if (!this.isOpen && (e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+      if (
+        !this.isOpen &&
+        !e.defaultPrevented &&
+        !e.isComposing &&
+        !e.repeat &&
+        !this.isEditableTarget(e.target) &&
+        (e.metaKey || e.ctrlKey) &&
+        e.key.toLowerCase() === "k" &&
+        this.config.shouldHandleShortcut?.(e, this) !== false
+      ) {
         e.preventDefault();
         this.toggle(true);
       }
@@ -798,8 +821,9 @@ class UltralyticsChat {
               .catch(console.error);
           }
         } else if (action === "like" || action === "dislike") {
-          this.feedback(action === "like" ? "up" : "down");
-          this.showCopySuccess(actionBtn);
+          void this.feedback(action === "like" ? "up" : "down").then((submitted) => {
+            if (submitted) this.showCopySuccess(actionBtn);
+          });
         } else if (action === "retry") {
           void this.retryLast();
         } else if (action === "edit") {
@@ -865,15 +889,61 @@ class UltralyticsChat {
 
   setupPillDrag() {
     const pill = this.refs.pill;
-    let ox, oy, rect, moved;
+    const posKey = "ultralytics-chat-pill-position";
+    let ox, oy, rect, moved, lastLeft, lastTop;
+    let parked = false;
+
+    // Users can park the pill up to 85% off-screen (the next best thing to
+    // removing it) — clamp drags, restores, and resizes to keep 15% visible.
+    // Only one axis may go off-screen at a time: a corner park would leave a
+    // tiny rounded sliver that is unusable as a touch target.
+    const clamp = (left, top) => {
+      const pw = pill.offsetWidth,
+        ph = pill.offsetHeight;
+      let l = Math.max(-0.85 * pw, Math.min(window.innerWidth - 0.15 * pw, left));
+      let t = Math.max(-0.85 * ph, Math.min(window.innerHeight - 0.15 * ph, top));
+      const lOff = Math.max(-l, l + pw - window.innerWidth, 0);
+      const tOff = Math.max(-t, t + ph - window.innerHeight, 0);
+      if (lOff && tOff) {
+        // An axis the pill cannot fit overflows unavoidably — re-clamp the other one
+        if (ph > window.innerHeight || (pw <= window.innerWidth && lOff < tOff))
+          l = Math.max(0, Math.min(window.innerWidth - pw, l));
+        else t = Math.max(0, Math.min(window.innerHeight - ph, t));
+      }
+      return [l, t];
+    };
+
+    // Convert absolute left/top to corner-relative offsets so CSS handles
+    // resize natively (pill stays anchored to its nearest corner). Use
+    // offsetWidth/Height (unaffected by transforms) instead of
+    // getBoundingClientRect() which includes :hover scale.
+    const anchor = (left, top) => {
+      const pw = pill.offsetWidth,
+        ph = pill.offsetHeight;
+      const fromRight = window.innerWidth - left - pw;
+      const fromBottom = window.innerHeight - top - ph;
+      const useLeft = left <= fromRight;
+      const useTop = top <= fromBottom;
+      Object.assign(pill.style, {
+        left: useLeft ? left + "px" : "auto",
+        right: useLeft ? "auto" : fromRight + "px",
+        top: useTop ? top + "px" : "auto",
+        bottom: useTop ? "auto" : fromBottom + "px",
+      });
+    };
 
     const onMove = (e) => {
       const dx = e.clientX - ox,
         dy = e.clientY - oy;
       if (!moved && Math.abs(dx) < 5 && Math.abs(dy) < 5) return;
-      moved = true;
-      pill.style.left = Math.max(0, Math.min(window.innerWidth - rect.width, rect.left + dx)) + "px";
-      pill.style.top = Math.max(0, Math.min(window.innerHeight - rect.height, rect.top + dy)) + "px";
+      if (!moved) {
+        moved = true;
+        pill.style.cursor = "grabbing";
+        Object.assign(pill.style, { right: "auto", bottom: "auto", left: rect.left + "px", top: rect.top + "px" });
+      }
+      [lastLeft, lastTop] = clamp(rect.left + dx, rect.top + dy);
+      pill.style.left = lastLeft + "px";
+      pill.style.top = lastTop + "px";
     };
 
     const onUp = (e) => {
@@ -883,20 +953,16 @@ class UltralyticsChat {
       pill.releasePointerCapture(e.pointerId);
       pill.style.cursor = "";
       if (moved) {
-        // Convert absolute left/top back to corner-relative offsets so CSS
-        // handles resize natively (pill stays anchored to its nearest corner).
-        const r = pill.getBoundingClientRect();
-        const fromRight = window.innerWidth - r.right;
-        const fromBottom = window.innerHeight - r.bottom;
-        const useLeft = r.left <= fromRight;
-        const useTop = r.top <= fromBottom;
-        Object.assign(pill.style, {
-          left: useLeft ? r.left + "px" : "auto",
-          right: useLeft ? "auto" : fromRight + "px",
-          top: useTop ? r.top + "px" : "auto",
-          bottom: useTop ? "auto" : fromBottom + "px",
-        });
-        pill.addEventListener("click", (ev) => ev.stopImmediatePropagation(), { once: true, capture: true });
+        parked = true;
+        anchor(lastLeft, lastTop);
+        try {
+          const { left, right, top, bottom } = pill.style;
+          localStorage.setItem(posKey, JSON.stringify({ left, right, top, bottom }));
+        } catch {}
+        const blocker = (ev) => ev.stopImmediatePropagation();
+        pill.addEventListener("click", blocker, { once: true, capture: true });
+        // 300ms: maximum possible delay between pointerup and click (mobile tap delay)
+        setTimeout(() => pill.removeEventListener("click", blocker, { capture: true }), 300);
       }
     };
 
@@ -906,12 +972,28 @@ class UltralyticsChat {
       ox = e.clientX;
       oy = e.clientY;
       moved = false;
-      pill.style.cursor = "grabbing";
-      Object.assign(pill.style, { right: "auto", bottom: "auto", left: rect.left + "px", top: rect.top + "px" });
       pill.setPointerCapture(e.pointerId);
       document.addEventListener("pointermove", onMove);
       document.addEventListener("pointerup", onUp, { once: true });
       document.addEventListener("pointercancel", onUp, { once: true });
+    });
+
+    // Restore the parked position across page loads, re-clamped to the current
+    // viewport (offsetLeft/Top are viewport-relative for fixed elements).
+    try {
+      const saved = JSON.parse(localStorage.getItem(posKey));
+      if (saved) {
+        for (const k of ["left", "right", "top", "bottom"]) {
+          if (typeof saved[k] === "string") pill.style[k] = saved[k];
+        }
+        parked = true;
+        anchor(...clamp(pill.offsetLeft, pill.offsetTop));
+      }
+    } catch {}
+
+    // Keep a parked pill reachable when the window shrinks or rotates
+    this.on(window, "resize", () => {
+      if (parked) anchor(...clamp(pill.offsetLeft, pill.offsetTop));
     });
   }
 
@@ -1066,11 +1148,13 @@ class UltralyticsChat {
   }
 
   async feedback(type) {
+    if (!this.config.analytics) return false;
+
     const vote = type === "up";
     const userCount = this.messages.filter((m) => m.role === "user").length;
     if (!userCount) {
       console.warn("feedback ignored: no user messages yet");
-      return;
+      return false;
     }
     const queryIndex = userCount - 1;
     try {
@@ -1086,8 +1170,10 @@ class UltralyticsChat {
       if (!response.ok) {
         throw new Error(`feedback failed with status ${response.status}`);
       }
+      return true;
     } catch (err) {
       console.warn("feedback failed", err);
+      return false;
     }
   }
 
@@ -1258,6 +1344,7 @@ class UltralyticsChat {
         messages: [{ role: "user", content: text }],
         session_id: this.sessionId,
         context: this.getPageContext(),
+        analytics: this.config.analytics,
       };
       if (this.config.instructions) body.instructions = this.config.instructions;
       if (safeEditIndex !== null) body.edit_index = safeEditIndex;
@@ -1378,10 +1465,13 @@ class UltralyticsChat {
 
   addMessageActions(group) {
     if (group.querySelector(".ult-message-actions")) return;
+    const feedbackActions = this.config.analytics
+      ? `<button class="ult-icon-btn" data-action="like" aria-label="Good response" data-tooltip="Good response">${this.icon("like")}</button><button class="ult-icon-btn" data-action="dislike" aria-label="Bad response" data-tooltip="Bad response">${this.icon("dislike")}</button>`
+      : "";
     const actions = this.el(
       "div",
       "ult-message-actions",
-      `<button class="ult-icon-btn" data-action="copy" aria-label="Copy response" data-tooltip="Copy response">${this.icon("copy")}</button><button class="ult-icon-btn" data-action="like" aria-label="Good response" data-tooltip="Good response">${this.icon("like")}</button><button class="ult-icon-btn" data-action="dislike" aria-label="Bad response" data-tooltip="Bad response">${this.icon("dislike")}</button><button class="ult-icon-btn" data-action="retry" aria-label="Try again" data-tooltip="Try again">${this.icon("refresh")}</button>`,
+      `<button class="ult-icon-btn" data-action="copy" aria-label="Copy response" data-tooltip="Copy response">${this.icon("copy")}</button>${feedbackActions}<button class="ult-icon-btn" data-action="retry" aria-label="Try again" data-tooltip="Try again">${this.icon("refresh")}</button>`,
     );
     group.appendChild(actions);
   }
