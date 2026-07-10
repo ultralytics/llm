@@ -849,6 +849,7 @@ results[0].show()</code></pre>
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
+          signal: AbortSignal.timeout(60000),
         });
         if (!res.ok) {
           throw new Error(`HTTP ${res.status}`);
