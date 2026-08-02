@@ -7,7 +7,6 @@
 [![CI](https://github.com/ultralytics/llm/actions/workflows/ci.yml/badge.svg)](https://github.com/ultralytics/llm/actions/workflows/ci.yml)
 [![Ultralytics Actions](https://github.com/ultralytics/llm/actions/workflows/format.yml/badge.svg)](https://github.com/ultralytics/llm/actions/workflows/format.yml)
 [![codecov](https://codecov.io/github/ultralytics/llm/branch/main/graph/badge.svg)](https://app.codecov.io/github/ultralytics/llm)
-[![Vercel Deploy](https://deploy-badge.vercel.app/vercel/chatjs-ultralytics?root=examples%2Fweb%2Fdemo)](https://chatjs-ultralytics.vercel.app/examples/web/demo)
 [![jsDelivr hits](https://data.jsdelivr.com/v1/package/gh/ultralytics/llm/badge?style=rounded)](https://www.jsdelivr.com/package/gh/ultralytics/llm)
 
 [![Ultralytics Discord](https://img.shields.io/discord/1089800235347353640?logo=discord&logoColor=white&label=Discord&color=blue)](https://discord.com/invite/ultralytics)
@@ -227,10 +226,14 @@ terser js/chat.js -o js/chat.min.js -c -m --comments false
 ### Local Testing
 
 ```bash
-# Serve examples locally
-python -m http.server 8000
-# Open http://localhost:8000/examples/web/demo.html
+# macOS
+open examples/web/demo.html
+
+# Linux
+xdg-open examples/web/demo.html
 ```
+
+You can also open `examples/web/demo.html` directly from your file browser. No local server or build step is required.
 
 ### Browser Compatibility
 

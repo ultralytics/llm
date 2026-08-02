@@ -62,7 +62,7 @@ This repo ships the Ultralytics chat widget: `js/chat.js`, a single zero-depende
 - `purge-cdn.yml` purges the jsDelivr cache on pushes to main touching `js/**` and after the "Tag and Release" workflow completes.
 - Releases are manual: `tag.yml` is `workflow_dispatch`-only and gated to repo `ultralytics/llm` with actor `glenn-jocher`; it creates a git tag and GitHub release. There is no PyPI publish workflow.
 - The package version lives in `ultralytics_llm/__init__.py` (`__version__`) and is read dynamically by setuptools.
-- `vercel.json` redirects `/` to `/examples/web/demo` for the Vercel-hosted demo (`examples/web/demo.html`).
+- `examples/web/demo.html` is a standalone local demo; open it directly in a browser without a server or build step.
 
 ## Conventions
 
