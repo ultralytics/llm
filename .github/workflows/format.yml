@@ -24,12 +24,12 @@ jobs:
       - name: Run Ultralytics Actions
         uses: ultralytics/actions@main
         with:
-          token: ${{ secrets._GITHUB_TOKEN || github.token }} # Auto-generated fallback
+          token: ${{ secrets._GITHUB_TOKEN || secrets.GITHUB_TOKEN }} # Auto-generated token
           labels: true # Auto-label issues/PRs using AI
           python: true # Format Python with Ruff and docformatter
           prettier: true # Format YAML, JSON, Markdown, CSS
-          biome: false # Enabling reformats js/chat.min.js unless biome.json excludes **/*.min.js — see PR description
-          swift: false # Format Swift (requires macos-latest)
+          biome: false # Enabling reformats the generated js/chat.min.js, which biome.json does not exclude
+          swift: false # Format Swift (requires a macOS runner)
           spelling: true # Check spelling with codespell
           links: true # Check broken links with Lychee
           summary: true # Generate AI-powered PR summaries
