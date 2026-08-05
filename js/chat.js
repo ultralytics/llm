@@ -393,13 +393,17 @@ class UltralyticsChat {
       }
       /* ========== END COLOR PALETTE ========== */
 
+      /* Glass pill tint, skipped where light-dark() or color-mix() would invalidate the token */
+      @supports (background:light-dark(#000,#fff)) and (background:color-mix(in srgb,#000 55%,transparent)){
+        .ultralytics-chat-pill{--ult-pill-bg:light-dark(color-mix(in srgb,var(--ult-accent) 55%,transparent),color-mix(in srgb,var(--ult-dark) 55%,transparent))}
+      }
+
       .ult-backdrop{display:none;position:fixed;inset:0;background:rgba(255,255,255,.07);
         backdrop-filter:${UltralyticsChat.BLUR};-webkit-backdrop-filter:${UltralyticsChat.BLUR};
         z-index:9999;opacity:0;visibility:hidden;transition:opacity .2s ease-out,visibility .2s;pointer-events:none}
       .ult-backdrop.open{display:block;opacity:1;visibility:visible;pointer-events:auto}
 
       .ultralytics-chat-pill{position:fixed;right:16px;bottom:36px;padding:14px 22px;border-radius:9999px;background:var(--ult-pill-bg);
-        background:light-dark(color-mix(in srgb,${accent} 55%,transparent),color-mix(in srgb,${dark} 55%,transparent));
         backdrop-filter:${UltralyticsChat.BLUR};-webkit-backdrop-filter:${UltralyticsChat.BLUR};
         color:var(--ult-pill-text);border:0;cursor:pointer;font-size:18px;font-weight:500;box-shadow:var(--ult-pill-shadow);
         z-index:10000;transition:opacity .2s ease-out,transform .15s ease-out;
