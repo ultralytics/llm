@@ -378,9 +378,9 @@ class UltralyticsChat {
         --ult-text-tertiary:#9ca3af;--ult-text-tertiary:light-dark(#9ca3af,#71717a);
         --ult-text-muted:#4b5563;--ult-text-muted:light-dark(#4b5563,#a1a1aa);
         --ult-success:#26C000;
-        --ult-pill-bg:var(--ult-accent);--ult-pill-bg:light-dark(var(--ult-accent),#40434f);
+        --ult-pill-bg:color-mix(in srgb,var(--ult-accent) 55%,transparent);--ult-pill-bg:light-dark(color-mix(in srgb,var(--ult-accent) 55%,transparent),color-mix(in srgb,var(--ult-dark) 55%,transparent));
         --ult-pill-text:var(--ult-dark);--ult-pill-text:light-dark(var(--ult-dark),#fff);
-        --ult-pill-shadow:0 20px 38px rgba(2,6,23,.22),0 8px 18px rgba(2,6,23,.14);--ult-pill-shadow:0 20px 38px light-dark(rgba(2,6,23,.22),rgba(0,0,0,.5)),0 8px 18px light-dark(rgba(2,6,23,.14),rgba(0,0,0,.32));
+        --ult-pill-shadow:0 20px 38px rgba(2,6,23,.22),0 8px 18px rgba(2,6,23,.14),inset 0 0 0 1px rgba(255,255,255,.45);--ult-pill-shadow:0 20px 38px light-dark(rgba(2,6,23,.22),rgba(0,0,0,.5)),0 8px 18px light-dark(rgba(2,6,23,.14),rgba(0,0,0,.32)),inset 0 0 0 1px light-dark(rgba(255,255,255,.45),rgba(255,255,255,.16));
         --ult-modal-shadow:0 24px 60px rgba(2,6,23,.25),0 8px 24px rgba(2,6,23,.18);--ult-modal-shadow:0 24px 60px light-dark(rgba(2,6,23,.25),rgba(0,0,0,.5)),0 8px 24px light-dark(rgba(2,6,23,.18),rgba(0,0,0,.4));
         --ult-msg-hover:rgba(247,247,249,.4);--ult-msg-hover:light-dark(rgba(247,247,249,.4),rgba(19,19,24,.4));
         --ult-msg-border:rgba(229,231,235,.6);--ult-msg-border:light-dark(rgba(229,231,235,.6),rgba(35,35,39,.6));
@@ -399,6 +399,7 @@ class UltralyticsChat {
       .ult-backdrop.open{display:block;opacity:1;visibility:visible;pointer-events:auto}
 
       .ultralytics-chat-pill{position:fixed;right:16px;bottom:36px;padding:14px 22px;border-radius:9999px;background:var(--ult-pill-bg);
+        backdrop-filter:${UltralyticsChat.BLUR};-webkit-backdrop-filter:${UltralyticsChat.BLUR};
         color:var(--ult-pill-text);border:0;cursor:pointer;font-size:18px;font-weight:500;box-shadow:var(--ult-pill-shadow);
         z-index:10000;transition:opacity .2s ease-out,transform .15s ease-out;
         display:inline-flex;align-items:center;gap:10px;transform:scale(1) translateZ(0);opacity:1;white-space:nowrap;
