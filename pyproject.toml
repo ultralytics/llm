@@ -30,6 +30,7 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Topic :: Software Development",
     "Topic :: Scientific/Engineering",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
@@ -50,7 +51,7 @@ dev = [
 [project.urls]
 "Homepage" = "https://ultralytics.com"
 "Source" = "https://github.com/ultralytics/llm"
-"Documentation" = "https://docs.ultralytics.com"
+"Documentation" = "https://github.com/ultralytics/llm/blob/main/docs/API.md"
 "Bug Reports" = "https://github.com/ultralytics/llm/issues"
 
 [tool.setuptools]

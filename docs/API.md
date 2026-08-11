@@ -253,6 +253,5 @@ except Exception as exc:
 ## Examples
 
 - [`examples/web/demo.html`](../examples/web/demo.html) – Browser integration demo.
-- [`examples/web/demo`](../examples/web/demo) – Demo deployed on Vercel (see README badge).
 
 For UI assets and release notes refer back to [`README.md`](../README.md).
