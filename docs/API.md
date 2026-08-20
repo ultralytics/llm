@@ -127,7 +127,7 @@ Request body:
     ],
     "session_id": "optional-session-id",
     "context": {
-        "url": "https://docs.ultralytics.com/models/yolov9/",
+        "url": "https://docs.ultralytics.com/models/yolov9",
         "title": "YOLOv9: A Leap Forward in Object Detection Technology",
         "description": "Meta description value",
         "path": "/models/yolov9/"
@@ -147,7 +147,7 @@ Response stream (SSE):
 ```
 data: {"content": "You're on the Ultralytics docs page: "}
 data: {"content": "\"YOLOv9: A Leap Forward in Object Detection Technology\" — "}
-data: {"content": "URL: https://docs.ultralytics.com/models/yolov9/"}
+data: {"content": "URL: https://docs.ultralytics.com/models/yolov9"}
 data: [DONE]
 ```
 
@@ -170,7 +170,7 @@ Response:
     "results": [
         {
             "title": "Training Configuration",
-            "url": "https://docs.ultralytics.com/usage/training/",
+            "url": "https://docs.ultralytics.com/usage/training",
             "text": "Step-by-step instructions for configuring Ultralytics training jobs…",
             "score": 0.95
         }
