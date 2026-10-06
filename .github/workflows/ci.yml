@@ -28,15 +28,13 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - uses: actions/setup-python@v7
+      - uses: ultralytics/actions/setup-uv@main
         with:
           python-version: ${{ matrix.python-version }}
 
-      - uses: ultralytics/actions/setup-uv@main
-
       - name: Install dependencies
         run: |
-          uv pip install --system -e ".[dev]"
+          uv pip install -e ".[dev]"
 
       - name: Import Package
         shell: python
