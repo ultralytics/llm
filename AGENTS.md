@@ -48,7 +48,7 @@ ruff format . && ruff check --fix .
 terser js/chat.js -o js/chat.min.js -c -m --comments false
 ```
 
-CI (`ci.yml`) runs the coverage command above on ubuntu/macos/windows × Python 3.9 and 3.14; `requires-python >=3.9` is the floor. Pytest `addopts` in pyproject.toml adds `--doctest-modules`, so docstring examples in the tested paths must run.
+CI (`ci.yml`) runs the coverage command above on ubuntu/macos/windows × Python 3.9 and 3.15; `requires-python >=3.9` is the floor. Pytest `addopts` in pyproject.toml adds `--doctest-modules`, so docstring examples in the tested paths must run.
 
 ## Architecture
 
